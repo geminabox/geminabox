@@ -34,7 +34,7 @@ class Geminabox < Sinatra::Base
   delete '/gems/*.gem' do
     File.delete file_path if File.exists? file_path
     reindex
-    redirect "/"
+    redirect ENV['RAILS_RELATIVE_URL_ROOT']+"/"
   end
 
   post '/upload' do
@@ -53,7 +53,7 @@ class Geminabox < Sinatra::Base
       end
     end
     reindex
-    redirect "/"
+    redirect ENV['RAILS_RELATIVE_URL_ROOT']+"/"
   end
 
 private
@@ -89,7 +89,7 @@ private
           request.scheme == "http" && request.port != 80
         url << ":#{request.port}"
       end
-
+      url << ENV['RAILS_RELATIVE_URL_ROOT']
       url << path
     end
   end
