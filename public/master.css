@@ -32,8 +32,6 @@ code {
   margin-top: 2em;
   padding: 1em;
   border: 1px solid #000;
-  box-shadow: 0 0 3em #fff; -moz-box-shadow: 0 0 3em #fff; -webkit-box-shadow: 0 0 3em #fff;
-  border-radius: 1em; -moz-border-radius: 1em; -webkit-border-radius: 1em;
   text-align: center;
 }
 
@@ -52,18 +50,9 @@ ul.gemlist {
   padding: 0;
 }
 
-ul.gemlist li {
+ul.gemlist fieldset {
   margin: 1em;
-  background: #eee;
-  border: 1px solid #444;
   padding: .4em;
-  border-radius: .5em; -moz-border-radius: .5em; -webkit-border-radius: .5em;
-  position: relative;
-}
-
-ul.gemlist li strong {
-  display: block;
-  font-size: 1.2em;
 }
 
 ul.gemlist li .delete-form {
@@ -76,10 +65,6 @@ ul.gemlist li .delete-form button {
   right: 0;
   top: 0;
 }
-ul.gemlist li .delete-form:hover button {
-  visibility: visible;
-}
-
 #alpha_index {
   font-size: 0.8em;
   margin-top: 1.0em;
