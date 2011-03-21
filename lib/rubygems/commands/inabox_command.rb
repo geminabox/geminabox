@@ -1,3 +1,4 @@
+require 'uri'
 require 'yaml'
 
 class Gem::Commands::InaboxCommand < Gem::Command
@@ -50,7 +51,16 @@ class Gem::Commands::InaboxCommand < Gem::Command
   end
 
   def send_gem
-    say "Pushing #{File.split(@gemfile).last} to #{geminabox_host}..."
+    # sanitize printed URL if a password is present
+    parsed_uri = URI.parse(geminabox_host)
+    if parsed_uri.password
+      parsed_uri.password = '***'
+      sanitized_geminabox_host = parsed_uri.to_s
+    else
+      sanitized_geminabox_host = geminabox_host
+    end
+
+    say "Pushing #{File.split(@gemfile).last} to #{sanitized_geminabox_host}..."
 
     File.open(@gemfile, "rb") do |file|
       url = URI.parse(geminabox_host)
@@ -151,6 +161,6 @@ class Gem::Commands::InaboxCommand < Gem::Command
         query = fp.collect {|p| "--" + BOUNDARY + "\r\n" + p.to_multipart }.join("") + "--" + BOUNDARY + "--"
         return query, HEADER
       end
-    end  
+    end
   end
 end
