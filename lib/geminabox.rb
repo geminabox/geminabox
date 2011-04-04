@@ -18,13 +18,13 @@ class Geminabox < Sinatra::Base
   autoload :GemVersionCollection, "geminabox/gem_version_collection"
 
   get '/' do
-    @gems = load_gems
+    @gems, @specs = load_gems
     @index_gems = index_gems(@gems)
     erb :index
   end
   
   get '/atom.xml' do
-    @gems = load_gems
+    @gems, @specs = load_gems
     erb :atom, :layout => false
   end
 
@@ -67,7 +67,7 @@ private
   end
 
   def load_gems
-    %w(specs prerelease_specs).inject(GemVersionCollection.new){|gems, specs_file_type|
+    gems = %w(specs prerelease_specs).inject(GemVersionCollection.new){|gems, specs_file_type|
       specs_file_path = File.join(options.data, "#{specs_file_type}.#{Gem.marshal_version}.gz")
       if File.exists?(specs_file_path)
         gems + Marshal.load(Gem.gunzip(Gem.read_binary(specs_file_path)))
@@ -75,6 +75,18 @@ private
         gems
       end
     }
+
+    specs = {}
+    Dir.new(File.join(options.data, "quick", "Marshal.#{Gem.marshal_version}")).grep(/\.rz/).each do |spec_file|
+      File.open(File.join(options.data, "quick", "Marshal.#{Gem.marshal_version}", spec_file), 'r') do |io| 
+        zipped_spec = io.read 
+        spec = Marshal.load(Gem.inflate(zipped_spec))
+        specs[[spec.name, spec.version].join('-')] =  spec
+        specs
+      end
+    end
+
+    [gems, specs]
   end
 
   def index_gems(gems)

@@ -15,7 +15,9 @@
             <button type="submit">delete</button>
           </form>
         <% end %>
-      </li>
+        <p align='left'>Description: <i style='font-size:0.75em;'><%= @specs[[name,[*versions].last].join('-')].description %></i></p>
+        <p align='left'>Author: <i style='font-size:0.75em;'><%= @specs[[name,[*versions].last].join('-')].author %></i> <a style='font-size:0.75em;' href='<%= @specs[[name,[*versions].last].join('-')].homepage %>'>Homepage</a></p>
+       </li>
     <% end %>
   </ul>
 <% end %>
