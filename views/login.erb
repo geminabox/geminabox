@@ -1,0 +1,8 @@
+<h2>
+  <%= flash.error %>
+</h2>
+<form method="POST" action="/authenticate">
+  <input type="text" name="user[email]" id="user_email"/>
+  <input type="text" name="user[password]" id="user_password"/>
+  <input type="submit"/>
+</form>

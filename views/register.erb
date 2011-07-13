@@ -1,0 +1,9 @@
+<h2>
+  <%= flash[:error] %>
+</h2>
+<form method="POST" action="do_register">
+  <input type="text" name="email" id="email"/>
+  <input type="text" name="password" id="password"/>
+  <input type="text" name="password_confirmation" id="password_confirmation"/>
+  <input type="submit" value="Register"/>
+</form>
