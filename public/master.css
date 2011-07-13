@@ -20,7 +20,39 @@ a:hover {
 
 form {
   margin: 0;
+  margin-left: 100px;
+  margin-right: 100px;
 }
+
+form label {
+  float: left;
+  padding-right: 25px;
+}
+
+form input {
+  float: right;
+}
+
+.clear {
+  clear: both;
+}
+
+#errors {
+  border: 1px solid red;
+  width: 250px;
+  margin-left: 175px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+#notices {
+  border: 1px solid green;
+  width: 250px;
+  margin-left: 175px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
 
 code {
   font-size: 0.7em;
