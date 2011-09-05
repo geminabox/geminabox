@@ -1,6 +1,14 @@
 require "rubygems"
 require "rubygems/package_task"
 require "rdoc/task"
+require "rspec/core/rake_task"
+
+desc "Run Specs"
+task :spec do
+  RSpec::Core::RakeTask.new(:spec) do |t|
+    t.pattern = "spec/*_spec.rb"
+  end
+end
 
 task :default => :package
 

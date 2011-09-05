@@ -15,5 +15,14 @@ Gem::Specification.new do |s|
   s.require_paths     = ['lib']
 
   s.add_dependency('sinatra')
+  s.add_dependency('sqlite3')
+  s.add_dependency('sinatra-sequel')
+  s.add_dependency('shield')
   s.add_dependency('builder')
+  s.add_dependency('rack-flash')
+
+  s.add_development_dependency('rspec')
+  s.add_development_dependency('rack-test')
+  s.add_development_dependency('rspec_tag_matchers')
+  s.add_development_dependency('mocha')
 end

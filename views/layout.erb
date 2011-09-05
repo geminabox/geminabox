@@ -12,6 +12,16 @@
         <pre><code>gem sources -a <%= url_for "/" %></code></pre>
         <pre><code>gem install geminabox<br />gem inabox [gemfile]</code></pre>
       </p>
+      <% unless flash[:notice].nil? %>
+        <div id="notices">
+          <%= flash[:notice] %>
+        </div>
+      <% end %>
+      <% unless flash[:error].nil? %>
+        <div id="errors">
+          <%= flash.error %>
+        </div>
+      <% end %>
       <%= yield %>
     </div>
     <script type="text/javascript" src="/jquery.js"></script>
