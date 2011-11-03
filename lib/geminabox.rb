@@ -139,6 +139,7 @@ HTML
         url << ":#{request.port}"
       end
 
+      url << ENV['RAILS_RELATIVE_URL_ROOT']
       url << path
     end
   end
