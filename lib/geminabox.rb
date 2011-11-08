@@ -48,7 +48,7 @@ class Geminabox < Sinatra::Base
   delete '/gems/*.gem' do
     File.delete file_path if File.exists? file_path
     reindex
-    redirect ENV['RAILS_RELATIVE_URL_ROOT']+"/"
+    redirect base_path+"/"
   end
 
   post '/upload' do
@@ -82,7 +82,7 @@ class Geminabox < Sinatra::Base
       end
     end
     reindex
-    redirect ENV['RAILS_RELATIVE_URL_ROOT']+"/"
+    redirect base_path+"/"
   end
 
 private
@@ -124,6 +124,10 @@ HTML
     Set.new(gems.map{|name, _| name[0..0]})
   end
 
+  def base_path
+    @base_path ||= ENV.key?('RAILS_RELATIVE_URL_ROOT') ? ENV['RAILS_RELATIVE_URL_ROOT'] : ''
+  end
+
   helpers do
     def spec_for(gem_name, version)
       spec_file = File.join(options.data, "quick", "Marshal.#{Gem.marshal_version}", "#{gem_name}-#{version}.gemspec.rz")
@@ -139,7 +143,7 @@ HTML
         url << ":#{request.port}"
       end
 
-      url << ENV['RAILS_RELATIVE_URL_ROOT']
+      url << base_path
       url << path
     end
   end
