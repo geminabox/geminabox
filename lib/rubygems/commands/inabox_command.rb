@@ -16,6 +16,8 @@ class Gem::Commands::InaboxCommand < Gem::Command
 
   def initialize
     super 'inabox', description
+      
+    load_config
 
     add_option('-c', '--configure', "Configure GemInABox") do |value, options|
       options[:configure] = true
@@ -23,6 +25,10 @@ class Gem::Commands::InaboxCommand < Gem::Command
 
     add_option('-g', '--host HOST', "Host to upload to.") do |value, options|
       options[:host] = value
+    end
+      
+    add_option('-t', '--trust-certificates', "Trust SSL certificates") do |value, options|
+      options[:'trust-certificates'] = true
     end
   end
 
@@ -52,6 +58,9 @@ class Gem::Commands::InaboxCommand < Gem::Command
 
   def send_gem
     # sanitize printed URL if a password is present
+    
+    ssl = geminabox_host.start_with? "https"
+    
     url = URI.parse(geminabox_host)
     url_for_presentation = url.clone
     url_for_presentation.password = '***' if url_for_presentation.password
@@ -62,20 +71,33 @@ class Gem::Commands::InaboxCommand < Gem::Command
       File.open(gemfile, "rb") do |file|
         request_body, request_headers = Multipart::MultipartPost.new.prepare_query("file" => file)
 
-        proxy.start(url.host, url.port) {|con|
+        con = create_connection url
+          
+        if ssl then
+            con.use_ssl = true
+            
+            if geminabox_trust then
+                con.verify_mode = OpenSSL::SSL::VERIFY_NONE
+            end
+        end
+        
+        con.start { |local_con|
           req = Net::HTTP::Post.new('/upload', request_headers)
           req.basic_auth(url.user, url.password) if url.user
-          handle_response(con.request(req, request_body))
+          handle_response(local_con.request(req, request_body))
         }
       end
     end
   end
 
-  def proxy
+    
+  def create_connection con_uri
+    require 'net/https'
+
     if proxy_info = ENV['http_proxy'] || ENV['HTTP_PROXY'] and uri = URI.parse(proxy_info)
-      Net::HTTP::Proxy(uri.host, uri.port, uri.user, uri.password)
+      Net::HTTP::Proxy(uri.host, uri.port, uri.user, uri.password).new(con_uri.host, con_uri.port)
     else
-      Net::HTTP
+      Net::HTTP.new(con_uri.host, con_uri.port)
     end
   end
 
@@ -96,23 +118,40 @@ class Gem::Commands::InaboxCommand < Gem::Command
     say "Enter the root url for your personal geminabox instance. (E.g. http://gems/)"
     host = ask("Host:")
     self.geminabox_host = host
+    self.geminabox_trust = ask_yes_no("Would you like to trust certificates?")
+    save_config
   end
 
   def geminabox_host
-    @geminabox_host ||= options[:host] || Gem.configuration.load_file(config_path)[:host]
+    options[:host] || @config[:host]
   end
 
   def geminabox_host=(host)
-    config = Gem.configuration.load_file(config_path).merge(:host => host)
-
-    dirname = File.dirname(config_path)
-    Dir.mkdir(dirname) unless File.exists?(dirname)
-
-    File.open(config_path, 'w') do |f|
-      f.write config.to_yaml
-    end
+    @config = @config.merge(:host => host)
   end
 
+  def geminabox_trust
+    options[:'trust-certificates'] || @config[:'trust-certificates']
+  end
+      
+  def geminabox_trust=(trust)
+    @config = @config.merge(:'trust-certificates' => trust)
+  end
+      
+  def load_config
+      @config = {}
+      @config = Gem.configuration.load_file(config_path) if File.exists?(config_path)
+      
+      dirname = File.dirname(config_path)
+      Dir.mkdir(dirname) unless File.exists?(dirname)
+  end
+      
+  def save_config
+      File.open(config_path, 'w') do |f|
+          f.write @config.to_yaml
+      end
+  end
+      
   module Multipart
     require 'net/http'
     require 'cgi'
