@@ -64,7 +64,11 @@ class Gem::Commands::InaboxCommand < Gem::Command
       File.open(gemfile, "rb") do |file|
         request_body, request_headers = Multipart::MultipartPost.new.prepare_query("file" => file)
 
-        proxy.start(url.host, url.port) {|con|
+        p = proxy.new(url.host, url.port) 
+        if url.port == 443 
+          p.use_ssl = true
+        end
+        p.start {|con|
           req = Net::HTTP::Post.new(url.path, request_headers)
           req.basic_auth(url.user, url.password) if url.user
           handle_response(con.request(req, request_body))
@@ -116,7 +120,7 @@ class Gem::Commands::InaboxCommand < Gem::Command
   end
 
   module Multipart
-    require 'net/http'
+    require 'net/https'
     require 'cgi'
 
     class Param
