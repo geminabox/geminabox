@@ -1,5 +1,5 @@
 Gem::Specification.new do |s|
-  s.name              = 'geminabox'
+  s.name              = 'geminabox-opensuse'
   s.version           = '0.5.2'
   s.summary           = 'Really simple rubygem hosting'
   s.description       = 'A sinatra based gem hosting app, with client side gem push style functionality.'
