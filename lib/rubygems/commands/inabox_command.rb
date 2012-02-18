@@ -73,8 +73,28 @@ class Gem::Commands::InaboxCommand < Gem::Command
     end
   end
 
+  def no_proxy_patterns
+    @no_proxy_patterns ||= begin
+      env_no_proxy = ENV['no_proxy'] || ENV['NO_PROXY']
+      if env_no_proxy.nil? or env_no_proxy.empty?
+        []
+      else
+        env_no_proxy.split(/\s*,\s*/)
+      end
+    end
+  end
+
+  def no_proxy?(host)
+    host = host.downcase
+    no_proxy_patterns.each do |pattern|
+      pattern = pattern.downcase
+      return true if host[-pattern.length, pattern.length] == pattern
+    end
+    return false
+  end
+
   def proxy
-    if proxy_info = ENV['http_proxy'] || ENV['HTTP_PROXY'] and uri = URI.parse(proxy_info)
+    if proxy_info = ENV['http_proxy'] || ENV['HTTP_PROXY'] and uri = URI.parse(proxy_info) and !no_proxy?(uri.host)
       Net::HTTP::Proxy(uri.host, uri.port, uri.user, uri.password)
     else
       Net::HTTP
