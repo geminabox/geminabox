@@ -1,5 +1,5 @@
 <% if @gems.any? %>
-  <a href="<%= url("/upload") %>">Upload Another Gem</a>
+  <a href="<%= "/upload" %>">Upload Another Gem</a>
 
   <div id="alpha_index"><%= ("a".."z").map{|i| @index_gems.include?(i) ? "<a href='#jump_#{i}'>#{i}</a>" : i }.join(" - ") %></div>
 
@@ -15,8 +15,8 @@
               <small class="platform"><%= version.platform %></small>
             <% end %>
           </p>
-          <form class="delete-form" method="post" action="<%= url("/gems/#{version.gemfile_name}.gem") %>">
-            <a class="download" href="<%= url("/gems/#{version.gemfile_name}.gem") %>">download</a>
+          <form class="delete-form" method="post" action="<%= "/gems/#{version.gemfile_name}.gem" %>">
+            <a class="download" href="<%= "/gems/#{version.gemfile_name}.gem" %>">download</a>
             <input type="hidden" name="_method" value="DELETE" />
             <button type="submit">delete</button>
           </form>
@@ -39,4 +39,4 @@
   </ul>
 <% end %>
 
-<a href="<%= url("/upload") %>">Upload Another Gem</a>
+<a href="/upload">Upload Another Gem</a>
