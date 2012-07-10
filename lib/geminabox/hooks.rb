@@ -1,10 +1,10 @@
 module Geminabox::Hooks
 
-  def self.get_root; end
-  def self.get_atom; end
-  def self.get_v1_dependencies; end
-  def self.get_upload; end
-  def self.get_reindex; end
-  def self.delete_gem; end
-  def self.post_upload; end
+  def get_root; end
+  def get_atom; end
+  def get_v1_dependencies; end
+  def get_upload; end
+  def get_reindex; end
+  def delete_gem; end
+  def post_upload; end
 end

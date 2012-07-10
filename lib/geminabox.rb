@@ -35,6 +35,8 @@ class Geminabox < Sinatra::Base
   autoload :DiskCache, "geminabox/disk_cache"
   autoload :Hooks, "geminabox/hooks"
 
+  include Geminabox::Hooks
+
   before do
     headers 'X-Powered-By' => "geminabox #{GeminaboxVersion}"
   end
@@ -42,20 +44,20 @@ class Geminabox < Sinatra::Base
   get '/' do
     @gems = load_gems
     @index_gems = index_gems(@gems)
-    Geminabox::Hooks.get_root
+    self.get_root
     erb :index
   end
 
   get '/atom.xml' do
     @gems = load_gems
-    Geminabox::Hooks.get_atom
+    self.get_atom
     erb :atom, :layout => false
   end
 
   get '/api/v1/dependencies' do
     query_gems = params[:gems].split(',').sort
     cache_key = query_gems.join(',')
-    Geminabox::Hooks.get_v1_dependencies
+    self.get_v1_dependencies
     disk_cache.cache(cache_key) do
       deps = load_gems.gems.select {|gem| query_gems.include?(gem.name) }.map do |gem|
         spec = spec_for(gem.name, gem.number)
@@ -71,20 +73,20 @@ class Geminabox < Sinatra::Base
   end
 
   get '/upload' do
-    Geminabox::Hooks.get_upload
+    self.get_upload
     erb :upload
   end
 
   get '/reindex' do
     reindex(:force_rebuild)
-    Geminabox::Hooks.get_reindex
+    self.get_reindex
     redirect url("/")
   end
 
   delete '/gems/*.gem' do
     File.delete file_path if File.exists? file_path
     reindex(:force_rebuild)
-    Geminabox::Hooks.delete_gem
+    self.delete_gem
     redirect url("/")
   end
 
@@ -130,7 +132,7 @@ class Geminabox < Sinatra::Base
     end
     reindex
 
-    Geminabox::Hooks.post_upload
+    self.post_upload
     if api_request?
       "Gem #{gem_name} received and indexed."
     else
