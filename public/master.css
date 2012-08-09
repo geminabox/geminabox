@@ -87,8 +87,8 @@ ul.gemlist li .delete-form {
   margin: 2px 0;
 }
 ul.gemlist li button,
-ul.gemlist li a.download
-{
+ul.gemlist li a.download,
+ul.gemlist li a.documentation {
   display: none;
   position: absolute;
   right: 0;
@@ -110,8 +110,16 @@ ul.gemlist li a.download {
   right: auto;
 }
 
+ul.gemlist li a.documentation {
+  background: #55c;
+  border-radius: .5em; -moz-border-radius: .5em; -webkit-border-radius: .5em;
+  left: 60px;
+  right: auto;
+}
+
 ul.gemlist li:hover button,
-ul.gemlist li:hover a.download {
+ul.gemlist li:hover a.download,
+ul.gemlist li:hover a.documentation {
   margin: 0;
   display: block;
 }

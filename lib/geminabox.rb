@@ -233,5 +233,10 @@ HTML
       spec_file = File.join(settings.data, "quick", "Marshal.#{Gem.marshal_version}", "#{gem_name}-#{version}.gemspec.rz")
       Marshal.load(Gem.inflate(File.read(spec_file))) if File.exists? spec_file
     end
+
+    def docs_url_for(gemfile_name)
+      path = "#{settings.public_folder}/docs/#{gemfile_name}"
+      Dir.exist?(path) ? "/docs/#{gemfile_name}/frames.html" : nil
+    end
   end
 end

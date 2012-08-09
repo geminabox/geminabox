@@ -17,6 +17,9 @@
           </p>
           <form class="delete-form" method="post" action="<%= url("/gems/#{version.gemfile_name}.gem") %>">
             <a class="download" href="<%= url("/gems/#{version.gemfile_name}.gem") %>">download</a>
+            <% if docs_url = docs_url_for(version.gemfile_name) %>
+              <a class="documentation" href="<%= url(docs_url) %>">documentation</a>
+            <% end %>
             <input type="hidden" name="_method" value="DELETE" />
             <button type="submit">delete</button>
           </form>
