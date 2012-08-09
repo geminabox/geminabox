@@ -4,9 +4,16 @@ require 'builder'
 require 'sinatra/base'
 require 'rubygems/builder'
 require 'rubygems/indexer'
+require 'rubygems/installer'
 require 'hostess'
 require 'geminabox/version'
 require 'rss/atom'
+
+begin
+  require 'yard'
+rescue LoadError
+  $stderr.puts 'To show documentation with your gems, please install YARD.'
+end
 
 class Geminabox < Sinatra::Base
   enable :static, :methodoverride
@@ -15,6 +22,7 @@ class Geminabox < Sinatra::Base
   set :data, File.join(File.dirname(__FILE__), *%w[.. data])
   set :build_legacy, false
   set :incremental_updates, false
+  set :document_gems, true
   set :views, File.join(File.dirname(__FILE__), *%w[.. views])
   set :allow_replace, false
   use Hostess
@@ -121,6 +129,7 @@ class Geminabox < Sinatra::Base
         f << blk
       end
     end
+    document_gem(dest_filename)
     reindex
 
     if api_request?
@@ -148,6 +157,31 @@ private
 </html>
 HTML
     halt [code, html]
+  end
+
+  def document_gem(gem)
+    return unless settings.document_gems
+    if !defined?(YARD)
+      $stderr.puts <<-MSG.lines.map(&:lstrip)
+        The 'document_gems' setting is enabled but you do not have the YARD gem
+        installed. Please either install YARD with `gem install yard` or disable
+        the documentation of gems by adding "Geminabox.document_gems = false" to
+        your config.ru.
+      MSG
+      return
+    end
+
+    gemname = File.basename(gem, '.gem')
+    tempdir = "#{Dir.tmpdir}/#{gemname}"
+    FileUtils.mkdir_p(tempdir)
+    installer = Gem::Installer.new(gem, :install_dir => tempdir)
+    installer.unpack(tempdir)
+
+    FileUtils.cd tempdir do
+      YARD::CLI::Yardoc.new.run("--no-cache",
+                                "--no-save",
+                                "-o", "#{settings.public_folder}/docs/#{gemname}")
+    end
   end
 
   def reindex(force_rebuild = false)
