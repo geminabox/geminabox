@@ -4,9 +4,16 @@ require 'builder'
 require 'sinatra/base'
 require 'rubygems/builder'
 require 'rubygems/indexer'
+require 'rubygems/installer'
 require 'hostess'
 require 'geminabox/version'
 require 'rss/atom'
+
+begin
+  require 'yard'
+rescue LoadError
+  $stderr.puts 'To show documentation with your gems, please install YARD.'
+end
 
 class Geminabox < Sinatra::Base
   enable :static, :methodoverride
@@ -15,6 +22,7 @@ class Geminabox < Sinatra::Base
   set :data, File.join(File.dirname(__FILE__), *%w[.. data])
   set :build_legacy, false
   set :incremental_updates, false
+  set :document_gems, true
   set :views, File.join(File.dirname(__FILE__), *%w[.. views])
   set :allow_replace, false
   use Hostess
@@ -75,8 +83,10 @@ class Geminabox < Sinatra::Base
     redirect url("/")
   end
 
-  delete '/gems/*.gem' do
+  delete '/gems/:gemname.gem' do
     File.delete file_path if File.exists? file_path
+    docs_path = docs_path_for(params[:gemname])
+    FileUtils.rm_rf docs_path if File.directory? docs_path
     reindex(:force_rebuild)
     redirect url("/")
   end
@@ -121,6 +131,7 @@ class Geminabox < Sinatra::Base
         f << blk
       end
     end
+    document_gem(dest_filename)
     reindex
 
     if api_request?
@@ -150,6 +161,31 @@ HTML
     halt [code, html]
   end
 
+  def document_gem(gem)
+    return unless settings.document_gems
+    if !defined?(YARD)
+      $stderr.puts <<-MSG.lines.map(&:lstrip)
+        The 'document_gems' setting is enabled but you do not have the YARD gem
+        installed. Please either install YARD with `gem install yard` or disable
+        the documentation of gems by adding "Geminabox.document_gems = false" to
+        your config.ru.
+      MSG
+      return
+    end
+
+    gemname = File.basename(gem, '.gem')
+    tempdir = "#{Dir.tmpdir}/#{gemname}"
+    FileUtils.mkdir_p(tempdir)
+    installer = Gem::Installer.new(gem, :install_dir => tempdir)
+    installer.unpack(tempdir)
+
+    FileUtils.cd tempdir do
+      YARD::CLI::Yardoc.new.run("--no-cache",
+                                "--no-save",
+                                "-o", "#{settings.public_folder}/docs/#{gemname}")
+    end
+  end
+
   def reindex(force_rebuild = false)
     Geminabox.fixup_bundler_rubygems!
     force_rebuild = true unless settings.incremental_updates
@@ -175,6 +211,10 @@ HTML
     File.expand_path(File.join(settings.data, *request.path_info))
   end
 
+  def docs_path_for(gemfile_name)
+    (@docs_paths ||= {})[gemfile_name] ||= "#{settings.public_folder}/docs/#{gemfile_name}"
+  end
+
   def disk_cache
     @disk_cache = Geminabox::DiskCache.new(File.join(settings.data, "_cache"))
   end
@@ -198,6 +238,11 @@ HTML
     def spec_for(gem_name, version)
       spec_file = File.join(settings.data, "quick", "Marshal.#{Gem.marshal_version}", "#{gem_name}-#{version}.gemspec.rz")
       Marshal.load(Gem.inflate(File.read(spec_file))) if File.exists? spec_file
+    end
+
+    def docs_url_for(gemfile_name)
+      path = docs_path_for(gemfile_name)
+      File.directory?(path) ? "/docs/#{gemfile_name}/frames.html" : nil
     end
   end
 end

@@ -19,6 +19,7 @@ class MiniTest::Unit::TestCase
 
   TEST_DATA_DIR="/tmp/geminabox-test-data"
   def clean_data_dir
+    FileUtils.rm_rf("#{Geminabox.public_folder}/docs")
     FileUtils.rm_rf(TEST_DATA_DIR)
     FileUtils.mkdir(TEST_DATA_DIR)
     Geminabox.data = TEST_DATA_DIR
