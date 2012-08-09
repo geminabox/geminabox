@@ -236,7 +236,7 @@ HTML
 
     def docs_url_for(gemfile_name)
       path = "#{settings.public_folder}/docs/#{gemfile_name}"
-      Dir.exist?(path) ? "/docs/#{gemfile_name}/frames.html" : nil
+      File.directory?(path) ? "/docs/#{gemfile_name}/frames.html" : nil
     end
   end
 end
