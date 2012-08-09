@@ -30,6 +30,14 @@ class Geminabox::TestCase < MiniTest::Unit::TestCase
       @data ||= data || "/tmp/geminabox-test-data"
     end
 
+    def document_gems(gen_doc = nil)
+      if gen_doc.nil?
+        @gen_doc.nil? ? (@gen_doc = true) : @gen_doc
+      else
+        @gen_doc = gen_doc
+      end
+    end
+
     def app(&block)
       @app = block || @app || lambda{|builder| run Geminabox }
     end
@@ -134,6 +142,7 @@ class Geminabox::TestCase < MiniTest::Unit::TestCase
     @app_server = fork do
       begin
         Geminabox.data = config.data
+        Geminabox.document_gems = config.document_gems
         STDERR.reopen("/dev/null")
         STDOUT.reopen("/dev/null")
         Rack::Server.start(server_options)
