@@ -83,8 +83,10 @@ class Geminabox < Sinatra::Base
     redirect url("/")
   end
 
-  delete '/gems/*.gem' do
+  delete '/gems/:gemname.gem' do
     File.delete file_path if File.exists? file_path
+    docs_path = docs_path_for(params[:gemname])
+    FileUtils.rm_rf docs_path if File.directory? docs_path
     reindex(:force_rebuild)
     redirect url("/")
   end
@@ -209,6 +211,10 @@ HTML
     File.expand_path(File.join(settings.data, *request.path_info))
   end
 
+  def docs_path_for(gemfile_name)
+    (@docs_paths ||= {})[gemfile_name] ||= "#{settings.public_folder}/docs/#{gemfile_name}"
+  end
+
   def disk_cache
     @disk_cache = Geminabox::DiskCache.new(File.join(settings.data, "_cache"))
   end
@@ -235,7 +241,7 @@ HTML
     end
 
     def docs_url_for(gemfile_name)
-      path = "#{settings.public_folder}/docs/#{gemfile_name}"
+      path = docs_path_for(gemfile_name)
       File.directory?(path) ? "/docs/#{gemfile_name}/frames.html" : nil
     end
   end
