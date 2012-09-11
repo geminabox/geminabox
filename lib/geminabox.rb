@@ -15,7 +15,7 @@ class Geminabox < Sinatra::Base
   set :public_folder, File.join(File.dirname(__FILE__), *%w[.. public])
   set :data, File.join(File.dirname(__FILE__), *%w[.. data])
   set :build_legacy, false
-  set :incremental_updates, false
+  set :incremental_updates, true
   set :views, File.join(File.dirname(__FILE__), *%w[.. views])
   set :allow_replace, false
   use Hostess
@@ -123,14 +123,14 @@ class Geminabox < Sinatra::Base
         error_response(200, "Ignoring upload, you uploaded the same thing previously.")
       end
     end
-    
+
     atomic_write(dest_filename) do |f|
       while blk = tmpfile.read(65536)
         f << blk
       end
     end
     reindex
-    
+
     if api_request?
       "Gem #{gem_name} received and indexed."
     else
@@ -165,6 +165,8 @@ HTML
       indexer.generate_index
     else
       begin
+        require 'geminabox/indexer'
+        Geminabox::Indexer.patch_rubygems_update_index_pre_1_8_25(indexer)
         indexer.update_index
       rescue => e
         puts "#{e.class}:#{e.message}"
@@ -211,7 +213,7 @@ HTML
     temp_file.close
     File.rename(temp_file.path, file_name)
   end
-  
+
   helpers do
     def spec_for(gem_name, version)
       spec_file = File.join(settings.data, "quick", "Marshal.#{Gem.marshal_version}", "#{gem_name}-#{version}.gemspec.rz")
