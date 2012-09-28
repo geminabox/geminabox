@@ -18,6 +18,7 @@ class Geminabox < Sinatra::Base
   set :incremental_updates, false
   set :views, File.join(File.dirname(__FILE__), *%w[.. views])
   set :allow_replace, false
+  set :gem_permissions, 0644
   use Hostess
 
   class << self
@@ -210,8 +211,9 @@ HTML
     yield temp_file
     temp_file.close
     File.rename(temp_file.path, file_name)
+    File.chmod(settings.gem_permissions, file_name)
   end
-  
+
   helpers do
     def spec_for(gem_name, version)
       spec_file = File.join(settings.data, "quick", "Marshal.#{Gem.marshal_version}", "#{gem_name}-#{version}.gemspec.rz")
