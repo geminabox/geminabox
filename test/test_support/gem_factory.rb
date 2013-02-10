@@ -37,7 +37,7 @@ class GemFactory
         end
       }
 
-      spec_file = Tempfile.open("spec") do |tmpfile|
+      spec_file = Tempfile.open("spec", {:binmode => true}) do |tmpfile|
         tmpfile << spec
         tmpfile.close
 
