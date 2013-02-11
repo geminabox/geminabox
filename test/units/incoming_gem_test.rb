@@ -40,10 +40,13 @@ class IncomingGemTest < MiniTest::Unit::TestCase
 
   test "#hexdigest" do
     file_name = GemFactory.gem_file(:example)
-    file = File.open(file_name)
+    file = File.open(file_name, 'rb')
     subject = Geminabox::IncomingGem.new(file)
 
-    assert_equal Digest::SHA1.hexdigest(File.read(file_name)), subject.hexdigest
+    File.open(file_name, 'rb') do |compare_file|
+      assert_equal Digest::SHA1.hexdigest(compare_file.read), subject.hexdigest
+    end
+
   end
 
 end
