@@ -226,7 +226,7 @@ HTML
   def atomic_write(file_name)
     temp_dir = File.join(settings.data, "_temp")
     FileUtils.mkdir_p(temp_dir)
-    temp_file = Tempfile.new("." + File.basename(file_name), temp_dir)
+    temp_file = Tempfile.new("." + File.basename(file_name), temp_dir, {:binmode => true})
     yield temp_file
     temp_file.close
     File.rename(temp_file.path, file_name)
@@ -236,7 +236,7 @@ HTML
   helpers do
     def spec_for(gem_name, version)
       spec_file = File.join(settings.data, "quick", "Marshal.#{Gem.marshal_version}", "#{gem_name}-#{version}.gemspec.rz")
-      Marshal.load(Gem.inflate(File.read(spec_file))) if File.exists? spec_file
+      File.open(spec_file, 'rb') { |file| Marshal.load(Gem.inflate(file.read)) } if File.exists? spec_file
     end
 
     # Return a list of versions of gem 'gem_name' with the dependencies of each version.

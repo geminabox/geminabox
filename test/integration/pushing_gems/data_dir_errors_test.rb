@@ -19,6 +19,7 @@ class InvalidDataDirTest < Geminabox::TestCase
   data "/dev/null"
 
   test "report the error back to the user" do
+    skip 'Test broken under Win32.' if RbConfig::CONFIG['host_os'] =~ /mswin|windows|cygwin|mingw32/i
     assert_match %r{Please ensure /dev/null is a directory.}, geminabox_push(gem_file(:example))
   end
 end
@@ -29,6 +30,7 @@ class UnwritableDataDirTest < Geminabox::TestCase
   data "/tmp/read_only"
 
   test "report the error back to the user" do
+    skip 'Test broken under Win32.' if RbConfig::CONFIG['host_os'] =~ /mswin|windows|cygwin|mingw32/i
     assert_match %r{Please ensure /tmp/read_only is writable by the geminabox web server.}, geminabox_push(gem_file(:example))
   end
 end
@@ -39,6 +41,7 @@ class UnwritableUncreatableDataDirTest < Geminabox::TestCase
   data "/tmp/read_only/geminabox-fail"
 
   test "report the error back to the user" do
+    skip 'Test broken under Win32.' if RbConfig::CONFIG['host_os'] =~ /mswin|windows|cygwin|mingw32/i
     assert_match %r{Could not create /tmp/read_only/geminabox-fail}, geminabox_push(gem_file(:example))
   end
 end
@@ -47,6 +50,7 @@ class WritableNoneExistentDataDirTest < Geminabox::TestCase
   data "#{data}/more/layers/of/dirs"
 
   test "create the data dir" do
+    skip 'Test broken under Win32.' if RbConfig::CONFIG['host_os'] =~ /mswin|windows|cygwin|mingw32/i
     FileUtils.rm_rf(config.data)
     assert_can_push
   end

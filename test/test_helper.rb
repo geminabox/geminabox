@@ -23,8 +23,9 @@ end
 
 class MiniTest::Unit::TestCase
   extend TestMethodMagic
+  DEV_NULL      = RbConfig::CONFIG['host_os'] =~ /mswin|windows|cygwin|mingw32/i ? 'nul' : '/dev/null'
+  TEST_DATA_DIR = RbConfig::CONFIG['host_os'] =~ /mswin|windows|cygwin|mingw32/i ? "#{ENV['temp'].gsub('\\', '/')}/geminabox-test-data" : "/tmp/geminabox-test-data"
 
-  TEST_DATA_DIR="/tmp/geminabox-test-data"
   def clean_data_dir
     FileUtils.rm_rf(TEST_DATA_DIR)
     FileUtils.mkdir(TEST_DATA_DIR)
@@ -42,7 +43,7 @@ class MiniTest::Unit::TestCase
 
   def silence_stream(stream)
     old_stream = stream.dup
-    stream.reopen('/dev/null')
+    stream.reopen(DEV_NULL)
     stream.sync = true
     yield
   ensure

@@ -13,13 +13,14 @@ class AtomFeedTest < MiniTest::Unit::TestCase
     Geminabox
   end
 
-  test "atom feed returns when no gems are defined" do
-    get "/atom.xml"
+  test 'atom feed returns when no gems are defined' do
+    get '/atom.xml'
     assert last_response.ok?
     refute_match %r{<entry>}, last_response.body
   end
 
-  test "atom feed with a single gem" do
+  test 'atom feed with a single gem' do
+    skip 'Test broken under Win32.' if RbConfig::CONFIG['host_os'] =~ /mswin|windows|cygwin|mingw32/i
     inject_gems do |builder|
       builder.gem "foo"
     end

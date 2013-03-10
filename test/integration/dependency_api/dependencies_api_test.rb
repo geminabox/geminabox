@@ -4,6 +4,7 @@ require 'set'
 
 class DependenciesApiTest < Geminabox::TestCase
   test "push a gem with dependencies" do
+    skip 'Test broken under Win32. (Missing fork)' if RbConfig::CONFIG['host_os'] =~ /mswin|windows|cygwin|mingw32/i
     cache_fixture_data_dir "a_gem_with_deps" do
       assert_can_push(:a, :deps => [[:b, '>= 0']])
     end
@@ -14,11 +15,13 @@ class DependenciesApiTest < Geminabox::TestCase
   end
 
   test "ask about a missing gem" do
+    skip 'Test broken under Win32. (Missing fork)' if RbConfig::CONFIG['host_os'] =~ /mswin|windows|cygwin|mingw32/i
     deps = fetch_deps("nothing", "nadda", "nought")
     assert_equal [], deps
   end
 
   test "get dependencies for multiple gems" do
+    skip 'Test broken under Win32. (Missing fork)' if RbConfig::CONFIG['host_os'] =~ /mswin|windows|cygwin|mingw32/i
     cache_fixture_data_dir "multiple_gems_with_deps" do
       assert_can_push(:a, :deps => [[:b, '>= 0']])
       assert_can_push(:another_gem, :deps => [[:fred, '>= 0'], [:john, '= 2.0']])
@@ -33,6 +36,7 @@ class DependenciesApiTest < Geminabox::TestCase
   end
 
   test "get dependencies for multiple versions of the same gem" do
+    skip 'Test broken under Win32. (Missing fork)' if RbConfig::CONFIG['host_os'] =~ /mswin|windows|cygwin|mingw32/i
     cache_fixture_data_dir "one_gem_many_versions" do
       assert_can_push(:a, :deps => [[:b, '>= 0']])
       assert_can_push(:a, :deps => [[:b, '>= 1']], :version => "2.0.0")
@@ -47,6 +51,7 @@ class DependenciesApiTest < Geminabox::TestCase
   end
 
   test "dependency cache is cleared as expected" do
+    skip 'Test broken under Win32. (Missing fork)' if RbConfig::CONFIG['host_os'] =~ /mswin|windows|cygwin|mingw32/i
     assert_can_push(:a, :deps => [[:b, '>= 0']])
 
     deps = fetch_deps("a")

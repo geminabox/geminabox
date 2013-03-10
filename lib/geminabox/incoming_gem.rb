@@ -8,7 +8,7 @@ class Geminabox::IncomingGem
     if RbConfig::CONFIG["MAJOR"].to_i <= 1 and RbConfig::CONFIG["MINOR"].to_i <= 8
       @tempfile = Tempfile.new("gem")
     else
-      @tempfile = Tempfile.new("gem", :encoding => 'binary')
+      @tempfile = Tempfile.new("gem", {:binmode => true})
     end
 
     while data = gem_data.read(1024**2)
