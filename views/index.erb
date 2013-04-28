@@ -37,7 +37,8 @@
 
         <div class="details">
           <p>
-            <% if spec = spec_for(name, versions.newest.number) %>
+            <% newest_gem = versions.newest %>
+            <% if spec = spec_for(name, newest_gem.number, newest_gem.platform) %>
               <%= spec.description %>
               <br/>
               <span class="author">– <%= spec.authors.map do |author|
