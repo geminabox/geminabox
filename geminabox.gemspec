@@ -5,9 +5,9 @@ Gem::Specification.new do |s|
   s.version           = GeminaboxVersion
   s.summary           = 'Really simple rubygem hosting'
   s.description       = 'A sinatra based gem hosting app, with client side gem push style functionality.'
-  s.author            = 'Tom Lea'
-  s.email             = 'contrib@tomlea.co.uk'
-  s.homepage          = 'http://tomlea.co.uk/p/gem-in-a-box'
+  s.author            = 'Rally Software Development Corp'
+  s.email             = 'integrations@rallydev.com'
+  s.homepage          = 'http://www.rallydev.com/'
 
   s.has_rdoc          = true
   s.extra_rdoc_files  = %w[README.markdown]
