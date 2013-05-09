@@ -40,8 +40,9 @@
             <% if spec = spec_for(name, versions.newest.number) %>
               <%= spec.description %>
               <br/>
-              <span class="author">– <%= spec.authors.map do |author|
-                "<a href='#{spec.homepage}'>#{author}</a>"
+              <a href="<%= spec.homepage %>">Homepage</a><br />
+              <span class="author">– <%= spec.authors.zip(spec.email).map do |author, email|
+                %Q{<a href="mailto:#{email}">#{author}</a>}
               end.join(', ') %></span>
             <% end %>
           </p>
