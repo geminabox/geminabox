@@ -80,6 +80,11 @@ Simples!
       Description:
         Push a gem up to your GemInABox
 
+##
+    Add this line to your Rakefile for a rally:publish task.
+
+    require 'geminabox/rake_task'
+
 ## Licence
 
 Fork it, mod it, choose it, use it, make it better. All under the [do what the fuck you want to + beer/pizza public license][WTFBPPL].
