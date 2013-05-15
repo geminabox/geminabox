@@ -16,13 +16,14 @@ Gem::Specification.new do |s|
   s.files             = %w[README.markdown] + Dir['{lib,public,views}/**/*']
   s.require_paths     = ['lib']
 
-  s.add_dependency('sinatra')
-  s.add_dependency('builder')
-  s.add_dependency('httpclient', [">= 2.2.7"])
-  s.add_development_dependency('rake')
-  s.add_development_dependency('rack-test')
-  s.add_development_dependency('minitest')
-  s.add_development_dependency('capybara')
-  s.add_development_dependency('capybara-mechanize')
-  s.add_development_dependency('pry')
+  s.add_dependency 'sinatra'
+  s.add_dependency 'builder'
+  s.add_dependency 'httpclient', [">= 2.2.7"]
+  s.add_development_dependency 'rake'
+  s.add_development_dependency 'rack-test'
+  s.add_development_dependency 'minitest'
+  s.add_development_dependency 'capybara'
+  s.add_development_dependency 'capybara-mechanize'
+  s.add_development_dependency 'pry'
+  s.add_development_dependency 'geminabox'
 end

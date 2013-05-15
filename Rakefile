@@ -1,5 +1,5 @@
-require "rubygems"
-require "rubygems/package_task"
+require 'rubygems/package_task'
+require 'bundler/gem_tasks'
 require 'geminabox/rake_task'
 
 Gem::PackageTask.new(eval(File.read("geminabox.gemspec"))) do |pkg|
