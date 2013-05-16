@@ -1,4 +1,5 @@
-require "rubygems/commands/inabox_command"
+require 'rake'
+require 'rubygems/commands/inabox_command'
 
 desc "Publish to Rally Geminabox server"
 namespace :rally do
