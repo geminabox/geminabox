@@ -38,6 +38,12 @@ RubyGems supports generating indexes for the so called legacy versions (< 1.2), 
 
 ## Client Usage
 
+Since version 0.10, Geminabox supports the standard gemcutter push API:
+
+    gem push pkg/my-awesome-gem-1.0.gem --host HOST
+
+You can also use the gem plugin:
+
     gem install geminabox
 
     gem inabox pkg/my-awesome-gem-1.0.gem
