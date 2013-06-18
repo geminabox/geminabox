@@ -1,37 +1,66 @@
-<p>
-<a href="/">Back to Gem Index</a>
-</p>
+<% @gem.by_name do |name, versions| %>
 
-<ul class="gemlist">
-  <% @gem.by_name do |name, versions| %>
-    <li class="gem-version">
-      <h2><%= name %> (<%= versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}" %>)</h2>
-      <% versions.each.reverse_each do |version| %>
-        <p>
-        <code>gem install <%= version.name %> <%= "--prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= version.number %>"</code>
-        <% unless version.platform =~ /^ruby/i %>
-          <small class="platform"><%= version.platform %></small>
-        <% end %>
-        </p>
-        <form class="delete-form" method="post" action="<%= url("/gems/#{version.gemfile_name}.gem") %>">
-          <a class="download" href="<%= url("/gems/#{version.gemfile_name}.gem") %>">download</a>
-          <input type="hidden" name="_method" value="DELETE" />
-          <button type="submit">delete</button>
-        </form>
+    <h1><%= name %></h1>
+
+    <ul class="nav nav-pills" id="versions">
+      <% versions.reverse_each.take(10).each do |version| %>
+          <li>
+            <a href="#version-<%= version.number.to_s.gsub '.', '_' %>" data-toggle="tab"><%= version.number %></a>
+          </li>
       <% end %>
+    </ul>
 
-      <div class="details">
-        <p>
-        <% if spec = spec_for(name, versions.newest.number) %>
-          <%= spec.description %>
-          <br/>
-          <span class="author">– <%= spec.authors.map do |author|
-            "<a href='#{spec.homepage}'>#{author}</a>"
-          end.join(', ') %></span>
-        <% end %>
-        </p>
-      </div>
+    <div class="tab-content">
+      <% versions.each do |version| %>
+          <div class="tab-pane" id="version-<%= version.number.to_s.gsub '.', '_' %>">
+            <h4>Add it to your Gemfile (recommended)</h4>
+            <pre class="prettyprint linenums languague-ruby">
+source '<%= url '/' %>">'
 
-    </li>
-  <% end %>
-</ul>
+gem '<%= name %>', '<%= version.number %>'</pre>
+            <h4>...or install it globally</h4>
+            <pre>
+$ gem sources -a <%= url '/' %>">
+$ gem install <%= name %> -v <%= version.number %>
+            </pre>
+            <h4>...or download it</h4>
+            <a class='btn btn-primary version' href='<%= url("/gems/#{version.gemfile_name}.gem") %>'>
+              <i class="icon-download icon-white"></i>
+              Download <%= version.number %>
+            </a>
+            <hr>
+            <div class="alert alert-block alert-error fade in">
+              <h4 class="alert-heading">DANGER - Destructive Action</h4>
+
+              <p>This action is irreversible</p>
+
+              <p>
+
+              <form class="form delete-form" style="margin: 0px;" method="post" action="<%= url("/gems/#{version.gemfile_name}.gem") %>" onSubmit="if(!confirm('Are you sure you want to delete version <%= version.number %> of <%= name %>')){return false;}">
+                <input type="hidden" name="_method" value="DELETE"/>
+                <button class="btn btn-danger" type="submit">Delete Version <%= version.number %></button>
+              </form>
+              </p>
+            </div>
+          </div>
+      <% end %>
+    </div>
+
+<% end %>
+
+<script>
+    $(function () {
+        var version = window.location.hash.substring(1);
+        var element = $('#versions a[href=#' + version + ']');
+
+        if (element.length > 0) {
+            element.tab('show')
+        } else {
+            $('#versions a:first').tab('show');
+        }
+
+        $('#versions a').on('shown', function (e) {
+            window.location.hash = e.target.hash;
+        })
+    })
+</script>

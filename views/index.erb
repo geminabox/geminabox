@@ -1,55 +1,35 @@
-<p>
-<small>If you did not need any credentials to get to this page</small>
-  <pre><code>gem sources -a <%= url "/" %></code></pre>
-<small>If you needed some credentials to get to this page</small>
-  <pre><code>gem sources -a <%= url.to_s.gsub('://','://username:password@') %></code></pre>
-<small>and then ...</small>
-  <pre><code>gem install geminabox<br />gem inabox [gemfile]</code></pre>
-</p>
+<h2 class="gem-listing-title">Gem Listing</h2>
 
 <% if @gems.any? %>
-  <a href="<%= url("/upload") %>">Upload Another Gem</a>
-
-  <div id="alpha_index"><%= ("a".."z").map{|i| @index_gems.include?(i) ? "<a href='#jump_#{i}'>#{i}</a>" : i }.join(" - ") %></div>
-
-  <ul class="gemlist">
-
-    <% @gems.by_name do |name, versions| %>
-      <li <%= %{id="jump_#{name[0..0].downcase}"} if @index_gems.delete(name[0..0].downcase) %> class="gem-version">
-        <h2><%= name %> (<%= versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}" %>)</h2>
-        <% versions.each.reverse_each.first(5).each do |version| %>
-          <p>
-            <code>gem install <%= version.name %> <%= "--prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= version.number %>"</code>
-            <% unless version.platform =~ /^ruby/i %>
-              <small class="platform"><%= version.platform %></small>
-            <% end %>
-          </p>
-          <form class="delete-form" method="post" action="<%= url("/gems/#{version.gemfile_name}.gem") %>">
-            <a class="download" href="<%= url("/gems/#{version.gemfile_name}.gem") %>">download</a>
-            <input type="hidden" name="_method" value="DELETE" />
-            <button type="submit">delete</button>
-          </form>
-        <% end %>
-
-        <% if versions.count > 5 %>
-          <a href="<%= url("/gems/#{name}") %>" id="more_link">Older versions...</a>
-        <% end %>
-
-        <div class="details">
-          <p>
-            <% if spec = spec_for(name, versions.newest.number) %>
-              <%= spec.description %>
-              <br/>
-              <span class="author">– <%= spec.authors.map do |author|
-                "<a href='#{spec.homepage}'>#{author}</a>"
-              end.join(', ') %></span>
-            <% end %>
-          </p>
-        </div>
-
-      </li>
-    <% end %>
-  </ul>
+    <div id="alpha_index"><%= ("a".."z").map { |i| @index_gems.include?(i) ? "<a href='#jump_#{i}'>#{i}</a>" : i }.join(" - ") %></div>
+    <table class="table">
+      <thead>
+      <th>Name</th>
+      <th>Author</th>
+      <th>Versions</th>
+      </thead>
+      <tbody>
+      <% @gems.by_name do |name, versions| %>
+          <tr>
+            <td><a href="<%= url("/gems/#{name}") %>"><%= name %></a></td>
+            <td>
+              <% if spec = spec_for(name, versions.newest.number) %>
+                  <%= spec.authors.map do |author|
+                    "<a href='#{spec.homepage}'>#{author}</a>"
+                  end.join(', ') %>
+              <% end %>
+            </td>
+            <td class="versions">
+              <%= versions.each.reverse_each.first(5).map do |version|
+                "<a class='version' href='#{ url("/gems/#{name}#version-#{version.number.to_s.gsub '.', '_'}") }'>#{version.number}</a>"
+              end.join(', ') %>
+            </td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+<% else %>
+    <p>No gems have been added to the Gem in a Box server yet.</p>
+    <h4><a href="/upload">Add/Upload a new Gem</a></h4>
 <% end %>
 
-<a href="<%= url("/upload") %>">Upload Another Gem</a>

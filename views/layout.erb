@@ -1,16 +1,47 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Gem in a Box</title>
-    <link rel="stylesheet" href="<%= url "/master.css" %>" type="text/css" media="screen">
-    <link href="<%= url "/atom.xml" %>" type="application/atom+xml" rel="alternate" title="Atom Feed">
-  </head>
-  <body>
-    <div id="content">
-      <h1>Gem in a Box</h1>
-      <%= yield %>
-    </div>
-    <script type="text/javascript" src="<%= url "/jquery.js" %>"></script>
-    <script type="text/javascript" src="<%= url "/master.js" %>"></script>
-  </body>
+<head>
+  <title>Gem in a Box</title>
+  <script type='text/javascript' src="/vendor/jquery-1.9.1.min.js"></script>
+  <script type='text/javascript' src="/vendor/bootstrap/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css" type="text/css" media="screen">
+  <script type='text/javascript' src="/vendor/bootstrap/js/prettify.min.js"></script>
+  <link rel="stylesheet" href="/vendor/bootstrap/css/prettify.min.css" type="text/css" media="screen">
+  <link href="<%= url "/atom.xml" %>" type="application/atom+xml" rel="alternate" title="Atom Feed">
+  <style>
+      .navbar {
+          width: 980px;
+          margin: 0px auto 20px;
+      }
+      pre {
+          font-size: 0.8em;
+      }
+      .brand {
+          color: #AA0800 !important;
+          font-weight: bold !important;
+      }
+      .adding-gems {
+          margin-bottom: 30px;
+      }
+      #alpha_index {
+          padding-left: 3px;
+          margin-bottom: 10px;
+      }
+  </style>
+</head>
+<body onload="prettyPrint()">
+<div class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="<%= url '/' %>">Gem in a Box</a>
+    <ul class="nav">
+      <li><a href="<%= url("/") %>">Home</a></li>
+      <li><a href="<%= url("/upload") %>">Upload</a></li>
+      <li><a href="<%= url("/example-gemfile") %>">Example Gemfile</a></li>
+    </ul>
+  </div>
+</div>
+<div class="container">
+  <%= yield %>
+</div>
+</body>
 </html>
