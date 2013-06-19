@@ -51,6 +51,7 @@ module GeminaboxClient::GemLocator
 
   def latest_gem_for(gemname, files)
     regexp_matcher = %r{(?:pkg/)#{gemname}-(#{Gem::Version::VERSION_PATTERN})\.gem}
+    regexp_matcher = %r{(?:pkg/).*-(#{Gem::Version::VERSION_PATTERN})\.gem}
     sorter = lambda{|v| Gem::Version.new(regexp_matcher.match(v)[1]) }
     files.grep(regexp_matcher).max_by(&sorter)
   end
