@@ -45,6 +45,7 @@ module GeminaboxClient::GemLocator
   def find_gem(dir)
     gemname = File.split(dir).last
     glob_matcher = "{pkg/,}#{gemname}-*.gem"
+    glob_matcher = "{pkg/,}*.gem"
     latest_gem_for(gemname, Dir.glob(glob_matcher)) or raise Gem::CommandLineError, NO_GEM_PROVIDED_ERROR_MESSAGE
   end
 
