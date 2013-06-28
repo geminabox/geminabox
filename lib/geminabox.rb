@@ -48,6 +48,15 @@ class Geminabox < Sinatra::Base
     erb :index
   end
 
+  get '/ping' do
+    'OK'
+  end
+
+  get '/health' do
+    load_gems
+    'OK'
+  end
+
   get '/atom.xml' do
     @gems = load_gems
     erb :atom, :layout => false
