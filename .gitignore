@@ -6,3 +6,4 @@ vendor/bundle
 .rbenv-version
 test/fixtures/fake_home_path/.gem/specs
 .idea
+.gem
