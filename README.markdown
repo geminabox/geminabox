@@ -7,7 +7,7 @@ The bundler dependencies API is supported out of the box.
 Authentication is left up to either the web server, or the Rack stack.
 For basic auth, try [Rack::Auth](http://rack.rubyforge.org/doc/Rack/Auth/Basic.html).
 
-![screen shot](http://pics.tomlea.co.uk/bbbba6/geminabox.png)
+![screen shot](http://i.imgur.com/hjm2PEc.png)
 
 ## System Requirements
 

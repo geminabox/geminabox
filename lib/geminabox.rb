@@ -68,6 +68,11 @@ class Geminabox < Sinatra::Base
     erb :upload
   end
 
+  get '/example-gemfile' do
+    content_type 'text/plain'
+    erb :example_gemfile, :layout => false
+  end
+
   get '/reindex' do
     reindex(:force_rebuild)
     redirect url("/")
@@ -116,7 +121,7 @@ private
     write_and_index(gem)
 
     if api_request?
-      "Gem #{gem.name} received and indexed."
+      "Gem #{gem.name} received and indexed. <a href=\"#{url("/")}\">Click here to return</a>"
     else
       redirect url("/")
     end

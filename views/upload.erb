@@ -1,8 +1,36 @@
-<p>
-<small>Choose a gem file to upload ...</small>
-</p>
+<div class="adding-gems">
+  <h3>Adding Gems:</h3>
+
+  <p>If you did not need any credentials to get to this page:</p>
+
+<pre>
+$ gem sources -a http://localhost:9293/
+</pre>
+
+  <p>If you needed some credentials to get to this page:</p>
+<pre>
+$ gem sources -a http://username:password@localhost:9293/
+</pre>
+
+  <p>Then:</p>
+<pre>
+$ gem install geminabox
+$ gem inabox my-gem-0.0.1.gem
+</pre>
+
+  <p>Enter the root url for your personal geminabox instance. (E.g. <%= url '/' %>)</p>
+</div>
+
+<h4>...or upload the .gem file directly from your computer:</h4>
 <%= @error %>
-<form method="POST" enctype="multipart/form-data"> 
-  <input type="file" name="file">
-  <input type="submit" value="Upload">
+<form method="post" enctype="multipart/form-data">
+  <div class="fileupload fileupload-new pull-left" data-provides="fileupload">
+    <div class="input-append">
+      <div class="uneditable-input span3"><i class="icon-file fileupload-exists"></i> <span class="fileupload-preview"></span></div><span class="btn btn-file"><span class="fileupload-new">Select file</span><span class="fileupload-exists">Change</span><input type="file" name="file" /></span><a href="#" class="btn fileupload-exists" data-dismiss="fileupload">Remove</a>
+    </div>
+  </div>
+  <div class="pull-left" style="height:1px;width:10px"></div>
+  <button type="submit" class="btn btn-primary pull-left" value="Upload">
+    <i class="icon-upload icon-white"></i> Upload
+  </button>
 </form> 
