@@ -1,4 +1,5 @@
-# Gem in a Box – Really simple rubygem hosting (now with Bootstrap based views)
+# Gem in a Box – Really simple rubygem hosting
+##(now with Bootstrap based views)
 
 Geminabox lets you host your own gems, and push new gems to it just like with rubygems.org.
 The bundler dependencies API is supported out of the box.
