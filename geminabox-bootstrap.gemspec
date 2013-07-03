@@ -4,7 +4,7 @@ Gem::Specification.new do |s|
   s.name              = 'geminabox-bootstrap'
   s.version           = GeminaboxVersion
   s.summary           = 'Really simple rubygem hosting'
-  s.description       = 'A sinatra based gem hosting app, with client side gem push style functionality.'
+  s.description       = 'A sinatra based gem hosting app, with client side gem push style functionality. Views have been re-done in bootstrap.'
   s.authors           = ['Tom Lea', 'Jack Foy', 'Tom Chapin']
   s.email             = ['contrib@tomlea.co.uk', 'jack@foys.net', 'tchapin@gmail.com']
   s.homepage          = 'https://github.com/tomchapin/geminabox-bootstrap'
