@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files  = %w[README.markdown]
   s.rdoc_options      = %w[--main README.markdown]
 
-  s.files             = %w[README.markdown] + Dir['{lib,public,views}/**/*']
+  s.files             = `git ls-files`.split($/)
   s.require_paths     = ['lib']
 
   s.add_dependency('sinatra')
