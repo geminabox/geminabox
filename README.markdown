@@ -44,11 +44,11 @@ RubyGems supports generating indexes for the so called legacy versions (< 1.2), 
 
 Configure Gem in a box (interactive prompt to specify where to upload to):
 
-    geminabox -c
+    gem inabox -c
 
 Change the host to upload to:
 
-    geminabox -g HOST
+    gem inabox -g HOST
 
 Simples!
 
