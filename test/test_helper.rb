@@ -7,7 +7,6 @@ require 'minitest/autorun'
 require 'fileutils'
 require 'test_support/gem_factory'
 require 'test_support/geminabox_test_case'
-require 'pry'
 
 require 'capybara/mechanize'
 require 'capybara/dsl'
@@ -17,11 +16,11 @@ Capybara.default_driver = :mechanize
 Capybara.app_host = "http://localhost"
 module TestMethodMagic
   def test(test_name, &block)
-    define_method "test: #{test_name} ", &block
+    define_method "test_method: #{test_name} ", &block
   end
 end
 
-class MiniTest::Unit::TestCase
+class Minitest::Test
   extend TestMethodMagic
 
   TEST_DATA_DIR="/tmp/geminabox-test-data"
