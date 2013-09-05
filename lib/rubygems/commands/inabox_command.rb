@@ -1,16 +1,24 @@
+require 'uri'
+require 'net/http'
+require 'nokogiri'
+require 'open-uri'
 require 'rubygems/command'
 
 class Gem::Commands::InaboxCommand < Gem::Command
   def description
-    'Push a gem up to your GemInABox'
+    'Interact with your GemInABox'
   end
 
   def arguments
-    "GEM       built gem to push up"
+    [
+     "list           List gems in your GemInABox",
+     "delete GEM     Delete GEM from your GemInABox",
+     "push GEM       Push GEM to your GemInABox",
+    ].join("\n")
   end
 
   def usage
-    "#{program_name} GEM"
+    "#{program_name} [CMD] <GEM>"
   end
 
   def initialize
@@ -43,10 +51,46 @@ class Gem::Commands::InaboxCommand < Gem::Command
       say "You didn't specify a gem, looking for one in . and in ./pkg/..."
       gemfiles = [GeminaboxClient::GemLocator.find_gem(Dir.pwd)]
     else
-      gemfiles = get_all_gem_names
+      # Now see what operation we're using
+      if options[:args][0] =~ /list/
+        # List gems on your GemInABox
+        doc = Nokogiri::HTML(open(geminabox_host))
+        say "\nListing gems on #{geminabox_host}\n\n"
+        doc.search('h2').each do |gem_tag|
+          say gem_tag.content
+        end
+      elsif options[:args][0] =~ /delete/
+        # Check for GEM and error if not present
+        if options[:args].size == 2
+          # Check to see that GEM is on GemInABox
+          doc = Nokogiri::HTML(open(geminabox_host))
+          geminabox_delete = nil
+          doc.search('h2').each do |gem_tag|
+            if gem_tag.content.gsub(/[\(\)]/, '').split(' ')[0] =~ /#{options[:args][1]}/
+              geminabox_delete = gem_tag.content.gsub(/[\(\)]/, '').split(' ')
+            end
+          end
+          if geminabox_delete == nil
+            say "The gem #{options[:args][1]} was not found on #{geminabox_host}"
+          else
+            # Delete GEM from GemInABox
+            uri = URI.parse("#{geminabox_host}/gems/#{geminabox_delete.join('-')}.gem")
+            # Shortcut
+            response = Net::HTTP.post_form(uri, {"_method" => "DELETE"})
+            if response.code.to_i != 303
+              say "There has been an error while deleting #{geminabox_delete.join('-')}. Unspecified behaviour may have ocurred."
+              puts response.code.inspect
+            else
+              say "The gem #{geminabox_delete.join('-')} has been deleted from #{geminabox_host}."
+            end
+          end
+        end
+      elsif options[:args][0] =~ /push/
+        options[:args].delete_at(0)
+        gemfiles = get_all_gem_names
+        send_gems(gemfiles)
+      end
     end
-
-    send_gems(gemfiles)
   end
 
   def send_gems(gemfiles)
