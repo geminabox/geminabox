@@ -6,6 +6,8 @@ require 'rubygems/indexer'
 require 'rubygems/package'
 require 'hostess'
 require 'geminabox/version'
+require 'geminabox/gem_store'
+require 'geminabox/gem_store_error'
 require 'rss/atom'
 require 'tempfile'
 
@@ -35,6 +37,35 @@ class Geminabox < Sinatra::Base
       return if @post_reset_hook_applied
       Gem.post_reset{ Gem::Specification.all = nil } if defined? Bundler and Gem.respond_to? :post_reset
       @post_reset_hook_applied = true
+    end
+
+    def reindex(force_rebuild = false)
+      Geminabox.fixup_bundler_rubygems!
+      force_rebuild = true unless Geminabox.incremental_updates
+      if force_rebuild
+        indexer.generate_index
+        dependency_cache.flush
+      else
+        begin
+          require 'geminabox/indexer'
+          updated_gemspecs = Geminabox::Indexer.updated_gemspecs(indexer)
+          Geminabox::Indexer.patch_rubygems_update_index_pre_1_8_25(indexer)
+          indexer.update_index
+          updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
+        rescue => e
+          puts "#{e.class}:#{e.message}"
+          puts e.backtrace.join("\n")
+          reindex(:force_rebuild)
+        end
+      end
+    end
+
+    def indexer
+      Gem::Indexer.new(Geminabox.data, :build_legacy => Geminabox.build_legacy)
+    end
+
+    def dependency_cache
+      @dependency_cache ||= Geminabox::DiskCache.new(File.join(Geminabox.data, "_cache"))
     end
   end
 
@@ -69,7 +100,7 @@ class Geminabox < Sinatra::Base
   end
 
   get '/reindex' do
-    reindex(:force_rebuild)
+    self.class.reindex(:force_rebuild)
     redirect url("/")
   end
 
@@ -85,7 +116,7 @@ class Geminabox < Sinatra::Base
       error_response(403, 'Gem deletion is disabled - see https://github.com/cwninja/geminabox/issues/115')
     end
     File.delete file_path if File.exists? file_path
-    reindex(:force_rebuild)
+    self.class.reindex(:force_rebuild)
     redirect url("/")
   end
 
@@ -110,10 +141,11 @@ class Geminabox < Sinatra::Base
 private
 
   def handle_incoming_gem(gem)
-    prepare_data_folders
-    error_response(400, "Cannot process gem") unless gem.valid?
-    handle_replacement(gem) unless params[:overwrite] == "true"
-    write_and_index(gem)
+    begin
+      GemStore.create(gem, params[:overwrite])
+    rescue GemStoreError => error
+      error_response error.code, error.reason
+    end
 
     if api_request?
       "Gem #{gem.name} received and indexed."
@@ -138,64 +170,6 @@ private
 </html>
 HTML
     halt [code, html]
-  end
-
-  def prepare_data_folders
-    if File.exists? Geminabox.data
-      error_response( 500, "Please ensure #{File.expand_path(Geminabox.data)} is a directory." ) unless File.directory? Geminabox.data
-      error_response( 500, "Please ensure #{File.expand_path(Geminabox.data)} is writable by the geminabox web server." ) unless File.writable? Geminabox.data
-    else
-      begin
-        FileUtils.mkdir_p(settings.data)
-      rescue Errno::EACCES, Errno::ENOENT, RuntimeError => e
-        error_response( 500, "Could not create #{File.expand_path(Geminabox.data)}.\n#{e}\n#{e.message}" )
-      end
-    end
-
-    FileUtils.mkdir_p(File.join(settings.data, "gems"))
-  end
-
-  def handle_replacement(gem)
-    if Geminabox.disallow_replace? and File.exist?(gem.dest_filename)
-      existing_file_digest = Digest::SHA1.file(gem.dest_filename).hexdigest
-
-      if existing_file_digest != gem.hexdigest
-        error_response(409, "Updating an existing gem is not permitted.\nYou should either delete the existing version, or change your version number.")
-      else
-        error_response(200, "Ignoring upload, you uploaded the same thing previously.\nPlease use -o to ovewrite.")
-      end
-    end
-  end
-
-  def write_and_index(gem)
-    tmpfile = gem.gem_data
-    atomic_write(gem.dest_filename) do |f|
-      while blk = tmpfile.read(65536)
-        f << blk
-      end
-    end
-    reindex
-  end
-
-  def reindex(force_rebuild = false)
-    Geminabox.fixup_bundler_rubygems!
-    force_rebuild = true unless settings.incremental_updates
-    if force_rebuild
-      indexer.generate_index
-      dependency_cache.flush
-    else
-      begin
-        require 'geminabox/indexer'
-        updated_gemspecs = Geminabox::Indexer.updated_gemspecs(indexer)
-        Geminabox::Indexer.patch_rubygems_update_index_pre_1_8_25(indexer)
-        indexer.update_index
-        updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
-      rescue => e
-        puts "#{e.class}:#{e.message}"
-        puts e.backtrace.join("\n")
-        reindex(:force_rebuild)
-      end
-    end
   end
 
   def indexer
@@ -229,15 +203,25 @@ HTML
     Set.new(gems.map{|gem| gem.name[0..0].downcase})
   end
 
-  # based on http://as.rubyonrails.org/classes/File.html
-  def atomic_write(file_name)
-    temp_dir = File.join(settings.data, "_temp")
-    FileUtils.mkdir_p(temp_dir)
-    temp_file = Tempfile.new("." + File.basename(file_name), temp_dir)
-    yield temp_file
-    temp_file.close
-    File.rename(temp_file.path, file_name)
-    File.chmod(settings.gem_permissions, file_name)
+  def reindex(force_rebuild = false)
+    Geminabox.fixup_bundler_rubygems!
+    force_rebuild = true unless Geminabox.incremental_updates
+    if force_rebuild
+      indexer.generate_index
+      dependency_cache.flush
+    else
+      begin
+        require 'geminabox/indexer'
+        updated_gemspecs = Geminabox::Indexer.updated_gemspecs(indexer)
+        Geminabox::Indexer.patch_rubygems_update_index_pre_1_8_25(indexer)
+        indexer.update_index
+        updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
+      rescue => e
+        puts "#{e.class}:#{e.message}"
+        puts e.backtrace.join("\n")
+        reindex(:force_rebuild)
+      end
+    end
   end
 
   helpers do
