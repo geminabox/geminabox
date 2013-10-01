@@ -203,27 +203,6 @@ HTML
     Set.new(gems.map{|gem| gem.name[0..0].downcase})
   end
 
-  def reindex(force_rebuild = false)
-    Geminabox.fixup_bundler_rubygems!
-    force_rebuild = true unless Geminabox.incremental_updates
-    if force_rebuild
-      indexer.generate_index
-      dependency_cache.flush
-    else
-      begin
-        require 'geminabox/indexer'
-        updated_gemspecs = Geminabox::Indexer.updated_gemspecs(indexer)
-        Geminabox::Indexer.patch_rubygems_update_index_pre_1_8_25(indexer)
-        indexer.update_index
-        updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
-      rescue => e
-        puts "#{e.class}:#{e.message}"
-        puts e.backtrace.join("\n")
-        reindex(:force_rebuild)
-      end
-    end
-  end
-
   helpers do
     def spec_for(gem_name, version)
       spec_file = File.join(settings.data, "quick", "Marshal.#{Gem.marshal_version}", "#{gem_name}-#{version}.gemspec.rz")
