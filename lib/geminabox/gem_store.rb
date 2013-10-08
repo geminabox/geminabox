@@ -87,6 +87,7 @@ class GemStore
     temp_dir = File.join(Geminabox.data, "_temp")
     FileUtils.mkdir_p(temp_dir)
     temp_file = Tempfile.new("." + File.basename(file_name), temp_dir)
+    temp_file.binmode
     yield temp_file
     temp_file.close
     File.rename(temp_file.path, file_name)
