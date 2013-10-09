@@ -172,10 +172,6 @@ HTML
     halt [code, html]
   end
 
-  def indexer
-    Gem::Indexer.new(settings.data, :build_legacy => settings.build_legacy)
-  end
-
   def file_path
     File.expand_path(File.join(settings.data, *request.path_info))
   end
