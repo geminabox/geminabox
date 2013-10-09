@@ -11,6 +11,8 @@ require 'test_support/geminabox_test_case'
 require 'capybara/mechanize'
 require 'capybara/dsl'
 
+require 'webmock/minitest'
+WebMock.disable_net_connect!(:allow_localhost => true)
 
 Capybara.default_driver = :mechanize
 Capybara.app_host = "http://localhost"

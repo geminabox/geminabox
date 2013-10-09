@@ -5,4 +5,5 @@ group :test do
   gem 'rake'
   gem 'minitest'
   gem 'capybara-mechanize'
+  gem 'webmock'
 end

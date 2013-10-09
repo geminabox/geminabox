@@ -8,6 +8,7 @@ require 'hostess'
 require 'geminabox/version'
 require 'geminabox/gem_store'
 require 'geminabox/gem_store_error'
+require 'geminabox/rubygems_dependency'
 require 'rss/atom'
 require 'tempfile'
 
