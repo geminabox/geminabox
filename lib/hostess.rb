@@ -2,7 +2,23 @@ require 'sinatra/base'
 
 class Hostess < Sinatra::Base
   def serve
+    get_from_rubygems_if_not_local if Geminabox.rubygems_proxy
+
     send_file(File.expand_path(File.join(Geminabox.data, *request.path_info)), :type => response['Content-Type'])
+  end
+
+  def get_from_rubygems_if_not_local
+
+    file = File.expand_path(File.join(Geminabox.data, *request.path_info))
+
+    unless File.exists?(file)
+      Net::HTTP.start("production.cf.rubygems.org") do |http|
+        path = File.join(*request.path_info)
+        response = http.get(path)
+        GemStore.create(IncomingGem.new(StringIO.new(response.body)))
+      end
+    end
+
   end
 
   %w[/specs.4.8.gz

@@ -23,6 +23,7 @@ class Geminabox < Sinatra::Base
   set :allow_replace, false
   set :gem_permissions, 0644
   set :allow_delete, true
+  set :rubygems_proxy, (ENV['RUBYGEMS_PROXY'] == 'true')
   use Hostess
 
   class << self
@@ -92,7 +93,8 @@ class Geminabox < Sinatra::Base
 
   get '/api/v1/dependencies' do
     query_gems = params[:gems].to_s.split(',')
-    deps = query_gems.inject([]){|memo, query_gem| memo + gem_dependencies(query_gem) }
+    rubygems =  settings.rubygems_proxy ? marshaled_rubygems(*query_gems) : []
+    deps = query_gems.inject(rubygems){|memo, query_gem| memo + gem_dependencies(query_gem) }
     Marshal.dump(deps)
   end
 
@@ -221,6 +223,26 @@ HTML
               :dependencies => runtime_dependencies(spec)
             }
           end
+      end
+    end
+
+    def marshaled_rubygems(*query_gems)
+      rubygems_dependencies = RubygemsDependency.for(*query_gems)
+      query_gems.each do |gem_name|
+        dependency_cache.marshal_cache(gem_name) do
+          rubygems_dependencies.
+            select {|gem_dependency| gem_dependency['name'] == gem_name}.
+            map    { |gem_dependency| [gem_dependency, spec_for(gem_dependency['name'], gem_dependency['number'])] }.
+            reject { |(_, spec)| spec.nil? }.
+            map do |(gem, spec)|
+              {
+                :name => gem.name,
+                :number => gem.number.version,
+                :platform => gem.platform,
+                :dependencies => runtime_dependencies(spec)
+              }
+            end
+        end
       end
     end
 
