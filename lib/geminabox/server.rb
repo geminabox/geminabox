@@ -241,7 +241,12 @@ HTML
         spec.
           dependencies.
           select { |dep| dep.type == :runtime }.
-          map    { |dep| [dep.name, dep.requirement.to_s] }
+          map    { |dep| name_and_requirements_for(dep) }
+      end
+
+      def name_and_requirements_for(dep)
+        name = dep.name.kind_of?(Array) ? dep.name.first : dep.name
+        [name, dep.requirement.to_s]
       end
     end
   end
