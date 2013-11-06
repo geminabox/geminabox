@@ -9,6 +9,7 @@ require 'geminabox/version'
 require 'geminabox/gem_store'
 require 'geminabox/gem_store_error'
 require 'geminabox/rubygems_dependency'
+require 'geminabox/gem_list_merge'
 require 'rss/atom'
 require 'tempfile'
 
@@ -92,10 +93,11 @@ class Geminabox < Sinatra::Base
   end
 
   get '/api/v1/dependencies' do
-    query_gems = params[:gems].to_s.split(',')
-    rubygems =  settings.rubygems_proxy ? marshaled_rubygems(*query_gems) : []
-    deps = query_gems.inject(rubygems){|memo, query_gem| memo + gem_dependencies(query_gem) }
-    Marshal.dump(deps)
+    Marshal.dump(gem_list)
+  end
+
+  get '/api/v1/dependencies.json' do
+    gem_list.to_json
   end
 
   get '/upload' do
@@ -201,6 +203,26 @@ HTML
   def index_gems(gems)
     Set.new(gems.map{|gem| gem.name[0..0].downcase})
   end
+  
+  def gem_list
+    settings.rubygems_proxy ? combined_gem_list : local_gem_list
+  end
+
+  def query_gems
+    params[:gems].to_s.split(',')
+  end
+
+  def local_gem_list
+    query_gems.map{|query_gem| gem_dependencies(query_gem) }.flatten(1)
+  end
+
+  def remote_gem_list
+    RubygemsDependency.for(*query_gems)
+  end
+
+  def combined_gem_list
+    GemListMerge.from(local_gem_list, remote_gem_list)
+  end
 
   helpers do
     def spec_for(gem_name, version)
@@ -226,25 +248,7 @@ HTML
       end
     end
 
-    def marshaled_rubygems(*query_gems)
-      rubygems_dependencies = RubygemsDependency.for(*query_gems)
-      query_gems.each do |gem_name|
-        dependency_cache.marshal_cache(gem_name) do
-          rubygems_dependencies.
-            select {|gem_dependency| gem_dependency['name'] == gem_name}.
-            map    { |gem_dependency| [gem_dependency, spec_for(gem_dependency['name'], gem_dependency['number'])] }.
-            reject { |(_, spec)| spec.nil? }.
-            map do |(gem, spec)|
-              {
-                :name => gem.name,
-                :number => gem.number.version,
-                :platform => gem.platform,
-                :dependencies => runtime_dependencies(spec)
-              }
-            end
-        end
-      end
-    end
+
 
     def runtime_dependencies(spec)
       spec.
