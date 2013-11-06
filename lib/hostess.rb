@@ -1,4 +1,5 @@
 require 'sinatra/base'
+require 'geminabox/incoming_gem'
 
 class Hostess < Sinatra::Base
   def serve

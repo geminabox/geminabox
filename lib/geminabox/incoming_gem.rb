@@ -1,4 +1,4 @@
-class Geminabox::IncomingGem
+class IncomingGem
   def initialize(gem_data, root_path = Geminabox.settings.data)
     unless gem_data.respond_to? :read
       raise ArgumentError, "Expected an instance of IO"
