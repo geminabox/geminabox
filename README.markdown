@@ -26,7 +26,7 @@ Create a config.ru as follows:
     require "geminabox"
 
     Geminabox.data = "/var/geminabox-data" # ... or wherever
-    run Geminabox
+    run Geminabox::Server
 
 Start your gem server with 'rackup' to run WEBrick or hook up the config.ru as you normally would ([passenger][passenger], [thin][thin], [unicorn][unicorn], whatever floats your boat).
 

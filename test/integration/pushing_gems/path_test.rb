@@ -5,7 +5,7 @@ class PathTest < Geminabox::TestCase
 
   app do
     map "/foo" do
-      run Geminabox
+      run Geminabox::Server
     end
   end
 
@@ -17,7 +17,7 @@ class PathWithTrailingSlashTest < Geminabox::TestCase
 
   app do
     map "/foo" do
-      run Geminabox
+      run Geminabox::Server
     end
   end
 

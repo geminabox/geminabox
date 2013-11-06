@@ -3,4 +3,4 @@ require "geminabox"
 
 ENV['RUBYGEMS_PROXY'] ||= 'false'
 
-run Geminabox
+run Geminabox::Server
