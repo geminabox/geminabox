@@ -30,17 +30,17 @@ class GemListMergeTest < Minitest::Test
     assert_equal expected, GemListMerge.from(list_one, list_two)
   end
 
-  def test_merge_with_symbols
+  def test_merge_with_text_keys
     list_one = gem_list [:c], [:a]
-    list_two = [build_symbol_gem(:b)]
-    expected = [build_gem(:a), build_symbol_gem(:b), build_gem(:c)]
+    list_two = [build_text_gem(:b)]
+    expected = gem_list [:a], [:b], [:c]
     assert_equal expected, GemListMerge.from(list_one, list_two)
   end
 
   def test_merge_ignores_dependencies
     list_one = gem_list [:a]
     list_two = gem_list [:a]
-    list_two.first['dependencies'] = [{foo: :bar}]
+    list_two.first[:dependencies] = [{foo: :bar}]
     expected = gem_list [:a]
     assert_equal expected, GemListMerge.from(list_one, list_two)
   end
@@ -50,7 +50,7 @@ class GemListMergeTest < Minitest::Test
     assert_equal [build_gem(:x)], gem_list_merge.hash[:x]
   end
 
-  def build_gem(name, number = '0.0.1')
+  def build_text_gem(name, number = '0.0.1')
     {
         'name' => name.to_s,
         'number' => number,
@@ -59,7 +59,7 @@ class GemListMergeTest < Minitest::Test
     }
   end
 
-  def build_symbol_gem(name, number = '0.0.1')
+  def build_gem(name, number = '0.0.1')
     {
         name: name.to_s,
         number: number,
