@@ -6,6 +6,7 @@ require 'rubygems/indexer'
 require 'rubygems/package'
 require 'rss/atom'
 require 'tempfile'
+require 'json'
 
 module Geminabox
 
