@@ -3,15 +3,22 @@ module Geminabox
   class Server < Sinatra::Base
     enable :static, :methodoverride
 
-    set :public_folder, File.join(File.dirname(__FILE__), *%w[.. .. public])
-    set :data, File.join(File.dirname(__FILE__), *%w[.. .. data])
-    set :build_legacy, false
-    set :incremental_updates, true
-    set :views, File.join(File.dirname(__FILE__), *%w[.. .. views])
-    set :allow_replace, false
-    set :gem_permissions, 0644
-    set :allow_delete, true
-    set :rubygems_proxy, (ENV['RUBYGEMS_PROXY'] == 'true')
+    def self.delegate_to_geminabox(*delegate_methods)
+      delegate_methods.each{|m| set m, Geminabox.send(m)}
+    end
+
+    delegate_to_geminabox(
+      :public_folder,
+      :data,
+      :build_legacy,
+      :incremental_updates,
+      :views,
+      :allow_replace,
+      :gem_permissions,
+      :allow_delete,
+      :rubygems_proxy
+    )
+ 
     use Hostess
 
     class << self
@@ -59,10 +66,7 @@ module Geminabox
       end
     end
 
-    autoload :GemVersionCollection, "geminabox/gem_version_collection"
-    autoload :GemVersion, "geminabox/gem_version"
-    autoload :DiskCache, "geminabox/disk_cache"
-    autoload :IncomingGem, "geminabox/incoming_gem"
+
 
     before do
       headers 'X-Powered-By' => "geminabox #{Geminabox::VERSION}"
@@ -169,7 +173,7 @@ HTML
     end
 
     def dependency_cache
-      @dependency_cache ||= Geminabox::DiskCache.new(File.join(settings.data, "_cache"))
+      self.class.dependency_cache
     end
 
     def all_gems
