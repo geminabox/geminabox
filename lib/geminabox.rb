@@ -10,12 +10,13 @@ require 'json'
 
 module Geminabox
 
+  require_relative 'geminabox/version'
+
   def self.geminabox_path(file)
     File.join File.dirname(__FILE__), 'geminabox', file
   end
 
   autoload :Hostess,              geminabox_path('hostess')
-  autoload :VERSION,              geminabox_path('version')
   autoload :GemStore,             geminabox_path('gem_store')
   autoload :GemStoreError,        geminabox_path('gem_store_error')
   autoload :RubygemsDependency,   geminabox_path('rubygems_dependency')
