@@ -177,14 +177,31 @@ HTML
     end
 
     def all_gems
-      %w(specs prerelease_specs).map{ |specs_file_type|
-        specs_file_path = File.join(settings.data, "#{specs_file_type}.#{Gem.marshal_version}.gz")
+      all_gems_with_duplicates.inject(:|)
+    end
+
+    def all_gems_with_duplicates
+      specs_files_paths.map do |specs_file_path|
         if File.exists?(specs_file_path)
           Marshal.load(Gem.gunzip(Gem.read_binary(specs_file_path)))
         else
           []
         end
-      }.inject(:|)
+      end
+    end
+
+    def specs_file_types
+      [:specs, :prerelease_specs]
+    end
+
+    def specs_files_paths
+      specs_file_types.map do |specs_file_type|
+        File.join(settings.data, spec_file_name(specs_file_type))
+      end
+    end
+
+    def spec_file_name(specs_file_type)
+      [specs_file_type, Gem.marshal_version, 'gz'].join('.')
     end
 
     def load_gems
