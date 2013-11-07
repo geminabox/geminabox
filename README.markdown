@@ -36,6 +36,18 @@ RubyGems supports generating indexes for the so called legacy versions (< 1.2), 
 
     Geminabox.build_legacy = false
 
+## RubyGems Proxy
+
+Geminabox can be configured to pull gems, it does not currently have, from rubygems.org. To enable this mode you can either:
+
+Set RUBYGEM_PROXY to true in the environment:
+
+    RUBYGEMS_PROXY=true rackup
+
+Or in config.ru (before the run command), set:
+
+    Geminabox.rubygems_proxy = true
+
 ## Client Usage
 
 Since version 0.10, Geminabox supports the standard gemcutter push API:
@@ -88,7 +100,7 @@ Simples!
 
 ## Licence
 
-Fork it, mod it, choose it, use it, make it better. All under the [do what the fuck you want to + beer/pizza public license][WTFBPPL].
+Fork it, mod it, choose it, use it, make it better. All under the MIT License.
 
 [WTFBPPL]: http://tomlea.co.uk/WTFBPPL.txt
 [sinatra]: http://www.sinatrarb.com/
