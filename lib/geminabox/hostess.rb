@@ -1,5 +1,4 @@
 require 'sinatra/base'
-require 'geminabox/incoming_gem'
 
 module Geminabox
 

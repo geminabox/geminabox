@@ -9,17 +9,21 @@ require 'tempfile'
 
 module Geminabox
 
-  autoload :Hostess,              'geminabox/hostess'
-  autoload :VERSION,              'geminabox/version'
-  autoload :GemStore,             'geminabox/gem_store'
-  autoload :GemStoreError,        'geminabox/gem_store_error'
-  autoload :RubygemsDependency,   'geminabox/rubygems_dependency'
-  autoload :GemListMerge,         'geminabox/gem_list_merge'
-  autoload :GemVersion,           'geminabox/gem_version'
-  autoload :GemVersionCollection, 'geminabox/gem_version_collection'
-  autoload :Server,               'geminabox/server'
-  autoload :DiskCache,            'geminabox/disk_cache'
-  autoload :IncomingGem,          'geminabox/incoming_gem'
+  def self.geminabox_path(file)
+    File.join File.dirname(__FILE__), 'geminabox', file
+  end
+
+  autoload :Hostess,              geminabox_path('hostess')
+  autoload :VERSION,              geminabox_path('version')
+  autoload :GemStore,             geminabox_path('gem_store')
+  autoload :GemStoreError,        geminabox_path('gem_store_error')
+  autoload :RubygemsDependency,   geminabox_path('rubygems_dependency')
+  autoload :GemListMerge,         geminabox_path('gem_list_merge')
+  autoload :GemVersion,           geminabox_path('gem_version')
+  autoload :GemVersionCollection, geminabox_path('gem_version_collection')
+  autoload :Server,               geminabox_path('server')
+  autoload :DiskCache,            geminabox_path('disk_cache')
+  autoload :IncomingGem,          geminabox_path('incoming_gem')
 
   class << self
 
