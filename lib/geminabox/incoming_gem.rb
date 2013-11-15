@@ -49,12 +49,13 @@ module Geminabox
     end
 
     def name
-      unless @name
-        filename = %W[#{spec.name} #{spec.version}]
-        filename.push(spec.platform) if spec.platform && spec.platform != "ruby"
-        @name = filename.join("-") + ".gem"
-      end
-      @name
+      @name ||= get_name
+    end
+
+    def get_name
+      filename = %W[#{spec.name} #{spec.version}]
+      filename.push(spec.platform) if spec.platform && spec.platform != "ruby"
+      filename.join("-") + ".gem"
     end
 
     def dest_filename
