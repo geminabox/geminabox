@@ -14,8 +14,8 @@ class DependenciesApiTest < Geminabox::TestCase
   end
 
   test "ask about a missing gem" do
-    deps = fetch_deps_without_marshal("nothing", "nadda", "nought")
-    assert_equal "", deps
+    deps = fetch_deps("nothing", "nadda", "nought")
+    assert_equal [], deps
   end
 
   test "get dependencies for multiple gems" do
@@ -66,8 +66,8 @@ class DependenciesApiTest < Geminabox::TestCase
   end
 
   test "dependency api with empty params" do
-    deps = HTTPClient.new.get_content(url_for("api/v1/dependencies"))
-    assert_equal "", deps
+    deps = Marshal.load HTTPClient.new.get_content(url_for("api/v1/dependencies"))
+    assert_equal [], deps
   end
 
   test "get dependencies for multiple gems as json" do
@@ -87,10 +87,6 @@ class DependenciesApiTest < Geminabox::TestCase
 
 protected
   def fetch_deps(*gems)
-    Marshal.load fetch_deps_without_marshal(*gems)
-  end
-
-  def fetch_deps_without_marshal(*gems)
-    HTTPClient.new.get_content(url_for("api/v1/dependencies?gems=#{gems.join(",")}"))
+    Marshal.load HTTPClient.new.get_content(url_for("api/v1/dependencies?gems=#{gems.join(",")}"))
   end
 end

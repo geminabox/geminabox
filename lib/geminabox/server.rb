@@ -84,11 +84,11 @@ module Geminabox
     end
 
     get '/api/v1/dependencies' do
-      gem_list.empty? ? nil : Marshal.dump(gem_list)
+      Marshal.dump(gem_list)
     end
 
     get '/api/v1/dependencies.json' do
-      gem_list.empty? ? nil : gem_list.to_json
+      gem_list.to_json
     end
 
     get '/upload' do
@@ -213,7 +213,7 @@ HTML
     end
 
     def gem_list
-      @gem_list ||= settings.rubygems_proxy ? combined_gem_list : local_gem_list
+      settings.rubygems_proxy ? combined_gem_list : local_gem_list
     end
 
     def query_gems
