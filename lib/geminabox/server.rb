@@ -18,8 +18,12 @@ module Geminabox
       :allow_delete,
       :rubygems_proxy
     )
- 
-    use Hostess
+
+    if Server.rubygems_proxy
+      use Proxy::Hostess
+    else
+      use Hostess
+    end
 
     class << self
       def disallow_replace?

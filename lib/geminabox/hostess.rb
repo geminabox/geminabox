@@ -4,19 +4,14 @@ module Geminabox
 
   class Hostess < Sinatra::Base
     def serve
-      if @splicer
-        send_file @splicer.splice_path
-      else
-        send_file(File.expand_path(File.join(Server.data, *request.path_info)), :type => response['Content-Type'])
-      end
+      send_file(File.expand_path(File.join(Server.data, *request.path_info)), :type => response['Content-Type'])
     end
 
-    %w[specs.4.8.gz
-       latest_specs.4.8.gz
-       prerelease_specs.4.8.gz
+    %w[/specs.4.8.gz
+       /latest_specs.4.8.gz
+       /prerelease_specs.4.8.gz
     ].each do |index|
-      get "/#{index}" do
-        splice_file index
+      get index do
         content_type 'application/x-gzip'
         serve
       end
@@ -27,48 +22,25 @@ module Geminabox
        /Marshal.4.8.Z
     ].each do |deflated_index|
       get deflated_index do
-        get_from_rubygems_if_not_local if Server.rubygems_proxy
         content_type('application/x-deflate')
         serve
       end
     end
 
-    %w[yaml
-       Marshal.4.8
-       specs.4.8
-       latest_specs.4.8
-       prerelease_specs.4.8
+    %w[/yaml
+       /Marshal.4.8
+       /specs.4.8
+       /latest_specs.4.8
+       /prerelease_specs.4.8
     ].each do |old_index|
-      get "/#{old_index}" do
-        splice_file old_index
+      get old_index do
         serve
       end
     end
 
     get "/gems/*.gem" do
-      get_from_rubygems_if_not_local if Server.rubygems_proxy
       serve
     end
-
-    private
-    def get_from_rubygems_if_not_local
-
-      file = File.expand_path(File.join(Server.data, *request.path_info))
-
-      unless File.exists?(file)
-        Net::HTTP.start("production.cf.rubygems.org") do |http|
-          path = File.join(*request.path_info)
-          response = http.get(path)
-          GemStore.create(IncomingGem.new(StringIO.new(response.body)))
-        end
-      end
-
-    end
-
-    def splice_file(file_name)
-      @splicer = Splicer.make(file_name) if Server.rubygems_proxy
-    end
-
 
   end
 end

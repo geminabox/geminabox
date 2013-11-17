@@ -11,6 +11,7 @@ require 'json'
 module Geminabox
 
   require_relative 'geminabox/version'
+  require_relative 'geminabox/proxy'
 
   def self.geminabox_path(file)
     File.join File.dirname(__FILE__), 'geminabox', file
@@ -26,7 +27,6 @@ module Geminabox
   autoload :Server,               geminabox_path('server')
   autoload :DiskCache,            geminabox_path('disk_cache')
   autoload :IncomingGem,          geminabox_path('incoming_gem')
-  autoload :Splicer,              geminabox_path('splicer')
 
   class << self
 
