@@ -3,10 +3,11 @@ require 'sinatra/base'
 module Geminabox
   module Proxy
     class Hostess < Sinatra::Base
+      attr_accessor :file_handler
       
       def serve
-        if @splicer
-          send_file @splicer.splice_path
+        if file_handler
+          send_file file_handler.proxy_path
         else
           send_file(File.expand_path(File.join(Server.data, *request.path_info)), :type => response['Content-Type'])
         end
@@ -23,12 +24,12 @@ module Geminabox
         end
       end
 
-      %w[/quick/Marshal.4.8/*.gemspec.rz
-         /yaml.Z
-         /Marshal.4.8.Z
+      %w[quick/Marshal.4.8/*.gemspec.rz
+         yaml.Z
+         Marshal.4.8.Z
       ].each do |deflated_index|
-        get deflated_index do
-          get_from_rubygems_if_not_local
+        get "/#{deflated_index}" do
+          copy_file request.path_info[1..-1]
           content_type('application/x-deflate')
           serve
         end
@@ -67,7 +68,11 @@ module Geminabox
       end
 
       def splice_file(file_name)
-        @splicer = Splicer.make(file_name) if Server.rubygems_proxy
+        self.file_handler = Splicer.make(file_name)
+      end
+
+      def copy_file(file_name)
+        self.file_handler = Copier.copy(file_name)
       end
 
 
