@@ -204,7 +204,8 @@ HTML
   end
 
   helpers do
-    def spec_for(gem_name, version)
+    def spec_for(gem_name, version, platform='ruby')
+      version = "#{version}-#{platform}" if platform != 'ruby'
       spec_file = File.join(settings.data, "quick", "Marshal.#{Gem.marshal_version}", "#{gem_name}-#{version}.gemspec.rz")
       Marshal.load(Gem.inflate(File.read(spec_file))) if File.exists? spec_file
     end
@@ -214,7 +215,7 @@ HTML
       dependency_cache.marshal_cache(gem_name) do
         load_gems.
           select { |gem| gem_name == gem.name }.
-          map    { |gem| [gem, spec_for(gem.name, gem.number)] }.
+          map    { |gem| [gem, spec_for(gem.name, gem.number, gem.platform)] }.
           reject { |(_, spec)| spec.nil? }.
           map do |(gem, spec)|
             {
