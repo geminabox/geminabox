@@ -46,6 +46,18 @@ class DependenciesApiTest < Geminabox::TestCase
     assert_equal expected, deps
   end
 
+  test "get dependencies for a platform-dependent gem" do
+    cache_fixture_data_dir "platform_dependent_gem" do
+      assert_can_push(:a, :deps => [[:b, '>= 0']])
+    end
+
+    deps = fetch_deps("a")
+    expected = [
+      {:name=>"a", :number=>"1.0.0", :platform=>"java", :dependencies=>[["b", ">= 0"]]},
+    ]
+    assert_equal expected, deps
+  end
+
   test "dependency cache is cleared as expected" do
     assert_can_push(:a, :deps => [[:b, '>= 0']])
 
