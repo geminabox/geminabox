@@ -1,4 +1,5 @@
 require 'sinatra/base'
+require 'net/http'
 
 module Geminabox
   module Proxy
@@ -58,7 +59,7 @@ module Geminabox
         file = File.expand_path(File.join(Server.data, *request.path_info))
 
         unless File.exists?(file)
-          Net::HTTP.start("production.cf.rubygems.org") do |http|
+          ::Net::HTTP.start("production.cf.rubygems.org") do |http|
             path = File.join(*request.path_info)
             response = http.get(path)
             GemStore.create(IncomingGem.new(StringIO.new(response.body)))
