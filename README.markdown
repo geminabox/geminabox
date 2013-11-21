@@ -26,7 +26,7 @@ Create a config.ru as follows:
     require "geminabox"
 
     Geminabox.data = "/var/geminabox-data" # ... or wherever
-    run Geminabox
+    run Geminabox::Server
 
 Start your gem server with 'rackup' to run WEBrick or hook up the config.ru as you normally would ([passenger][passenger], [thin][thin], [unicorn][unicorn], whatever floats your boat).
 
@@ -35,6 +35,18 @@ Start your gem server with 'rackup' to run WEBrick or hook up the config.ru as y
 RubyGems supports generating indexes for the so called legacy versions (< 1.2), and since it is very rare to use such versions nowadays, it can be disabled, thus improving indexing times for large repositories. If it's safe for your application, you can disable support for these legacy versions by adding the following configuration to your config.ru file:
 
     Geminabox.build_legacy = false
+
+## RubyGems Proxy
+
+Geminabox can be configured to pull gems, it does not currently have, from rubygems.org. To enable this mode you can either:
+
+Set RUBYGEM_PROXY to true in the environment:
+
+    RUBYGEMS_PROXY=true rackup
+
+Or in config.ru (before the run command), set:
+
+    Geminabox.rubygems_proxy = true
 
 ## Client Usage
 
@@ -88,7 +100,7 @@ Simples!
 
 ## Licence
 
-Fork it, mod it, choose it, use it, make it better. All under the [do what the fuck you want to + beer/pizza public license][WTFBPPL].
+Fork it, mod it, choose it, use it, make it better. All under the MIT License.
 
 [WTFBPPL]: http://tomlea.co.uk/WTFBPPL.txt
 [sinatra]: http://www.sinatrarb.com/

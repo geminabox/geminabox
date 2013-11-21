@@ -1,12 +1,13 @@
 require 'nesty'
+module Geminabox
+  class GemStoreError < StandardError
+    attr_reader :code, :reason
 
-class GemStoreError < StandardError
-  attr_reader :code, :reason
+    include Nesty::NestedError
 
-  include Nesty::NestedError
-
-  def initialize(code, reason)
-    @code = code.to_s
-    @reason = reason
+    def initialize(code, reason)
+      @code = code.to_s
+      @reason = reason
+    end
   end
 end

@@ -10,7 +10,7 @@ class AtomFeedTest < Minitest::Test
   end
 
   def app
-    Geminabox
+    Geminabox::Server
   end
 
   test "atom feed returns when no gems are defined" do

@@ -70,6 +70,21 @@ class DependenciesApiTest < Geminabox::TestCase
     assert_equal [], deps
   end
 
+  test "get dependencies for multiple gems as json" do
+    cache_fixture_data_dir "multiple_gems_with_deps" do
+      assert_can_push(:a, :deps => [[:b, '>= 0']])
+      assert_can_push(:another_gem, :deps => [[:fred, '>= 0'], [:john, '= 2.0']])
+    end
+
+    gems = %w(a another_gem)
+    deps = JSON.parse HTTPClient.new.get_content(url_for("api/v1/dependencies.json?gems=#{gems.join(",")}"))
+    expected = Set[
+      {"name"=>"a", "number"=>"1.0.0", "platform"=>"ruby", "dependencies"=>[["b", ">= 0"]]},
+      {"name"=>"another_gem", "number"=>"1.0.0", "platform"=>"ruby", "dependencies"=>[["fred", ">= 0"], ["john", "= 2.0"]]}
+    ]
+    assert_equal expected, Set[*deps]
+  end
+
 protected
   def fetch_deps(*gems)
     Marshal.load HTTPClient.new.get_content(url_for("api/v1/dependencies?gems=#{gems.join(",")}"))

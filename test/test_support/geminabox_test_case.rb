@@ -35,7 +35,7 @@ class Geminabox::TestCase < Minitest::Test
     end
 
     def app(&block)
-      @app = block || @app || lambda{|builder| run Geminabox }
+      @app = block || @app || lambda{|builder| run Geminabox::Server }
     end
 
     def to_app

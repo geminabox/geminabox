@@ -8,7 +8,7 @@ class AuthTest < Geminabox::TestCase
       username == "foo" and password == "bar"
     end
 
-    run Geminabox
+    run Geminabox::Server
   end
 
   should_push_gem
