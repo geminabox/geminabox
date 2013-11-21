@@ -205,7 +205,7 @@ class Geminabox::TestCase < Minitest::Test
           TCPSocket.open("127.0.0.1", @test_server_port).close
         end
       rescue Errno::ECONNREFUSED
-        sleep 0.05
+        sleep 0.10
         retry
       end
     end
