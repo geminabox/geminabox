@@ -10,3 +10,4 @@ test/fixtures/fake_home_path/.gem/specs
 .ruby-*
 .bin
 *.gem
+test/fixtures/*.fixture
