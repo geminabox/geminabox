@@ -66,8 +66,8 @@ class DependenciesApiTest < Geminabox::TestCase
   end
 
   test "dependency api with empty params" do
-    deps = Marshal.load HTTPClient.new.get_content(url_for("api/v1/dependencies"))
-    assert_equal [], deps
+    request = HTTPClient.new.get(url_for("api/v1/dependencies"))
+    assert_equal 200, request.status
   end
 
   test "get dependencies for multiple gems as json" do

@@ -88,11 +88,11 @@ module Geminabox
     end
 
     get '/api/v1/dependencies' do
-      Marshal.dump(gem_list)
+      query_gems.any? ? Marshal.dump(gem_list) : 200
     end
 
     get '/api/v1/dependencies.json' do
-      gem_list.to_json
+      query_gems.any? ? gem_list.to_json : {}
     end
 
     get '/upload' do
