@@ -53,6 +53,10 @@ module Geminabox
     def settings
       Server.settings
     end
+    
+    def call(env)
+      Server.call env
+    end
   end
 
   set_defaults(
