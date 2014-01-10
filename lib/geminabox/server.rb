@@ -155,7 +155,7 @@ module Geminabox
     end
 
     def api_request?
-      request.accept.first != "text/html"
+      request.accept.first.strip != "text/html"
     end
 
     def error_response(code, message)
