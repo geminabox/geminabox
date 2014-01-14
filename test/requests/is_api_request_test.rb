@@ -7,6 +7,10 @@ class IsApiRequestTest < Minitest::Test
 
   def setup
     clean_data_dir
+
+    silence do
+      Gem::Indexer.new(Geminabox.data).generate_index
+    end
   end
 
   def app
