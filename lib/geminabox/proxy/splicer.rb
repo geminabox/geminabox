@@ -2,7 +2,7 @@
 module Geminabox
   module Proxy
     class Splicer < FileHandler
-      
+
       def self.make(file_name)
         splicer = new(file_name)
         splicer.create
@@ -47,7 +47,13 @@ module Geminabox
 
       private
       def merge_gziped_content
-        package(unpackage(local_content) | unpackage(remote_content))
+        begin
+          rc = remote_content
+        rescue => error
+          warn "Unable to fetch remote content from rubygems: #{error}"
+          return local_content
+        end
+        package(unpackage(local_content) | unpackage(rc))
       end
 
       def unpackage(content)
