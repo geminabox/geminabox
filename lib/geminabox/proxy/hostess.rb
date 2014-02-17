@@ -5,7 +5,7 @@ module Geminabox
   module Proxy
     class Hostess < Sinatra::Base
       attr_accessor :file_handler
-      
+
       def serve
         if file_handler
           send_file file_handler.proxy_path
@@ -69,7 +69,7 @@ module Geminabox
       end
 
       def net_http_class
-        return ::Net::HTTP if ENV['http_proxy'].empty?
+        return ::Net::HTTP unless ENV['http_proxy']
         proxy_uri = URI.parse(ENV['http_proxy'])
         ::Net::HTTP::Proxy(proxy_uri.host, proxy_uri.port, proxy_uri.user, proxy_uri.password)
       end
