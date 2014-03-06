@@ -5,7 +5,7 @@ module Geminabox
   module Proxy
     class Hostess < Sinatra::Base
       attr_accessor :file_handler
-      
+
       def serve
         if file_handler
           send_file file_handler.proxy_path
