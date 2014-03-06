@@ -44,6 +44,8 @@ module Geminabox
 
       def remote_content
         HTTPClient.get_content(remote_url).force_encoding(encoding)
+      rescue
+        raise GemStoreError.new(500, "Unable to get content from #{remote_url}")
       end
 
       def remote_url
