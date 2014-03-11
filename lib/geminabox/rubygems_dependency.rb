@@ -1,4 +1,3 @@
-require 'httpclient'
 require 'json'
 
 module Geminabox
@@ -13,7 +12,7 @@ module Geminabox
           '?gems=',
           gems.map(&:to_s).join(',')
         ].join
-        body = HTTPClient.get_content(url)
+        body = Geminabox.http_adapter.get_content(url)
         JSON.parse(body)
       end
 

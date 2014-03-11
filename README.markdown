@@ -48,6 +48,21 @@ Or in config.ru (before the run command), set:
 
     Geminabox.rubygems_proxy = true
 
+## HTTP adapter
+
+Geminabox uses the HTTPClient gem to manage its connections to remote resources.
+The relationship is managed via Geminabox::HttpClientAdapter.
+
+If you would like to use an alternative HTTP gem, create your own adapter
+and specify it in config.ru:
+
+    Geminabox.http_adapter = YourHttpAdapter.new
+
+It is recommend (but not essential) that your adapter inherits from HttpAdapter.
+The adapter will need to replace HttpAdapter's methods with those specific to
+the alternative HTTP gem. It should also be able to handle HTTP proxy
+settings.
+
 ## Client Usage
 
 Since version 0.10, Geminabox supports the standard gemcutter push API:

@@ -1,17 +1,13 @@
 require 'uri'
-require 'httpclient'
+require 'geminabox'
 
 class GeminaboxClient
   attr_reader :url, :http_client
 
   def initialize(url)
     extract_username_and_password_from_url!(url)
-    @http_client = HTTPClient.new
-    @http_client.set_auth(url_for(:upload), @username, @password) if @username or @password
-    @http_client.www_auth.basic_auth.challenge(url_for(:upload)) # Workaround: https://github.com/nahi/httpclient/issues/63
-    @http_client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    @http_client.send_timeout = 0
-    @http_client.receive_timeout = 0
+    @http_client = Geminabox.http_adapter
+    @http_client.set_auth(url_for(:upload), @username, @password) 
   end
 
   def extract_username_and_password_from_url!(url)

@@ -8,6 +8,10 @@ module Geminabox
         clean_data_dir
       end
 
+      def teardown
+        Geminabox.http_adapter = HttpClientAdapter.new
+      end
+
       def test_with_no_files_in_place
         assert_equal false, file_handler.local_file_exists?
         assert_equal false, file_handler.proxy_file_exists?
@@ -28,6 +32,13 @@ module Geminabox
       def test_remote_content
         stub_request(:get, "http://rubygems.org/foo/bar").
           to_return(:status => 200, :body => remote_content)
+        assert_equal remote_content, file_handler.remote_content
+      end
+
+      def test_remote_content_with_alternative_http_adapter
+        @http_dummy = HttpDummy.new
+        @http_dummy.default_response = remote_content
+        Geminabox.http_adapter = @http_dummy
         assert_equal remote_content, file_handler.remote_content
       end
       

@@ -59,19 +59,12 @@ module Geminabox
         file = File.expand_path(File.join(Server.data, *request.path_info))
 
         unless File.exists?(file)
-          net_http_class.start("production.cf.rubygems.org") do |http|
-            path = File.join(*request.path_info)
-            response = http.get(path)
-            GemStore.create(IncomingGem.new(StringIO.new(response.body)))
-          end
+          ruby_gems_url = 'http://production.cf.rubygems.org'
+          path = File.join(ruby_gems_url, *request.path_info)
+          content = Geminabox.http_adapter.get_content(path)
+          GemStore.create(IncomingGem.new(StringIO.new(content)))
         end
 
-      end
-
-      def net_http_class
-        return ::Net::HTTP unless ENV['http_proxy']
-        proxy_uri = URI.parse(ENV['http_proxy'])
-        ::Net::HTTP::Proxy(proxy_uri.host, proxy_uri.port, proxy_uri.user, proxy_uri.password)
       end
 
       def splice_file(file_name)
