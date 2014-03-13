@@ -14,6 +14,9 @@ module Geminabox
         ].join
         body = Geminabox.http_adapter.get_content(url)
         JSON.parse(body)
+      rescue Exception => e
+        return [] if Geminabox.allow_remote_failure
+        raise e
       end
 
       def rubygems_uri
