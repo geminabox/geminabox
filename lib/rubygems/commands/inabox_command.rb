@@ -27,6 +27,10 @@ class Gem::Commands::InaboxCommand < Gem::Command
     add_option('-o', '--overwrite', "Overwrite Gem.") do |value, options|
       options[:overwrite] = true
     end
+
+    add_option('-p', '--port', "Sets port") do |value, options|
+      options[:port] = value
+    end
   end
 
   def last_minute_requires!
