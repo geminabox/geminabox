@@ -1,4 +1,4 @@
-require 'httpclient'
+
 module Geminabox
   module Proxy
     class FileHandler
@@ -43,7 +43,7 @@ module Geminabox
       end
 
       def remote_content
-        HTTPClient.get_content(remote_url).force_encoding(encoding)
+        Geminabox.http_adapter.get_content(remote_url).force_encoding(encoding)
       rescue
         raise GemStoreError.new(500, "Unable to get content from #{remote_url}")
       end

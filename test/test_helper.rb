@@ -2,11 +2,12 @@ require "rubygems"
 gem "bundler"
 require "bundler/setup"
 
-require 'geminabox'
+require_relative '../lib/geminabox'
 require 'minitest/autorun'
 require 'fileutils'
 require 'test_support/gem_factory'
 require 'test_support/geminabox_test_case'
+require 'test_support/http_dummy'
 
 require 'capybara/mechanize'
 require 'capybara/dsl'

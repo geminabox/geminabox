@@ -13,21 +13,22 @@ module Geminabox
 
   require_relative 'geminabox/version'
   require_relative 'geminabox/proxy'
+  require_relative 'geminabox/http_adapter'
 
   def self.geminabox_path(file)
     File.join File.dirname(__FILE__), 'geminabox', file
   end
 
-  autoload :Hostess,              geminabox_path('hostess')
-  autoload :GemStore,             geminabox_path('gem_store')
-  autoload :GemStoreError,        geminabox_path('gem_store_error')
-  autoload :RubygemsDependency,   geminabox_path('rubygems_dependency')
-  autoload :GemListMerge,         geminabox_path('gem_list_merge')
-  autoload :GemVersion,           geminabox_path('gem_version')
-  autoload :GemVersionCollection, geminabox_path('gem_version_collection')
-  autoload :Server,               geminabox_path('server')
-  autoload :DiskCache,            geminabox_path('disk_cache')
-  autoload :IncomingGem,          geminabox_path('incoming_gem')
+  autoload :Hostess,                geminabox_path('hostess')
+  autoload :GemStore,               geminabox_path('gem_store')
+  autoload :GemStoreError,          geminabox_path('gem_store_error')
+  autoload :RubygemsDependency,     geminabox_path('rubygems_dependency')
+  autoload :GemListMerge,           geminabox_path('gem_list_merge')
+  autoload :GemVersion,             geminabox_path('gem_version')
+  autoload :GemVersionCollection,   geminabox_path('gem_version_collection')
+  autoload :Server,                 geminabox_path('server')
+  autoload :DiskCache,              geminabox_path('disk_cache')
+  autoload :IncomingGem,            geminabox_path('incoming_gem')
 
   class << self
 
@@ -40,7 +41,8 @@ module Geminabox
       :allow_replace,
       :gem_permissions,
       :allow_delete,
-      :rubygems_proxy
+      :rubygems_proxy,
+      :http_adapter
     )
 
     def set_defaults(defaults)
@@ -69,7 +71,8 @@ module Geminabox
     allow_replace:       false,
     gem_permissions:     0644,
     rubygems_proxy:      (ENV['RUBYGEMS_PROXY'] == 'true'),
-    allow_delete:        true
+    allow_delete:        true,
+    http_adapter:        HttpClientAdapter.new
 
   )
     
