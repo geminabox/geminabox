@@ -42,7 +42,8 @@ module Geminabox
       :gem_permissions,
       :allow_delete,
       :rubygems_proxy,
-      :http_adapter
+      :http_adapter,
+      :allow_remote_failure
     )
 
     def set_defaults(defaults)
@@ -62,18 +63,17 @@ module Geminabox
   end
 
   set_defaults(
-
-    data:                File.join(File.dirname(__FILE__), *%w[.. data]),
-    public_folder:       File.join(File.dirname(__FILE__), *%w[.. public]),
-    build_legacy:        false,
-    incremental_updates: true,
-    views:               File.join(File.dirname(__FILE__), *%w[.. views]),
-    allow_replace:       false,
-    gem_permissions:     0644,
-    rubygems_proxy:      (ENV['RUBYGEMS_PROXY'] == 'true'),
-    allow_delete:        true,
-    http_adapter:        HttpClientAdapter.new
-
+    data:                 File.join(File.dirname(__FILE__), *%w[.. data]),
+    public_folder:        File.join(File.dirname(__FILE__), *%w[.. public]),
+    build_legacy:         false,
+    incremental_updates:  true,
+    views:                File.join(File.dirname(__FILE__), *%w[.. views]),
+    allow_replace:        false,
+    gem_permissions:      0644,
+    rubygems_proxy:       (ENV['RUBYGEMS_PROXY'] == 'true'),
+    allow_delete:         true,
+    http_adapter:         HttpClientAdapter.new,
+    allow_remote_failure: false
   )
     
 end

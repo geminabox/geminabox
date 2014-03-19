@@ -8,6 +8,7 @@ require 'fileutils'
 require 'test_support/gem_factory'
 require 'test_support/geminabox_test_case'
 require 'test_support/http_dummy'
+require 'test_support/http_socket_error_dummy'
 
 require 'capybara/mechanize'
 require 'capybara/dsl'
