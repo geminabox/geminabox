@@ -61,7 +61,12 @@ and specify it in config.ru:
 It is recommend (but not essential) that your adapter inherits from HttpAdapter.
 The adapter will need to replace HttpAdapter's methods with those specific to
 the alternative HTTP gem. It should also be able to handle HTTP proxy
-settings.
+settings. 
+
+Defining your own adapter also allows you to configure Geminabox to use the
+local systems SSL certificates.
+
+TemplateFaradayAdapter is provided as an example of an alternative HTTPAdapter.
 
 ## Client Usage
 

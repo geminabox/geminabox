@@ -5,7 +5,7 @@ module Geminabox
 
     def setup
       @default = 'foo bar'
-      @http_adapter = HttpClientAdapter.new
+      @http_adapter = TemplateFaradayAdapter.new
     end
 
     def test_get_content
@@ -22,7 +22,6 @@ module Geminabox
       response = @http_adapter.get('http://example.com')
       assert_equal @default, response.body
       assert_equal 200, response.status
-      assert_equal 200, response.code
     end
 
     def test_post
@@ -32,16 +31,15 @@ module Geminabox
       response = @http_adapter.post('http://example.com')
       assert_equal @default, response.body
       assert_equal 200, response.status
-      assert_equal 200, response.code
     end
 
     def test_set_auth
       stub_request(:get, "http://foo:bar@example.com/").
-         with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='}).
          to_return(:status => 200, :body => @default, :headers => {})
 
-      @http_adapter.set_auth('http://example.com', 'foo', 'bar')
-      assert_equal @default, @http_adapter.get_content('http://example.com')
+      connection = @http_adapter.set_auth('http://example.com', 'foo', 'bar')
+      response = connection.get('http://example.com')
+      assert_equal @default, response.body
     end
 
   end

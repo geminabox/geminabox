@@ -28,7 +28,7 @@ class GeminaboxClient
     if response.status < 300
       response.body
     else
-      raise GeminaboxClient::Error, "Error (#{response.code} received)\n\n#{response.body}"
+      raise GeminaboxClient::Error, "Error (#{response.status} received)\n\n#{response.body}"
     end
   end
 
