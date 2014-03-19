@@ -9,10 +9,6 @@ module Geminabox
       @http_dummy.default_response = @default
     end
 
-    def teardown
-      Geminabox.http_adapter = HttpClientAdapter.new
-    end
-
     def test_get_content
       assert_equal @default, @http_dummy.get_content('http://example.com')
     end
