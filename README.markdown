@@ -48,6 +48,10 @@ Or in config.ru (before the run command), set:
 
     Geminabox.rubygems_proxy = true
 
+If you want Geminabox to carry on providing gems when rubygems.org is unavailable, add this to config.ru:
+
+    Geminabox.allow_remote_failure = true 
+
 ## HTTP adapter
 
 Geminabox uses the HTTPClient gem to manage its connections to remote resources.
