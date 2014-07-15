@@ -29,6 +29,7 @@ module Geminabox
 
       def prep_server(klass, flock_return = nil)
         @server = Geminabox::Server.new.instance_variable_get(:@instance)
+        # ivar for the tests.  Local variable for the define_method.  <sigh>
         fake_file_class = @fake_file_class = klass.new(flock_return)
         server.singleton_class.send(:define_method, :file_class){ fake_file_class }
         @mock_file = fake_file_class.mock_file
