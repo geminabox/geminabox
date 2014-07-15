@@ -2,16 +2,21 @@ require 'test_helper'
 
 module Geminabox
   class ServerTest < Minitest::Test
-    module FileOpenNoYield
-      attr_reader :name, :mode, :block
+    class FileOpenNoYield
+      attr_reader :name, :mode, :block, :mock_file
+      def initialize(dummy) ; end
+
       def open(name, mode, &block)
         @name, @mode, @block = name, mode, block
       end
     end
 
-    module FileOpenYields
-      def mock_file
-        @mock_file ||= Minitest::Mock.new
+    class FileOpenYields
+      attr_reader :mock_file
+
+      def initialize(flock_return)
+        @mock_file = Minitest::Mock.new
+        mock_file.expect(:flock, flock_return, [File::LOCK_EX | File::LOCK_NB])
       end
 
       def open(name, mode)
@@ -22,14 +27,11 @@ module Geminabox
     module PrepServer
       attr_reader :server, :fake_file_class, :mock_file
 
-      def prep_server(mod, flock_return = nil)
+      def prep_server(klass, flock_return = nil)
         @server = Geminabox::Server.new.instance_variable_get(:@instance)
-        fake_file_class = @fake_file_class = Class.new(File){ extend mod }
+        fake_file_class = @fake_file_class = klass.new(flock_return)
         server.singleton_class.send(:define_method, :file_class){ fake_file_class }
-        unless flock_return.nil?
-          @mock_file = fake_file_class.mock_file
-          mock_file.expect(:flock, flock_return, [File::LOCK_EX | File::LOCK_NB])
-        end
+        @mock_file = fake_file_class.mock_file
       end
     end
 
