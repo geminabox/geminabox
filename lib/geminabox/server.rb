@@ -16,6 +16,8 @@ module Geminabox
       :allow_replace,
       :gem_permissions,
       :allow_delete,
+      :lockfile,
+      :retry_interval,
       :rubygems_proxy
     )
 
@@ -100,8 +102,10 @@ module Geminabox
     end
 
     get '/reindex' do
-      self.class.reindex(:force_rebuild)
-      redirect url("/")
+      serialize_update do
+        self.class.reindex(:force_rebuild)
+        redirect url("/")
+      end
     end
 
     get '/gems/:gemname' do
@@ -115,22 +119,31 @@ module Geminabox
       unless self.class.allow_delete?
         error_response(403, 'Gem deletion is disabled - see https://github.com/cwninja/geminabox/issues/115')
       end
-      File.delete file_path if File.exists? file_path
-      self.class.reindex(:force_rebuild)
-      redirect url("/")
+
+      serialize_update do
+        File.delete file_path if File.exists? file_path
+        self.class.reindex(:force_rebuild)
+        redirect url("/")
+      end
+
     end
 
     post '/upload' do
-      unless params[:file] && params[:file][:filename] && (tmpfile = params[:file][:tempfile])
+      if params[:file] && params[:file][:filename] && (tmpfile = params[:file][:tempfile])
+        serialize_update do
+          handle_incoming_gem(Geminabox::IncomingGem.new(tmpfile))
+        end
+      else
         @error = "No file selected"
         halt [400, erb(:upload)]
       end
-      handle_incoming_gem(Geminabox::IncomingGem.new(tmpfile))
     end
 
     post '/api/v1/gems' do
       begin
-        handle_incoming_gem(Geminabox::IncomingGem.new(request.body))
+        serialize_update do
+          handle_incoming_gem(Geminabox::IncomingGem.new(request.body))
+        end
       rescue Object => o
         File.open "/tmp/debug.txt", "a" do |io|
           io.puts o, o.backtrace
@@ -139,6 +152,24 @@ module Geminabox
     end
 
   private
+
+    def serialize_update(&block)
+      with_lock(&block)
+    rescue AlreadyLocked
+      halt 503, { 'Retry-After' => settings.retry_interval }, 'Repository lock is held by another process'
+    end
+
+    def with_lock
+      file_class.open(settings.lockfile, File::RDWR | File::CREAT) do |f|
+        raise AlreadyLocked unless f.flock(File::LOCK_EX | File::LOCK_NB)
+        yield
+      end
+    end
+
+    # This method provides a test hook, as stubbing File is painful...
+    def file_class
+      File
+    end
 
     def handle_incoming_gem(gem)
       begin
