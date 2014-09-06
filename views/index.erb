@@ -16,7 +16,10 @@
 
     <% @gems.by_name do |name, versions| %>
       <li <%= %{id="jump_#{name[0..0].downcase}"} if @index_gems.delete(name[0..0].downcase) %> class="gem-version">
-        <h2><%= name %> (<%= versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}" %>)</h2>
+        <h2>
+          <%= name %> (<%= versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}" %>)
+          <a href="<%= url("/gems/#{name}") %>"><img src="<%= url("/gems/#{name}.svg") %>" alt="Gem Version" height="18"></a>
+        </h2>
         <% versions.each.reverse_each.first(5).each do |version| %>
           <p>
             <code>gem install <%= version.name %> <%= "--prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= version.number %>"</code>
