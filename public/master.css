@@ -153,3 +153,22 @@ ul.gemlist li:hover a.download {
 .gem-version small.platform {
   padding: 0 0 0 15px;
 }
+
+.badge {
+  margin: 2em;
+  font-size: 0.7em;
+}
+
+.badge dt{
+  text-align: left;
+  margin-top: 5px;
+}
+
+.badge dd{
+  margin-left: 0px;
+}
+
+.badge dd input,
+.badge dd textarea{
+  width: 100%;
+}
