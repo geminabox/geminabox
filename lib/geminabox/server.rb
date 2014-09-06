@@ -104,6 +104,13 @@ module Geminabox
       redirect url("/")
     end
 
+    get '/gems/:gemname.svg' do
+      gems = Hash[load_gems.by_name]
+      @gem = gems[params[:gemname]]
+      halt 404 unless @gem
+      erb :"gem_badge.svg", :layout => false, :content_type => "image/svg+xml"
+    end
+
     get '/gems/:gemname' do
       gems = Hash[load_gems.by_name]
       @gem = gems[params[:gemname]]
