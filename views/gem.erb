@@ -50,17 +50,6 @@
         <dd><input class='click-select' type='text' value='[![Gem Version](<%= badge_url %>)](<%= gem_url %>)' readonly/></dd>
         <dt>HTML</dt>
         <dd><input class='click-select' type='text' value='<a href="<%= gem_url %>"><img src="<%= badge_url %>" alt="Gem Version" height="18"></a>' readonly/></dd>
-        <dt>Textile</dt>
-        <dd><input class='click-select' type='text' value='!<%= badge_url %>!:<%= gem_url %>' readonly/></dd>
-        <dt>RDOC</dt>
-        <dd><input class='click-select' type='text' value='{<img src="<%= badge_url %>" alt="Gem Version" />}[<%= gem_url %>]' readonly/></dd>
-        <dt>AsciiDoc</dt>
-        <dd><input class='click-select' type='text' value='image:<%= badge_url %>["Gem Version", link="<%= gem_url %>"]' readonly/></dd>
-        <dt>RST</dt>
-        <dd>
-          <textarea class='click-select' readonly>.. image:: <%= badge_url %>
-    :target: <%= gem_url %></textarea>
-        </dd>
       </dl>
     </div>
   <% end %>
