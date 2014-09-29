@@ -29,6 +29,7 @@ module Geminabox
   autoload :Server,                 geminabox_path('server')
   autoload :DiskCache,              geminabox_path('disk_cache')
   autoload :IncomingGem,            geminabox_path('incoming_gem')
+  autoload :GemFinder,              geminabox_path('gem_finder')
 
   class << self
 
