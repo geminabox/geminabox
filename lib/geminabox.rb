@@ -56,7 +56,7 @@ module Geminabox
     def settings
       Server.settings
     end
-    
+
     def call(env)
       Server.call env
     end
@@ -75,5 +75,5 @@ module Geminabox
     http_adapter:         HttpClientAdapter.new,
     allow_remote_failure: false
   )
-    
+
 end
