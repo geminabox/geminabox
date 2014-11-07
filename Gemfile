@@ -6,5 +6,5 @@ group :test do
   gem 'rack-test'
   gem 'minitest'
   gem 'capybara-mechanize'
-  gem 'webmock'
+  gem 'webmock', '1.19.0'
 end
