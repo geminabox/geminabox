@@ -11,4 +11,5 @@ test/fixtures/fake_home_path/.gem/specs
 .ruby-*
 .bin
 *.gem
+!samples/*.gem
 test/fixtures/*.fixture
