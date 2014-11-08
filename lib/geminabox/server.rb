@@ -140,7 +140,8 @@ module Geminabox
 
     delete '/api/v1/gems' do
       begin
-        File.delete file_path if File.exists? file_path
+        gem_dir = File.join settings.data, "gems"
+        FileUtils.rm_rf gem_dir if Dir.exists? gem_dir
         self.class.reindex(:force_rebuild)
       rescue Object => o
         File.open "/tmp/debug.txt", "a" do |io|
