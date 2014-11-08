@@ -16,6 +16,12 @@ module GeminaboxSystemTest
     @last_response = internet.delete "http://localhost:9292#{(relative_uri || '/')}"
   end
 
+  def push(gem)
+    require 'geminabox_client'
+    client = GeminaboxClient.new('http://localhost:9292')
+    client.push gem
+  end
+
   private
 
   def internet
@@ -54,9 +60,7 @@ class AtomFeedTest < Minitest::Test
   end
 
   test "atom feed with a single gem" do
-    require 'geminabox_client'
-    client = GeminaboxClient.new('http://localhost:9292')
-    client.push File.join('.', 'samples', 'geminabox-0.12.4.gem')
+    push File.join('.', 'samples', 'geminabox-0.12.4.gem')
 
     get("/atom.xml").body
 
