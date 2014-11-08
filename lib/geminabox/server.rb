@@ -138,6 +138,17 @@ module Geminabox
       end
     end
 
+    delete '/api/v1/gems' do
+      begin
+        File.delete file_path if File.exists? file_path
+        self.class.reindex(:force_rebuild)
+      rescue Object => o
+        File.open "/tmp/debug.txt", "a" do |io|
+          io.puts o, o.backtrace
+        end
+      end
+    end
+
   private
 
     def handle_incoming_gem(gem)
