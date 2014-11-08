@@ -20,7 +20,7 @@ class AtomFeedTest < Minitest::Test
   test "atom feed with a single gem" do
     push File.join('.', 'samples', 'geminabox-0.12.4.gem')
 
-    get("/atom.xml").body
+    get "/atom.xml"
 
     assert last_response.ok?
     feed_content = RSS::Parser.parse(last_response.body)
