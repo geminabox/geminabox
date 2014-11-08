@@ -12,6 +12,10 @@ module GeminaboxSystemTest
     @last_response = internet.get "http://localhost:9292#{relative_uri}"
   end
 
+  def delete(relative_uri=nil)
+    @last_response = internet.delete "http://localhost:9292#{(relative_uri || '/')}"
+  end
+
   private
 
   def internet
@@ -37,6 +41,10 @@ end
 class AtomFeedTest < Minitest::Test
   include GeminaboxSystemTest
   
+  def setup
+    puts delete("/api/v1/gems").body
+  end
+
   test "atom feed returns when no gems are defined" do
     get "/atom.xml"
     
