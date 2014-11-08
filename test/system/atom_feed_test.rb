@@ -30,25 +30,6 @@ module GeminaboxSystemTest
   end
 end
 
-class Settings
-  class << self
-    def base_earl; 'http://localhost:9292'; end
-  end
-end
-
-module Assume
-  class << self
-    def local_server_running_at(earl)
-      begin 
-        reply = Geminabox::HttpClientAdapter.new.get earl
-        fail "Your local server is running at <#{earl}>, but returned unexpected status. #{reply.inspect}" unless reply.ok?
-      rescue Exception => e
-        fail "Your local server is not running at <#{earl}>."
-      end
-    end
-  end
-end
-
 class AtomFeedTest < Minitest::Test
   include GeminaboxSystemTest
   
