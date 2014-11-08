@@ -4,36 +4,41 @@ require 'minitest/unit'
 module GeminaboxSystemTest
   attr_accessor :last_response 
 
-  def self.included(klass)
-    Assume.local_server_running
-  end
-  
   def get(relative_uri)
-    @last_response = internet.get "http://localhost:9292#{relative_uri}"
+    @last_response = internet.get "#{base_earl}#{relative_uri}"
   end
 
-  def delete(relative_uri=nil)
-    @last_response = internet.delete "http://localhost:9292#{(relative_uri || '/')}"
+  def delete(relative_uri)
+    @last_response = internet.delete "#{base_earl}#{relative_uri}"
   end
 
   def push(gem)
     require 'geminabox_client'
-    client = GeminaboxClient.new('http://localhost:9292')
-    client.push gem
+    GeminaboxClient.new(base_earl).push gem
   end
 
   private
+  
+  def base_earl; Settings.base_earl; end
+
+  def self.included(klass)
+    Assume.local_server_running_at Settings.base_earl
+  end  
 
   def internet
     Geminabox::HttpClientAdapter.new
   end
 end
 
+class Settings
+  class << self
+    def base_earl; 'http://localhost:9292'; end
+  end
+end
+
 module Assume
   class << self
-    def local_server_running
-      earl = "http://localhost:9292/"
-
+    def local_server_running_at(earl)
       begin 
         reply = Geminabox::HttpClientAdapter.new.get earl
         fail "Your local server is running at <#{earl}>, but returned unexpected status. #{reply.inspect}" unless reply.ok?
