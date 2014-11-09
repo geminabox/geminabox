@@ -18,7 +18,7 @@ class AtomFeedTest < Minitest::Test
   end
 
   test "atom feed with a single gem" do
-    push File.join('.', 'samples', 'geminabox-0.12.4.gem')
+    push fixture('geminabox-0.12.4.gem')
 
     get "/atom.xml"
 
@@ -36,7 +36,7 @@ class DeletingEntireGemCollection < Minitest::Test
   end
 
   test "after deleting all, collection is empty" do
-    push File.join('.', 'samples', 'geminabox-0.12.4.gem')
+    push fixture('geminabox-0.12.4.gem')
 
     delete("/api/v1/gems")
     
@@ -46,7 +46,7 @@ class DeletingEntireGemCollection < Minitest::Test
   end
 
   test "that deletes are idempotent" do
-    push File.join('.', 'samples', 'geminabox-0.12.4.gem')
+    push fixture('geminabox-0.12.4.gem')
 
     assert delete("/api/v1/gems").ok?
     assert delete("/api/v1/gems").ok?
