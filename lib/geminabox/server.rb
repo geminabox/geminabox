@@ -70,8 +70,6 @@ module Geminabox
       end
     end
 
-
-
     before do
       headers 'X-Powered-By' => "geminabox #{Geminabox::VERSION}"
     end
@@ -128,6 +126,12 @@ module Geminabox
       handle_incoming_gem(Geminabox::IncomingGem.new(tmpfile))
     end
 
+    get '/api/v1/gems' do
+      @gems = load_gems
+      @index_gems = index_gems(@gems)
+      @gems.map{|it| {:name => it.name, :version => it.version}}.to_json
+    end
+    
     post '/api/v1/gems' do
       begin
         handle_incoming_gem(Geminabox::IncomingGem.new(request.body))
