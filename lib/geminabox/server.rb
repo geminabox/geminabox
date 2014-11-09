@@ -147,6 +147,7 @@ module Geminabox
         gem_dir = File.join settings.data, "gems"
         FileUtils.rm_rf gem_dir if Dir.exists? gem_dir
         self.class.reindex(:force_rebuild)
+        204
       rescue Object => o
         File.open "/tmp/debug.txt", "a" do |io|
           io.puts o, o.backtrace

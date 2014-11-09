@@ -48,7 +48,7 @@ class DeletingEntireGemCollection < Minitest::Test
   test "that deletes are idempotent" do
     push fixture('geminabox-0.12.4.gem')
 
-    assert delete("/api/v1/gems").ok?
-    assert delete("/api/v1/gems").ok?
+    assert_equal 204, delete("/api/v1/gems").code
+    assert_equal 204, delete("/api/v1/gems").code
   end
 end
