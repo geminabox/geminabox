@@ -9,6 +9,10 @@ module GeminaboxSystemTest
     @last_response = internet.delete "#{base_earl}#{relative_uri}"
   end
 
+  def post(relative_uri, opts={})
+    @last_response = internet.post "#{base_earl}#{relative_uri}", opts[:body], opts[:headers]
+  end
+
   def push(gem)
     require 'geminabox_client'
     GeminaboxClient.new(base_earl).push gem
