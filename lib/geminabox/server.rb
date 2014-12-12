@@ -9,6 +9,7 @@ module Geminabox
 
     delegate_to_geminabox(
       :public_folder,
+      :s3_sync_dir,
       :data,
       :build_legacy,
       :incremental_updates,
@@ -70,7 +71,20 @@ module Geminabox
             reindex(:force_rebuild)
           end
         end
+        s3_sync
       rescue Gem::SystemExitException
+      end
+
+      def ensure_dir_path(path)
+        if path[-1] != '/'
+          "#{path}/"
+        else
+          path
+        end
+      end
+
+      def s3_sync
+        system("s3cmd sync #{ensure_dir_path(data)} #{ensure_dir_path(s3_sync_dir)} --exclude _cache/*") if s3_sync_dir
       end
 
       def indexer

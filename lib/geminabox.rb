@@ -52,7 +52,8 @@ module Geminabox
       :allow_remote_failure,
       :ruby_gems_url,
       :bundler_ruby_gems_url,
-      :allow_upload
+      :allow_upload,
+      :s3_sync_dir
     )
 
     def set_defaults(defaults)
@@ -65,7 +66,7 @@ module Geminabox
     def settings
       Server.settings
     end
-    
+
     def call(env)
       Server.call env
     end
@@ -87,7 +88,8 @@ module Geminabox
     allow_remote_failure:  false,
     ruby_gems_url:         'https://rubygems.org/',
     bundler_ruby_gems_url: 'https://bundler.rubygems.org/',
-    allow_upload:          true
+    allow_upload:          true,
+    s3_sync_dir:           nil
   )
-    
+
 end
