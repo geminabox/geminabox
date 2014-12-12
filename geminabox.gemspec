@@ -1,7 +1,7 @@
 require File.expand_path('../lib/geminabox/version', __FILE__)
 
 Gem::Specification.new do |s|
-  s.name              = 'geminabox'
+  s.name              = 'placed-geminabox'
   s.version           = Geminabox::VERSION
   s.summary           = 'Really simple rubygem hosting'
   s.description       = 'A sinatra based gem hosting app, with client side gem push style functionality.'
