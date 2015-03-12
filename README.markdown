@@ -1,6 +1,7 @@
 # Gem in a Box – Really simple rubygem hosting
 [![Build Status](https://secure.travis-ci.org/geminabox/geminabox.png)](http://travis-ci.org/geminabox/geminabox)
 [![Gem Version](https://badge.fury.io/rb/geminabox.png)](http://badge.fury.io/rb/geminabox)
+[![Code Climate](https://codeclimate.com/github/geminabox/geminabox/badges/gpa.svg)](https://codeclimate.com/github/geminabox/geminabox)
 
 Geminabox lets you host your own gems, and push new gems to it just like with rubygems.org.
 The bundler dependencies API is supported out of the box.
