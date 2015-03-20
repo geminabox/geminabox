@@ -16,7 +16,8 @@ module Geminabox
       :allow_replace,
       :gem_permissions,
       :allow_delete,
-      :rubygems_proxy
+      :rubygems_proxy,
+      :gem_store
     )
 
     if Server.rubygems_proxy
@@ -142,7 +143,7 @@ module Geminabox
 
     def handle_incoming_gem(gem)
       begin
-        GemStore.create(gem, params[:overwrite])
+        settings.gem_store.create(gem, params[:overwrite])
       rescue GemStoreError => error
         error_response error.code, error.reason
       end
