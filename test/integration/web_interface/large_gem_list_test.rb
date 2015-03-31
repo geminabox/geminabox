@@ -20,25 +20,26 @@ class LargeGemListSpec < Geminabox::TestCase
 
     visit url_for("/")
 
-    assert_equal gems_on_page, %w[
+    assert %w[
       my_gem-6.0
       my_gem-5.0
       my_gem-4.0
       my_gem-3.0
       my_gem-2.0
       unrelated_gem-1.0
-    ]
+    ].all? { |gem| gems_on_page.include? gem }
+    assert !gems_on_page.include?("my_gem-1.0")
 
     page.click_link 'Older versions...'
 
-    assert_equal gems_on_page, %w[
+    assert %w[
       my_gem-6.0
       my_gem-5.0
       my_gem-4.0
       my_gem-3.0
       my_gem-2.0
       my_gem-1.0
-    ]
+    ].all? { |gem| gems_on_page.include? gem }
   end
 
   def gems_on_page
