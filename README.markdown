@@ -51,7 +51,7 @@ Or in config.ru (before the run command), set:
 
 If you want Geminabox to carry on providing gems when rubygems.org is unavailable, add this to config.ru:
 
-    Geminabox.allow_remote_failure = true 
+    Geminabox.allow_remote_failure = true
 
 ## HTTP adapter
 
@@ -66,7 +66,7 @@ and specify it in config.ru:
 It is recommend (but not essential) that your adapter inherits from HttpAdapter.
 The adapter will need to replace HttpAdapter's methods with those specific to
 the alternative HTTP gem. It should also be able to handle HTTP proxy
-settings. 
+settings.
 
 Defining your own adapter also allows you to configure Geminabox to use the
 local systems SSL certificates.
@@ -122,6 +122,38 @@ Simples!
 
       Description:
         Push a gem up to your GemInABox
+
+## Docker
+
+Using Gem in a Box is really simple with the Dockerfile.  Move this Dockerfile into a directory that you want to use for your server.
+
+That directory only needs to contain:
+
+```
+config.ru (explained above)
+Gemfile
+Gemfile.lock
+```
+
+Your Gemfile only needs:
+
+```ruby
+source 'https://rubygems.org'
+
+gem 'geminabox'
+```
+
+From there
+
+```
+docker build -t geminabox .
+```
+
+```
+docker run -d -p 9292:9292 geminabox:latest
+```
+
+You're server should now be running!
 
 ## Licence
 
