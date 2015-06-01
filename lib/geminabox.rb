@@ -11,6 +11,9 @@ require 'json'
 
 module Geminabox
 
+  class Error < StandardError ; end
+  class AlreadyLocked < Error ; end
+
   require_relative 'geminabox/version'
   require_relative 'geminabox/proxy'
   require_relative 'geminabox/http_adapter'
@@ -43,6 +46,8 @@ module Geminabox
       :allow_delete,
       :rubygems_proxy,
       :http_adapter,
+      :lockfile,
+      :retry_interval,
       :allow_remote_failure
     )
 
@@ -73,6 +78,8 @@ module Geminabox
     rubygems_proxy:       (ENV['RUBYGEMS_PROXY'] == 'true'),
     allow_delete:         true,
     http_adapter:         HttpClientAdapter.new,
+    lockfile:             '/tmp/geminabox.lockfile',
+    retry_interval:       60,
     allow_remote_failure: false
   )
     
