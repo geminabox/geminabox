@@ -6,7 +6,7 @@
 Geminabox lets you host your own gems, and push new gems to it just like with rubygems.org.
 The bundler dependencies API is supported out of the box.
 Authentication is left up to either the web server, or the Rack stack.
-For basic auth, try [Rack::Auth](http://rack.rubyforge.org/doc/Rack/Auth/Basic.html).
+For basic auth, try [Rack::Auth](http://www.rubydoc.info/github/rack/rack/Rack/Auth/Basic).
 
 ![screen shot](http://pics.tomlea.co.uk/bbbba6/geminabox.png)
 
