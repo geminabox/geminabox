@@ -25,16 +25,13 @@ task "test:smoke" do
   require "smoke_test"
 end
 
-Rake::TestTask.new("test:requests") do |t|
-  t.libs << "test" << "lib"
-  t.pattern = "test/requests/**/*_test.rb"
-end
-
-Rake::TestTask.new("test:units") do |t|
-  t.libs << "test" << "lib"
-  t.pattern = "test/units/**/*_test.rb"
+%w{ units requests system }.each do |name|
+  Rake::TestTask.new("test:#{name}") do |t|
+    t.libs << "test" << "lib"
+    t.pattern = "test/#{name}/**/*_test.rb"
+  end 
 end
 
 task :st => "test:smoke"
-task :test => ["test:units", "test:requests", "test:integration"]
+task :test => ["test:units", "test:requests", "test:integration", "test:system"]
 task :default => :test

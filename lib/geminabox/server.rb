@@ -72,8 +72,6 @@ module Geminabox
       end
     end
 
-
-
     before do
       headers 'X-Powered-By' => "geminabox #{Geminabox::VERSION}"
     end
@@ -139,11 +137,30 @@ module Geminabox
       end
     end
 
+    get '/api/v1/gems' do
+      @gems = load_gems
+      @index_gems = index_gems(@gems)
+      @gems.map{|it| {:name => it.name, :version => it.version}}.to_json
+    end
+    
     post '/api/v1/gems' do
       begin
         serialize_update do
           handle_incoming_gem(Geminabox::IncomingGem.new(request.body))
         end
+      rescue Object => o
+        File.open "/tmp/debug.txt", "a" do |io|
+          io.puts o, o.backtrace
+        end
+      end
+    end
+
+    delete '/api/v1/gems' do
+      begin
+        gem_dir = File.join settings.data, "gems"
+        FileUtils.rm_rf gem_dir if Dir.exists? gem_dir
+        self.class.reindex(:force_rebuild)
+        204
       rescue Object => o
         File.open "/tmp/debug.txt", "a" do |io|
           io.puts o, o.backtrace

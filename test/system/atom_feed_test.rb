@@ -1,30 +1,27 @@
 require 'test_helper'
 require 'minitest/unit'
-require 'rack/test'
+require 'system/geminabox_system_test'
 
 class AtomFeedTest < Minitest::Test
-  include Rack::Test::Methods
-
+  include GeminaboxSystemTest
+  
   def setup
-    clean_data_dir
-  end
-
-  def app
-    Geminabox::Server
+    delete("/api/v1/gems")
   end
 
   test "atom feed returns when no gems are defined" do
     get "/atom.xml"
+    
     assert last_response.ok?
+    
     refute_match %r{<entry>}, last_response.body
   end
 
   test "atom feed with a single gem" do
-    inject_gems do |builder|
-      builder.gem "foo"
-    end
+    push fixture('geminabox-0.12.4.gem')
 
     get "/atom.xml"
+
     assert last_response.ok?
     feed_content = RSS::Parser.parse(last_response.body)
     feed_content.items.size == 1

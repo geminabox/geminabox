@@ -16,6 +16,10 @@ module Geminabox
       http_client.post(*args)
     end
 
+    def delete(*args)
+      http_client.delete(*args)
+    end
+
     def set_auth(url, username = nil, password = nil)
       http_client.set_auth(url, username, password) if username or password
       http_client.www_auth.basic_auth.challenge(url) # Workaround: https://github.com/nahi/httpclient/issues/63
