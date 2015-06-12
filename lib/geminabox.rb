@@ -25,7 +25,7 @@ module Geminabox
   autoload :Hostess,                geminabox_path('hostess')
   autoload :GemStore,               geminabox_path('gem_store')
   autoload :GemStoreError,          geminabox_path('gem_store_error')
-  autoload :RubygemsDependency,     geminabox_path('rubygems_dependency')
+  autoload :ExternalDependency,     geminabox_path('external_dependency')
   autoload :GemListMerge,           geminabox_path('gem_list_merge')
   autoload :GemVersion,             geminabox_path('gem_version')
   autoload :GemVersionCollection,   geminabox_path('gem_version_collection')

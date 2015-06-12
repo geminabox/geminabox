@@ -2,7 +2,7 @@ require 'test_helper'
 require 'json'
 module Geminabox
 
-  class RubyGemDependencyTest < Minitest::Test
+  class ExternalDependencyTest < Minitest::Test
 
     def teardown
       Geminabox.http_adapter = HttpClientAdapter.new
@@ -13,7 +13,7 @@ module Geminabox
       stub_request(:get, "https://bundler.rubygems.org/api/v1/dependencies.json?gems=some_gem,other_gem").
         to_return(:status => 200, :body => some_gem_dependencies.to_json, :headers => {"Content-Type" => 'application/json'})
 
-      assert_equal some_gem_dependencies, RubygemsDependency.for(:some_gem, :other_gem)
+      assert_equal some_gem_dependencies, ExternalDependency.for(:some_gem, :other_gem)
     end
 
     def test_get_list_with_500_error
@@ -21,7 +21,7 @@ module Geminabox
         to_return(:status => 500, :body => 'Whoops')
 
       assert_raises HTTPClient::BadResponseError do
-        RubygemsDependency.for(:some_gem, :other_gem)
+        ExternalDependency.for(:some_gem, :other_gem)
       end
     end
 
@@ -29,7 +29,7 @@ module Geminabox
       stub_request(:get, "https://bundler.rubygems.org/api/v1/dependencies.json?gems=some_gem,other_gem").
         to_return(:status => 401, :body => 'Whoops')
       assert_raises HTTPClient::BadResponseError do
-        RubygemsDependency.for(:some_gem, :other_gem)
+        ExternalDependency.for(:some_gem, :other_gem)
       end
     end
 
@@ -38,7 +38,7 @@ module Geminabox
       http_adapter.default_response = 'getaddrinfo: Name or service not known'
       Geminabox.http_adapter = http_adapter
       assert_raises SocketError do
-        RubygemsDependency.for(:some_gem, :other_gem)
+        ExternalDependency.for(:some_gem, :other_gem)
       end
     end
 
@@ -47,7 +47,7 @@ module Geminabox
         to_return(:status => 500, :body => 'Whoops')
 
       Geminabox.allow_remote_failure = true
-      assert_equal [], RubygemsDependency.for(:some_gem, :other_gem)
+      assert_equal [], ExternalDependency.for(:some_gem, :other_gem)
     end
 
     def test_get_list_with_401_error_and_allow_remote_failure
@@ -55,7 +55,7 @@ module Geminabox
         to_return(:status => 401, :body => 'Whoops')
 
       Geminabox.allow_remote_failure = true
-      assert_equal [], RubygemsDependency.for(:some_gem, :other_gem)
+      assert_equal [], ExternalDependency.for(:some_gem, :other_gem)
     end
 
     def test_get_list_with_socket_error_and_allow_remote_failure
@@ -63,7 +63,7 @@ module Geminabox
       http_adapter.default_response = 'getaddrinfo: Name or service not known'
       Geminabox.http_adapter = http_adapter
       Geminabox.allow_remote_failure = true
-      assert_equal [], RubygemsDependency.for(:some_gem, :other_gem)
+      assert_equal [], ExternalDependency.for(:some_gem, :other_gem)
     end
 
     def some_gem_dependencies
