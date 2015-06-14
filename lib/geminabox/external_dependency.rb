@@ -12,14 +12,14 @@ module Geminabox
           body = Geminabox.http_adapter.get_content(url)
           source_list << JSON.parse(body)
         end
-        source_list
+        source_list.flatten.uniq
       rescue Exception => e
         return [] if Geminabox.allow_remote_failure
         raise e
       end
 
       def external_uri(source)
-        "https://#{source.url}/api/v1/dependencies.json"
+        "https://#{source}/api/v1/dependencies.json"
       end
 
     end

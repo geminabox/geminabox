@@ -8,6 +8,7 @@ require 'rubygems/package'
 require 'rss/atom'
 require 'tempfile'
 require 'json'
+require 'settingslogic'
 
 module Geminabox
 
@@ -32,6 +33,7 @@ module Geminabox
   autoload :Server,                 geminabox_path('server')
   autoload :DiskCache,              geminabox_path('disk_cache')
   autoload :IncomingGem,            geminabox_path('incoming_gem')
+  autoload :Sources,                geminabox_path('sources')
 
   class << self
 
@@ -44,7 +46,7 @@ module Geminabox
       :allow_replace,
       :gem_permissions,
       :allow_delete,
-      :rubygems_proxy,
+      :external_proxy,
       :http_adapter,
       :lockfile,
       :retry_interval,
@@ -61,7 +63,7 @@ module Geminabox
     def settings
       Server.settings
     end
-    
+
     def call(env)
       Server.call env
     end
@@ -75,12 +77,12 @@ module Geminabox
     views:                File.join(File.dirname(__FILE__), *%w[.. views]),
     allow_replace:        false,
     gem_permissions:      0644,
-    rubygems_proxy:       (ENV['RUBYGEMS_PROXY'] == 'true'),
     allow_delete:         true,
     http_adapter:         HttpClientAdapter.new,
     lockfile:             '/tmp/geminabox.lockfile',
     retry_interval:       60,
-    allow_remote_failure: false
+    allow_remote_failure: false,
+    external_proxy:       Sources.external_sources.count > 0
   )
-    
+
 end
