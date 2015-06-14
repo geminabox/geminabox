@@ -37,21 +37,17 @@ RubyGems supports generating indexes for the so called legacy versions (< 1.2), 
 
     Geminabox.build_legacy = false
 
-## RubyGems Proxy
+## External Proxy
 
-Geminabox can be configured to pull gems, it does not currently have, from rubygems.org. To enable this mode you can either:
+Geminabox can be configured to pull gems it does not currently have. To enable this create config/proxy_sources.yml with the following format.
 
-Set RUBYGEM_PROXY to true in the environment:
+```yaml
+external_sources:
+    - rubygems.org
+    - rails-assets.org
+```
 
-    RUBYGEMS_PROXY=true rackup
-
-Or in config.ru (before the run command), set:
-
-    Geminabox.rubygems_proxy = true
-
-If you want Geminabox to carry on providing gems when rubygems.org is unavailable, add this to config.ru:
-
-    Geminabox.allow_remote_failure = true 
+Note here we have defined two proxy sources however you can add as many as you like to this file.
 
 ## HTTP adapter
 
