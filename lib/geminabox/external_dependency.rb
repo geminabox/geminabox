@@ -19,7 +19,7 @@ module Geminabox
       end
 
       def external_uri(source)
-        "https://#{source}/api/v1/dependencies.json"
+        "#{source}/api/v1/dependencies.json"
       end
 
     end

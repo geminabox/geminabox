@@ -5,7 +5,6 @@ module Geminabox
   module Proxy
     class Hostess < Sinatra::Base
       attr_accessor :file_handler
-      
       def serve
         if file_handler
           send_file file_handler.proxy_path
@@ -72,9 +71,7 @@ module Geminabox
       end
 
       def get_gem_from_external_source(source)
-        #external_source_url = 'http://production.cf.' + source
-        external_source_url = 'http://' + source
-        path = File.join(external_source_url, *request.path_info)
+        path = File.join(source, *request.path_info)
         begin
           Geminabox.http_adapter.get_content(path)
         rescue HTTPClient::BadResponseError

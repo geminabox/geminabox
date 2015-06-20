@@ -63,7 +63,7 @@ module Geminabox
       end
 
       def remote_url source
-        "http://#{source}/#{file_name}"
+        "#{source}/#{file_name}"
       end
 
       def local_content
