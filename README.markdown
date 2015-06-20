@@ -43,8 +43,8 @@ Geminabox can be configured to pull gems it does not currently have. To enable t
 
 ```yaml
 external_sources:
-    - rubygems.org
-    - rails-assets.org
+    - https://rubygems.org
+    - http://rails-assets.org
 ```
 
 Note here we have defined two proxy sources however you can add as many as you like to this file.
