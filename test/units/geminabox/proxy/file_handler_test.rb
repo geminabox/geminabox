@@ -28,9 +28,9 @@ module Geminabox
         assert_equal false, file_handler.local_file_exists?
         assert_equal true, file_handler.proxy_file_exists?
       end
-      
+
       def test_remote_content
-        stub_request(:get, "http://rubygems.org/foo/bar").
+        stub_request(:get, "https://rubygems.org/foo/bar").
           to_return(:status => 200, :body => remote_content)
         assert_equal remote_content, file_handler.remote_content
       end
@@ -41,11 +41,13 @@ module Geminabox
         Geminabox.http_adapter = @http_dummy
         assert_equal remote_content, file_handler.remote_content
       end
-      
+
       def test_remote_content_connection_failure
-        stub_request(:get, "http://rubygems.org/foo/bar").
+        stub_request(:get, "https://rubygems.org/foo/bar").
           to_return(:status => 500, :body => 'Whoops')
-        assert_raises GemStoreError do 
+        stub_request(:get, "https://rails-assets.org/foo/bar").
+          to_return(:status => 500, :body => 'Whoops')
+        assert_raises GemStoreError do
           file_handler.remote_content
         end
       end

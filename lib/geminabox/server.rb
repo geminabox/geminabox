@@ -18,10 +18,10 @@ module Geminabox
       :allow_delete,
       :lockfile,
       :retry_interval,
-      :rubygems_proxy
+      :external_proxy
     )
 
-    if Server.rubygems_proxy
+    if Server.external_proxy
       use Proxy::Hostess
     else
       use Hostess
@@ -248,7 +248,7 @@ HTML
     end
 
     def gem_list
-      settings.rubygems_proxy ? combined_gem_list : local_gem_list
+      settings.external_proxy ? combined_gem_list : local_gem_list
     end
 
     def query_gems
@@ -260,7 +260,7 @@ HTML
     end
 
     def remote_gem_list
-      RubygemsDependency.for(*query_gems)
+      ExternalDependency.for(*query_gems)
     end
 
     def combined_gem_list

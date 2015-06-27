@@ -9,7 +9,7 @@ module Geminabox
         @file_name = file_name
         ensure_destination_exists
       end
-      
+
       def local_path
         File.expand_path(file_name, root_path)
       end
@@ -21,7 +21,7 @@ module Geminabox
       def local_file_exists?
         file_exists? local_path
       end
-      
+
       def proxy_file_exists?
         file_exists? proxy_path
       end
@@ -43,13 +43,27 @@ module Geminabox
       end
 
       def remote_content
-        Geminabox.http_adapter.get_content(remote_url).force_encoding(encoding)
-      rescue
-        raise GemStoreError.new(500, "Unable to get content from #{remote_url}")
+        remote_content = false
+        Sources.external_sources.each do |source|
+          remote_content = remote_content_for_source(source)
+          break if remote_content
+        end
+
+        unless remote_content
+          raise GemStoreError.new(500, "Unable to get content from any source")
+        end
+
+        remote_content
       end
 
-      def remote_url
-        "http://rubygems.org/#{file_name}"
+      def remote_content_for_source source
+        Geminabox.http_adapter.get_content(remote_url(source)).force_encoding(encoding)
+      rescue HTTPClient::BadResponseError
+        false
+      end
+
+      def remote_url source
+        "#{source}/#{file_name}"
       end
 
       def local_content

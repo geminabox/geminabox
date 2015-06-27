@@ -5,7 +5,6 @@ module Geminabox
   module Proxy
     class Hostess < Sinatra::Base
       attr_accessor :file_handler
-      
       def serve
         if file_handler
           send_file file_handler.proxy_path
@@ -49,22 +48,35 @@ module Geminabox
       end
 
       get "/gems/*.gem" do
-        get_from_rubygems_if_not_local
+        get_from_external_sources_if_not_local
         serve
       end
 
       private
-      def get_from_rubygems_if_not_local
-
+      def get_from_external_sources_if_not_local
         file = File.expand_path(File.join(Server.data, *request.path_info))
-
         unless File.exists?(file)
-          ruby_gems_url = 'http://production.cf.rubygems.org'
-          path = File.join(ruby_gems_url, *request.path_info)
-          content = Geminabox.http_adapter.get_content(path)
+          content = false
+          Sources.external_sources.each do |source|
+            content = get_gem_from_external_source(source)
+            break if content
+          end
+
+          unless content
+            raise Geminabox::Error.new("Cant find ")
+          end
+
           GemStore.create(IncomingGem.new(StringIO.new(content)))
         end
+      end
 
+      def get_gem_from_external_source(source)
+        path = File.join(source, *request.path_info)
+        begin
+          Geminabox.http_adapter.get_content(path)
+        rescue HTTPClient::BadResponseError
+          false
+        end
       end
 
       def splice_file(file_name)
