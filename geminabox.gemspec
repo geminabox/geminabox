@@ -17,6 +17,8 @@ Gem::Specification.new do |s|
   s.files             = %w[MIT-LICENSE README.markdown] + Dir['{lib,public,views}/**/*']
   s.require_paths     = ['lib']
 
+  s.required_ruby_version = '>= 1.9.3'
+
   s.add_dependency('sinatra', [">= 1.2.7"])
   s.add_dependency('builder')
   s.add_dependency('httpclient', [">= 2.2.7"])
