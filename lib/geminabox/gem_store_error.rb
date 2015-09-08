@@ -6,7 +6,7 @@ module Geminabox
     include Nesty::NestedError
 
     def initialize(code, reason)
-      @code = code.to_s
+      @code = code
       @reason = reason
     end
   end

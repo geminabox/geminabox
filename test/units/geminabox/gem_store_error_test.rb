@@ -7,7 +7,7 @@ module Geminabox
       begin
         raise GemStoreError.new(500, reason)
       rescue GemStoreError => error
-        assert_equal(code.to_s, error.code)
+        assert_equal(code, error.code)
         assert_equal(reason, error.reason)
       end
     end
