@@ -59,7 +59,7 @@ module Geminabox
         file = File.expand_path(File.join(Server.data, *request.path_info))
 
         unless File.exists?(file)
-          ruby_gems_url = 'http://production.cf.rubygems.org'
+          ruby_gems_url = 'https://rubygems.org'
           path = File.join(ruby_gems_url, *request.path_info)
           content = Geminabox.http_adapter.get_content(path)
           GemStore.create(IncomingGem.new(StringIO.new(content)))
