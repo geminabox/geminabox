@@ -18,7 +18,8 @@ module Geminabox
       :allow_delete,
       :lockfile,
       :retry_interval,
-      :rubygems_proxy
+      :rubygems_proxy,
+      :ruby_gems_url
     )
 
     if Server.rubygems_proxy
