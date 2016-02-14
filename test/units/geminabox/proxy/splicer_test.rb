@@ -51,7 +51,7 @@ module Geminabox
         assert_equal expected, splice.local_path
       end
 
-      def test_local_file_path
+      def test_splice_file_path
         expected = File.expand_path(file_name, File.join(Geminabox::Server.data, 'proxy'))
         assert_equal expected, splice.splice_path
       end
