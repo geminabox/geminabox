@@ -21,7 +21,7 @@ module Geminabox::Indexer
   end
 
   def self.updated_gemspecs(indexer)
-    specs_mtime = File.stat(indexer.dest_specs_index).mtime
+    specs_mtime = File.stat(indexer.dest_specs_index).mtime rescue Time.at(0)
     newest_mtime = Time.at 0
 
     updated_gems = indexer.gem_file_list.select do |gem|
