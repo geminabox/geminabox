@@ -39,7 +39,7 @@ class GemFactory
           s.files             = []
           s.email             = 'fake@fake.fake'
           s.homepage          = 'http://fake.fake/fake'
-          s.licenses          = ['fake']
+          s.licenses          = ['Nonstandard']
           #{dependencies}
         end
       }
