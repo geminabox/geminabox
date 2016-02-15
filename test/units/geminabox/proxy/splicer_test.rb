@@ -46,11 +46,6 @@ module Geminabox
         )
       end
 
-      def test_local_file_path
-        expected = File.expand_path(file_name, Geminabox::Server.data)
-        assert_equal expected, splice.local_path
-      end
-
       # This test seems unstable, and I'm not sure why.
       def xtest_local_file_path
         expected = File.expand_path(file_name, File.join(Geminabox::Server.data, 'proxy'))
