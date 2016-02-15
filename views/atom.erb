@@ -4,6 +4,7 @@
   <title>Gem in a Box</title>
   <link href="<%= url '/atom.xml' %>" rel="self" />
   <link href="<%= url '/' %>" />
+  <author><name>Gem in a Box</name></author>
   <id><%= url '/atom.xml' %></id>
   <% @gems.by_name do |name, versions| %>
   <% newest_gem = versions.newest %>
