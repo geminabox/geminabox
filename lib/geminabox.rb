@@ -8,6 +8,7 @@ require 'rubygems/package'
 require 'rss/atom'
 require 'tempfile'
 require 'json'
+require 'tilt/erb'
 
 module Geminabox
 
