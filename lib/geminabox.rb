@@ -83,7 +83,7 @@ module Geminabox
     lockfile:             '/tmp/geminabox.lockfile',
     retry_interval:       60,
     allow_remote_failure: false,
-    ruby_gems_url:        'http://production.cf.rubygems.org/'
+    ruby_gems_url:        'https://rubygems.org/'
   )
     
 end
