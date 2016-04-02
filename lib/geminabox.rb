@@ -50,7 +50,8 @@ module Geminabox
       :lockfile,
       :retry_interval,
       :allow_remote_failure,
-      :ruby_gems_url
+      :ruby_gems_url,
+      :bundler_ruby_gems_url
     )
 
     def set_defaults(defaults)
@@ -70,20 +71,21 @@ module Geminabox
   end
 
   set_defaults(
-    data:                 File.join(File.dirname(__FILE__), *%w[.. data]),
-    public_folder:        File.join(File.dirname(__FILE__), *%w[.. public]),
-    build_legacy:         false,
-    incremental_updates:  true,
-    views:                File.join(File.dirname(__FILE__), *%w[.. views]),
-    allow_replace:        false,
-    gem_permissions:      0644,
-    rubygems_proxy:       (ENV['RUBYGEMS_PROXY'] == 'true'),
-    allow_delete:         true,
-    http_adapter:         HttpClientAdapter.new,
-    lockfile:             '/tmp/geminabox.lockfile',
-    retry_interval:       60,
-    allow_remote_failure: false,
-    ruby_gems_url:        'https://rubygems.org/'
+    data:                  File.join(File.dirname(__FILE__), *%w[.. data]),
+    public_folder:         File.join(File.dirname(__FILE__), *%w[.. public]),
+    build_legacy:          false,
+    incremental_updates:   true,
+    views:                 File.join(File.dirname(__FILE__), *%w[.. views]),
+    allow_replace:         false,
+    gem_permissions:       0644,
+    rubygems_proxy:        (ENV['RUBYGEMS_PROXY'] == 'true'),
+    allow_delete:          true,
+    http_adapter:          HttpClientAdapter.new,
+    lockfile:              '/tmp/geminabox.lockfile',
+    retry_interval:        60,
+    allow_remote_failure:  false,
+    ruby_gems_url:         'https://rubygems.org/',
+    bundler_ruby_gems_url: 'https://bundler.rubygems.org/'
   )
     
 end

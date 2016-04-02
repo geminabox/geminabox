@@ -1,4 +1,5 @@
 require 'json'
+require 'uri'
 
 module Geminabox
   module RubygemsDependency
@@ -20,7 +21,7 @@ module Geminabox
       end
 
       def rubygems_uri
-        "https://bundler.rubygems.org/api/v1/dependencies"
+        URI.join(Geminabox.bundler_ruby_gems_url, '/api/v1/dependencies')
       end
 
     end
