@@ -10,14 +10,14 @@ module Geminabox
     end
 
     def test_get_list
-      stub_request(:get, "https://bundler.rubygems.org/api/v1/dependencies.json?gems=some_gem,other_gem").
-        to_return(:status => 200, :body => some_gem_dependencies.to_json, :headers => {"Content-Type" => 'application/json'})
+      stub_request(:get, "https://bundler.rubygems.org/api/v1/dependencies?gems=some_gem,other_gem").
+        to_return(:status => 200, :body => Marshal.dump(some_gem_dependencies), :headers => {"Content-Type" => 'application/octet-stream'})
 
       assert_equal some_gem_dependencies, RubygemsDependency.for(:some_gem, :other_gem)
     end
 
     def test_get_list_with_500_error
-      stub_request(:get, "https://bundler.rubygems.org/api/v1/dependencies.json?gems=some_gem,other_gem").
+      stub_request(:get, "https://bundler.rubygems.org/api/v1/dependencies?gems=some_gem,other_gem").
         to_return(:status => 500, :body => 'Whoops')
 
       assert_raises HTTPClient::BadResponseError do
@@ -26,7 +26,7 @@ module Geminabox
     end
 
     def test_get_list_with_401_error
-      stub_request(:get, "https://bundler.rubygems.org/api/v1/dependencies.json?gems=some_gem,other_gem").
+      stub_request(:get, "https://bundler.rubygems.org/api/v1/dependencies?gems=some_gem,other_gem").
         to_return(:status => 401, :body => 'Whoops')
       assert_raises HTTPClient::BadResponseError do
         RubygemsDependency.for(:some_gem, :other_gem)
@@ -43,7 +43,7 @@ module Geminabox
     end
 
     def test_get_list_with_500_error_and_allow_remote_failure
-      stub_request(:get, "https://bundler.rubygems.org/api/v1/dependencies.json?gems=some_gem,other_gem").
+      stub_request(:get, "https://bundler.rubygems.org/api/v1/dependencies?gems=some_gem,other_gem").
         to_return(:status => 500, :body => 'Whoops')
 
       Geminabox.allow_remote_failure = true
@@ -51,7 +51,7 @@ module Geminabox
     end
 
     def test_get_list_with_401_error_and_allow_remote_failure
-      stub_request(:get, "https://bundler.rubygems.org/api/v1/dependencies.json?gems=some_gem,other_gem").
+      stub_request(:get, "https://bundler.rubygems.org/api/v1/dependencies?gems=some_gem,other_gem").
         to_return(:status => 401, :body => 'Whoops')
 
       Geminabox.allow_remote_failure = true

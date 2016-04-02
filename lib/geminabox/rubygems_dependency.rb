@@ -13,14 +13,14 @@ module Geminabox
           gems.map(&:to_s).join(',')
         ].join
         body = Geminabox.http_adapter.get_content(url)
-        JSON.parse(body)
+        Marshal.load(body)
       rescue Exception => e
         return [] if Geminabox.allow_remote_failure
         raise e
       end
 
       def rubygems_uri
-        "https://bundler.rubygems.org/api/v1/dependencies.json"
+        "https://bundler.rubygems.org/api/v1/dependencies"
       end
 
     end
