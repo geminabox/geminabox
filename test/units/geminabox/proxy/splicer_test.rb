@@ -10,13 +10,13 @@ module Geminabox
       def test_make
         stub_request_for_file(file_name)
         splice = Splicer.make(file_name)
-        assert_equal true, File.exists?(splice.splice_path)
+        assert_equal true, File.exist?(splice.splice_path)
       end
 
       def test_create
         stub_request_for_file(file_name)
         splice.create
-        assert_equal true, File.exists?(splice.splice_path)
+        assert_equal true, File.exist?(splice.splice_path)
       end
 
       def test_spliced_file_created_from_remote

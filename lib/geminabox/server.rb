@@ -125,7 +125,7 @@ module Geminabox
       end
 
       serialize_update do
-        File.delete file_path if File.exists? file_path
+        File.delete file_path if File.exist? file_path
         self.class.reindex(:force_rebuild)
         redirect url("/")
       end
@@ -221,7 +221,7 @@ HTML
 
     def all_gems_with_duplicates
       specs_files_paths.map do |specs_file_path|
-        if File.exists?(specs_file_path)
+        if File.exist?(specs_file_path)
           Marshal.load(Gem.gunzip(Gem.read_binary(specs_file_path)))
         else
           []
@@ -279,7 +279,7 @@ HTML
         File::open(spec_file, 'r') do |unzipped_spec_file|
           unzipped_spec_file.binmode
           Marshal.load(Gem.inflate(unzipped_spec_file.read))
-        end if File.exists? spec_file
+        end if File.exist? spec_file
       end
 
       def default_platform

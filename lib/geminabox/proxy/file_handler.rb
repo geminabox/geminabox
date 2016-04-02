@@ -31,7 +31,7 @@ module Geminabox
       end
 
       def file_exists?(path)
-        File.exists? path
+        File.exist? path
       end
 
       def proxy_folder_path
@@ -71,7 +71,7 @@ module Geminabox
       end
 
       def proxy_folder_exists?
-        Dir.exists?(proxy_file_folder)
+        Dir.exist?(proxy_file_folder)
       end
 
       def create_proxy_folder
@@ -83,7 +83,7 @@ module Geminabox
       end
 
       def local_folder_exists?
-        Dir.exists?(local_file_folder)
+        Dir.exist?(local_file_folder)
       end
 
       def create_local_folder

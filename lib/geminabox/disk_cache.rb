@@ -52,7 +52,7 @@ module Geminabox
 
     def read_int(key_hash)
       path = path(key_hash)
-      yield(path) if File.exists?(path)
+      yield(path) if File.exist?(path)
     end
 
     def write(key_hash, value)
