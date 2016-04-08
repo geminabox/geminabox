@@ -34,8 +34,9 @@ form {
   margin: 0;
 }
 
-code {
-  font-size: 0.7em;
+pre, code {
+  text-align: left;
+  font-size: 0.8em;
   font-family: "Droid Sans Mono", monospace;
 }
 
@@ -47,6 +48,15 @@ code {
   overflow: hidden;
   padding: 0.5em 0 1em 0;
   text-align: center;
+}
+
+#instruction {
+  margin: auto;
+  width: 60%;
+  border: 1px solid #333300;
+  background: #eee;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 #content h1 {
