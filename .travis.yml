@@ -11,5 +11,4 @@ before_install:
 
 env:
   - gemver: 2.5.2
-  - gemver: 
 
