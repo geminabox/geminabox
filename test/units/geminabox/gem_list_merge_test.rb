@@ -30,13 +30,6 @@ module Geminabox
       assert_equal expected, GemListMerge.from(list_one, list_two)
     end
 
-    def test_merge_with_text_keys
-      list_one = gem_list [:c], [:a]
-      list_two = [build_text_gem(:b)]
-      expected = gem_list [:a], [:b], [:c]
-      assert_equal expected, GemListMerge.from(list_one, list_two)
-    end
-
     def test_merge_ignores_dependencies
       list_one = gem_list [:a]
       list_two = gem_list [:a]
@@ -50,20 +43,6 @@ module Geminabox
       list_two = []
       expected = gem_list [:a], [:b]
       assert_equal expected, GemListMerge.from(list_one, list_two)
-    end
-
-    def test_hash
-      assert_equal [:x, :y], gem_list_merge.hash.keys
-      assert_equal [build_gem(:x)], gem_list_merge.hash[:x]
-    end
-
-    def build_text_gem(name, number = '0.0.1')
-      {
-          'name' => name.to_s,
-          'number' => number,
-          'platform' => 'ruby',
-          'dependencies' => []
-      }
     end
 
     def build_gem(name, number = '0.0.1')

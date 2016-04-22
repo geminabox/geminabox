@@ -25,7 +25,10 @@ module Geminabox
     end
 
     def http_client
-      @http_client ||= HTTPClient.new(ENV['http_proxy'])
+      @http_client ||= HTTPClient.new(ENV['http_proxy']).tap {|client|
+        client.transparent_gzip_decompression = true
+        client.keep_alive_timeout = 32 # sec
+      }
     end
 
   end
