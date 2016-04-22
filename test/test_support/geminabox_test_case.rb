@@ -46,7 +46,7 @@ class Geminabox::TestCase < Minitest::Test
       test("can push #{gemname}") do
         assert_can_push(gemname, *args)
         gem_path = File.join(config.data, "gems", File.basename(gem_file(gemname, *args)) )
-        assert File.exists?( gem_path ), "Gemfile not in data dir."
+        assert File.exist?( gem_path ), "Gemfile not in data dir."
         assert File.stat(gem_path).mode.to_s(8).match(/#{config.gem_permissions.to_s(8)}$/), "Gemfile has incorrect permissions."
       end
     end
@@ -56,7 +56,7 @@ class Geminabox::TestCase < Minitest::Test
         gem_file = gem_file(gemname, *args)
         gemcutter_push(gem_file)
         gem_path = File.join(config.data, "gems", File.basename(gem_file) )
-        assert File.exists?( gem_path ), "Gemfile not in data dir."
+        assert File.exist?( gem_path ), "Gemfile not in data dir."
         assert File.stat(gem_path).mode.to_s(8).match(/#{config.gem_permissions.to_s(8)}$/), "Gemfile has incorrect permissions."
       end
     end
@@ -158,7 +158,7 @@ class Geminabox::TestCase < Minitest::Test
 
   def cache_fixture_data_dir(name)
     path = FIXTURES_PATH.join("#{name}.fixture")
-    if File.exists? path
+    if File.exist? path
       load_fixture_data_dir(name)
     else
       yield

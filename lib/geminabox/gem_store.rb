@@ -48,7 +48,7 @@ module Geminabox
 
     private
     def ensure_existing_data_folder_compatible
-      if File.exists? Geminabox.data
+      if File.exist? Geminabox.data
         ensure_data_folder_is_directory
         ensure_data_folder_is_writable
       end

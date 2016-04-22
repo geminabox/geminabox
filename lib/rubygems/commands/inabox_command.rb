@@ -85,7 +85,7 @@ class Gem::Commands::InaboxCommand < Gem::Command
     config = Gem.configuration.load_file(config_path).merge(:host => host)
 
     dirname = File.dirname(config_path)
-    Dir.mkdir(dirname) unless File.exists?(dirname)
+    Dir.mkdir(dirname) unless File.exist?(dirname)
 
     File.open(config_path, 'w') do |f|
       f.write config.to_yaml
