@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'minitest/mock'
 
 module Geminabox
   module Proxy
@@ -6,6 +7,17 @@ module Geminabox
 
       def setup
         clean_data_dir
+      end
+
+      def test_remote_content_failure
+        raise_stub = proc { puts caller.join("\n") ; raise }
+        copier.stub :remote_content, raise_stub do
+          begin
+            copier.get_remote
+          rescue
+          end
+          assert(!File.exists?(copier.proxy_path), "Cached file should not exist")
+        end
       end
 
       def test_with_no_files_in_place
