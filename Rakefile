@@ -13,11 +13,13 @@ require 'rake/testtask'
 Rake::TestTask.new("test:integration") do |t|
   t.libs << "test" << "lib"
   t.pattern = "test/integration/**/*_test.rb"
+  t.warning = nil
 end
 
 Rake::TestTask.new("test:smoke:paranoid") do |t|
   t.libs << "test" << "lib"
   t.pattern = "test/smoke_test.rb"
+  t.warning = nil
 end
 
 desc "Run the smoke tests, faster."
@@ -29,11 +31,13 @@ end
 Rake::TestTask.new("test:requests") do |t|
   t.libs << "test" << "lib"
   t.pattern = "test/requests/**/*_test.rb"
+  t.warning = nil
 end
 
 Rake::TestTask.new("test:units") do |t|
   t.libs << "test" << "lib"
   t.pattern = "test/units/**/*_test.rb"
+  t.warning = nil
 end
 
 task :st => "test:smoke"
