@@ -37,7 +37,7 @@ module Geminabox
         if existing_file_digest != gem.hexdigest
           raise GemStoreError.new(409, "Updating an existing gem is not permitted.\nYou should either delete the existing version, or change your version number.")
         else
-          raise GemStoreError.new(200, "Ignoring upload, you uploaded the same thing previously.\nPlease use -o to ovewrite.")
+          raise GemStoreError.new(200, "Ignoring upload, you uploaded the same thing previously.\nPlease use -o to overwrite.")
         end
       end
     end
