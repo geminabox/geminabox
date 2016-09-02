@@ -9,7 +9,7 @@ module Geminabox
         @file_name = file_name
         ensure_destination_exists
       end
-      
+
       def local_path
         File.expand_path(file_name, root_path)
       end
@@ -21,7 +21,7 @@ module Geminabox
       def local_file_exists?
         file_exists? local_path
       end
-      
+
       def proxy_file_exists?
         file_exists? proxy_path
       end
