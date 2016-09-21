@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative '../../test_helper'
 
 class SSLTest < Geminabox::TestCase
   url "https://127.0.0.1/"
