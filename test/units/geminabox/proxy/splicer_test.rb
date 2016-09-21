@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative '../../../test_helper'
 module Geminabox
   module Proxy
     class SplicerTest < Minitest::Test

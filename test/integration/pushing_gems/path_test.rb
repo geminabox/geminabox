@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative '../../test_helper'
 
 class PathTest < Geminabox::TestCase
   url "http://localhost/foo"
