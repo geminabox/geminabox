@@ -53,6 +53,7 @@ module Geminabox
           begin
             require 'geminabox/indexer'
             updated_gemspecs = Geminabox::Indexer.updated_gemspecs(indexer)
+            return if updated_gemspecs.empty?
             Geminabox::Indexer.patch_rubygems_update_index_pre_1_8_25(indexer)
             indexer.update_index
             updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
@@ -107,7 +108,11 @@ module Geminabox
 
     get '/reindex' do
       serialize_update do
-        self.class.reindex(:force_rebuild)
+        if params[:incremental] == 'true'
+          self.class.reindex
+        else
+          self.class.reindex(:force_rebuild)
+        end
         redirect url("/")
       end
     end
