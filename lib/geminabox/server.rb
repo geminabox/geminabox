@@ -108,11 +108,8 @@ module Geminabox
 
     get '/reindex' do
       serialize_update do
-        if params[:incremental] == 'true'
-          self.class.reindex
-        else
-          self.class.reindex(:force_rebuild)
-        end
+        force_rebuild = params[:incremental] != 'true'
+        self.class.reindex(force_rebuild)
         redirect url("/")
       end
     end
