@@ -51,7 +51,8 @@ module Geminabox
       :retry_interval,
       :allow_remote_failure,
       :ruby_gems_url,
-      :bundler_ruby_gems_url
+      :bundler_ruby_gems_url,
+      :allow_upload
     )
 
     def set_defaults(defaults)
@@ -85,7 +86,8 @@ module Geminabox
     retry_interval:        60,
     allow_remote_failure:  false,
     ruby_gems_url:         'https://rubygems.org/',
-    bundler_ruby_gems_url: 'https://bundler.rubygems.org/'
+    bundler_ruby_gems_url: 'https://bundler.rubygems.org/',
+    allow_upload:          true
   )
     
 end

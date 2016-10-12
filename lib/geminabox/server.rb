@@ -19,7 +19,8 @@ module Geminabox
       :lockfile,
       :retry_interval,
       :rubygems_proxy,
-      :ruby_gems_url
+      :ruby_gems_url,
+      :allow_upload
     )
 
     if Server.rubygems_proxy
@@ -35,6 +36,10 @@ module Geminabox
 
       def allow_delete?
         allow_delete
+      end
+
+      def allow_upload?
+        allow_upload
       end
 
       def fixup_bundler_rubygems!
@@ -85,6 +90,8 @@ module Geminabox
     get '/' do
       @gems = load_gems
       @index_gems = index_gems(@gems)
+      @allow_upload = self.class.allow_upload?
+      @allow_delete = self.class.allow_delete?
       erb :index
     end
 
@@ -102,6 +109,10 @@ module Geminabox
     end
 
     get '/upload' do
+      unless self.class.allow_upload?
+        error_response(403, 'Gem uploading is disabled')
+      end
+
       erb :upload
     end
 
@@ -133,6 +144,10 @@ module Geminabox
     end
 
     post '/upload' do
+      unless self.class.allow_upload?
+        error_response(403, 'Gem uploading is disabled')
+      end
+
       if params[:file] && params[:file][:filename] && (tmpfile = params[:file][:tempfile])
         serialize_update do
           handle_incoming_gem(Geminabox::IncomingGem.new(tmpfile))
@@ -144,6 +159,10 @@ module Geminabox
     end
 
     post '/api/v1/gems' do
+      unless self.class.allow_upload?
+        error_response(403, 'Gem uploading is disabled')
+      end
+
       begin
         serialize_update do
           handle_incoming_gem(Geminabox::IncomingGem.new(request.body))
