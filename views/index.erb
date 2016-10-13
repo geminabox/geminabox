@@ -3,12 +3,14 @@
   <pre><code>gem sources -a <%= url "/" %></code></pre>
 <small>If you needed some credentials to get to this page</small>
   <pre><code>gem sources -a <%= url.to_s.gsub('://','://username:password@') %></code></pre>
+<% if @allow_upload %>
 <small>and then ...</small>
   <pre><code>gem install geminabox<br />gem inabox [gemfile]</code></pre>
+<% end %>
 </p>
 
 <% if @gems.any? %>
-  <a href="<%= url("/upload") %>">Upload Another Gem</a>
+  <% if @allow_upload %><a href="<%= url("/upload") %>">Upload Another Gem</a><% end %>
 
   <div id="alpha_index"><%= ("a".."z").map{|i| @index_gems.include?(i) ? "<a href='#jump_#{i}'>#{i}</a>" : i }.join(" - ") %></div>
 
@@ -26,8 +28,10 @@
           </p>
           <form class="delete-form" method="post" action="<%= url("/gems/#{version.gemfile_name}.gem") %>">
             <a class="download" href="<%= url("/gems/#{version.gemfile_name}.gem") %>">download</a>
+            <% if @allow_delete %>
             <input type="hidden" name="_method" value="DELETE" />
             <button type="submit">delete</button>
+            <% end %>
           </form>
         <% end %>
 
@@ -53,4 +57,4 @@
   </ul>
 <% end %>
 
-<a href="<%= url("/upload") %>">Upload Another Gem</a>
+<% if @allow_upload %><a href="<%= url("/upload") %>">Upload Another Gem</a><% end %>
