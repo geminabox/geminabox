@@ -154,13 +154,7 @@ Your server should now be running!
 
 ## Licence
 
-Fork it, mod it, choose it, use it, make it better. All under the MIT License.
-
-[WTFBPPL]: http://tomlea.co.uk/WTFBPPL.txt
-[sinatra]: http://www.sinatrarb.com/
-[passenger]: http://www.modrails.com/
-[thin]: http://code.macournoyer.com/thin/
-[unicorn]: http://unicorn.bogomips.org/
+[MIT_LICENSE](./MIT-LICENSE)
 
 ## ChangeLog
 
