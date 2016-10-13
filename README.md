@@ -12,10 +12,7 @@ For basic auth, try [Rack::Auth](http://www.rubydoc.info/github/rack/rack/Rack/A
 
 ## System Requirements
 
-    Tested on Mac OS X 10.8.2
-    Ruby 1.9.3-392
-
-    Tests fail on Ruby 2.0.0-p0
+See [.travis.yml](./.travis.yml) for supported ruby versions
 
 ## Server Setup
 
