@@ -58,6 +58,7 @@ module Geminabox
           begin
             require 'geminabox/indexer'
             updated_gemspecs = Geminabox::Indexer.updated_gemspecs(indexer)
+            return if updated_gemspecs.empty?
             Geminabox::Indexer.patch_rubygems_update_index_pre_1_8_25(indexer)
             indexer.update_index
             updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
@@ -118,7 +119,12 @@ module Geminabox
 
     get '/reindex' do
       serialize_update do
-        self.class.reindex(:force_rebuild)
+        params[:force_rebuild] ||= 'true'
+        unless %w(true false).include? params[:force_rebuild]
+          error_response(400, "force_rebuild parameter must be either of true or false, but was #{params[:force_rebuild]}")
+        end
+        force_rebuild = params[:force_rebuild] == 'true'
+        self.class.reindex(force_rebuild)
         redirect url("/")
       end
     end
