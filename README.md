@@ -164,3 +164,7 @@ Fork it, mod it, choose it, use it, make it better. All under the MIT License.
 [passenger]: http://www.modrails.com/
 [thin]: http://code.macournoyer.com/thin/
 [unicorn]: http://unicorn.bogomips.org/
+
+## ChangeLog
+
+[CHANGELOG.md](./CHANGELOG.md)
