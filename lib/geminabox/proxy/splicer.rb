@@ -1,8 +1,9 @@
+require 'tempfile'
 
 module Geminabox
   module Proxy
     class Splicer < FileHandler
-      
+
       def self.make(file_name)
         splicer = new(file_name)
         splicer.create
@@ -10,7 +11,16 @@ module Geminabox
       end
 
       def create
-        File.open(splice_path, 'w'){|f| f.write(new_content)}
+        data = new_content
+        return nil if data.nil?
+        begin
+          tmp = Tempfile.new('geminabox')
+          File.open(tmp, 'w'){|f| f.write(data)}
+        rescue
+          return nil
+        end
+
+        FileUtils.mv tmp, splice_path
       end
 
       def new_content
