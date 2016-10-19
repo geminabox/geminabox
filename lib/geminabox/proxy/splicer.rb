@@ -1,4 +1,5 @@
 require 'tempfile'
+require 'fileutils'
 
 module Geminabox
   module Proxy
@@ -12,15 +13,13 @@ module Geminabox
 
       def create
         data = new_content
-        return nil if data.nil?
+        f = Tempfile.create('geminabox')
         begin
-          tmp = Tempfile.new('geminabox')
-          File.open(tmp, 'w'){|f| f.write(data)}
-        rescue
-          return nil
+          f.write(data)
+        ensure
+          f.close rescue nil
         end
-
-        FileUtils.mv tmp, splice_path
+        FileUtils.mv f.path, splice_path
       end
 
       def new_content
