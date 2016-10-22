@@ -116,7 +116,7 @@ module Geminabox
       end
 
       def stub_request_for_file(file_name)
-         stub_request(:get, "http://rubygems.org/#{file_name}").
+         stub_request(:get, "https://rubygems.org/#{file_name}").
           to_return(:status => 200, :body => remote_content)
       end
     end

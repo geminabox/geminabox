@@ -30,7 +30,7 @@ module Geminabox
       end
       
       def test_remote_content
-        stub_request(:get, "http://rubygems.org/foo/bar").
+        stub_request(:get, "https://rubygems.org/foo/bar").
           to_return(:status => 200, :body => remote_content)
         assert_equal remote_content, file_handler.remote_content
       end
@@ -43,7 +43,7 @@ module Geminabox
       end
       
       def test_remote_content_connection_failure
-        stub_request(:get, "http://rubygems.org/foo/bar").
+        stub_request(:get, "https://rubygems.org/foo/bar").
           to_return(:status => 500, :body => 'Whoops')
         assert_raises GemStoreError do 
           file_handler.remote_content
