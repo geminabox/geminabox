@@ -43,3 +43,10 @@ end
 task :st => "test:smoke"
 task :test => ["test:units", "test:requests", "test:integration"]
 task :default => :test
+
+
+desc 'Open an irb session preloaded with the gem library'
+task :console do
+  sh 'irb -rubygems -I lib -r geminabox.rb'
+end
+task :c => :console
