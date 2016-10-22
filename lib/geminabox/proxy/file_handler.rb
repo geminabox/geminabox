@@ -49,7 +49,7 @@ module Geminabox
       end
 
       def remote_url
-        "http://rubygems.org/#{file_name}"
+        URI.join(Geminabox.ruby_gems_url, file_name)
       end
 
       def local_content
