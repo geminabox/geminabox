@@ -1,3 +1,9 @@
+# 0.13.4 (2016-10-25)
+
+Fixes:
+
+* Fix allow_remote_failure was not working in proxy/file_handler
+
 # 0.13.3 (2016-10-13)
 
 Enhancements:
