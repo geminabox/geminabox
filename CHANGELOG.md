@@ -1,3 +1,9 @@
+# 0.13.5 (2017-01-14)
+
+Fixes:
+
+* disk_cache.rb: ignore Errno::ENOENT, and EOFError. There is a possibility that the file is removed by another process after checking File.exist?.
+
 # 0.13.4 (2016-10-25)
 
 Fixes:
