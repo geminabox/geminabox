@@ -43,11 +43,28 @@ module Geminabox
     end
 
     def read(key_hash)
-      read_int(key_hash) { |path| File.read(path) }
+      read_int(key_hash) do |path|
+        begin
+          File.read(path)
+        rescue Errno::ENOENT
+          # There is a possibility that the file is removed by another process
+          # after checking File.exist?. Return nil if the file does not exist.
+          nil
+        end
+      end
     end
 
     def marshal_read(key_hash)
-      read_int(key_hash) { |path| Marshal.load(File.open(path)) }
+      read_int(key_hash) do |path|
+        begin
+          Marshal.load(File.open(path))
+        rescue Errno::ENOENT, EOFError
+          # There is a possibility that the file is removed by another process.
+          # Marshal.load raises EOFError if the file is removed after File.open(path) succeeds.
+          # Return nil if the file does not exist.
+          nil
+        end
+      end
     end
 
     def read_int(key_hash)
