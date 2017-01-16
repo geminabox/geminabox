@@ -28,6 +28,7 @@ module Geminabox
       @http_client ||= HTTPClient.new(ENV['http_proxy']).tap {|client|
         client.transparent_gzip_decompression = true
         client.keep_alive_timeout = 32 # sec
+        client.ssl_config.ssl_version = "TLSv1"
       }
     end
 
