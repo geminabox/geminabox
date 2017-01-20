@@ -5,10 +5,7 @@ module Geminabox
   module Proxy
     class Hostess < Sinatra::Base
       attr_accessor :file_handler
-<<<<<<< HEAD
-=======
 
->>>>>>> 8d6660b... Update default rubygems url and add config.ru override
       def serve
         if file_handler
           send_file file_handler.proxy_path
@@ -61,13 +58,8 @@ module Geminabox
 
         file = File.expand_path(File.join(Server.data, *request.path_info))
 
-<<<<<<< HEAD
         unless File.exist?(file)
           ruby_gems_url = Geminabox.ruby_gems_url
-=======
-        unless File.exists?(file)
-          ruby_gems_url = Geminabox.rubygems_url
->>>>>>> 8d6660b... Update default rubygems url and add config.ru override
           path = File.join(ruby_gems_url, *request.path_info)
           content = Geminabox.http_adapter.get_content(path)
           GemStore.create(IncomingGem.new(StringIO.new(content)))
