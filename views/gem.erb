@@ -5,7 +5,10 @@
 <ul class="gemlist">
   <% @gem.by_name do |name, versions| %>
     <li class="gem-version">
-      <h2><%= name %> (<%= versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}" %>)</h2>
+      <h2>
+        <%= name %> (<%= versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}" %>)
+        <a href="<%= url("/gems/#{name}") %>"><img src="<%= url("/gems/#{name}.svg") %>" alt="Gem Version" height="18"></a>
+      </h2>
       <% versions.each.reverse_each do |version| %>
         <p>
         <code>gem install <%= version.name %> <%= "--prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= version.number %>"</code>
@@ -34,5 +37,20 @@
       </div>
 
     </li>
+
+    <div class="badge">
+      <%
+         badge_url = url("/gems/#{name}.svg")
+         gem_url   = url("/gems/#{name}")
+      %>
+      <dl>
+        <dt>Badge URL</dt>
+        <dd><input class='click-select' type='text' value='<%= badge_url %>' readonly/></dd>
+        <dt>Markdown</dt>
+        <dd><input class='click-select' type='text' value='[![Gem Version](<%= badge_url %>)](<%= gem_url %>)' readonly/></dd>
+        <dt>HTML</dt>
+        <dd><input class='click-select' type='text' value='<a href="<%= gem_url %>"><img src="<%= badge_url %>" alt="Gem Version" height="18"></a>' readonly/></dd>
+      </dl>
+    </div>
   <% end %>
 </ul>

@@ -33,6 +33,7 @@ module Geminabox
   autoload :Server,                 geminabox_path('server')
   autoload :DiskCache,              geminabox_path('disk_cache')
   autoload :IncomingGem,            geminabox_path('incoming_gem')
+  autoload :GemFinder,              geminabox_path('gem_finder')
 
   class << self
 
@@ -65,7 +66,7 @@ module Geminabox
     def settings
       Server.settings
     end
-    
+
     def call(env)
       Server.call env
     end
@@ -89,5 +90,5 @@ module Geminabox
     bundler_ruby_gems_url: 'https://bundler.rubygems.org/',
     allow_upload:          true
   )
-    
+
 end

@@ -1,0 +1,36 @@
+<svg contentScriptType="text/ecmascript" width="120"
+     xmlns:xlink="http://www.w3.org/1999/xlink" zoomAndPan="magnify"
+     contentStyleType="text/css" height="18" preserveAspectRatio="xMidYMid meet"
+     xmlns="http://www.w3.org/2000/svg" version="1.0">
+
+
+  <linearGradient xmlns:xlink="http://www.w3.org/1999/xlink" x2="0" y2="100%"
+                  xlink:type="simple" xlink:actuate="onLoad" id="a"
+                  xlink:show="other">
+    <stop stop-opacity=".7" stop-color="#fff" offset="0"/>
+    <stop stop-opacity=".1" stop-color="#aaa" offset=".1"/>
+    <stop stop-opacity=".3" offset=".9"/>
+    <stop stop-opacity=".5" offset="1"/>
+  </linearGradient>
+
+  <rect rx="4" fill="#555" width="120" height="18" class="sWidth"/>
+  <rect rx="4" fill="#4c1" width="39" x="81" height="18" class="vWidth tMove"/>
+  <rect fill="#4c1" x="81" width="13" height="18" class="tMove"/>
+  <rect rx="4" fill="url(#a)" width="120" height="18" class="sWidth"/>
+
+  <g font-size="11" font-family="DejaVu Sans,Verdana,Geneva,sans-serif"
+     fill="#fff">
+    <text x="6" fill="#010101" fill-opacity=".3" y="13">
+      gem version
+    </text>
+    <text x="6" id="tText" y="12">
+      gem version
+    </text>
+    <text fill="#010101" x="86" fill-opacity=".3" y="13" class="tMove">
+      <%= @gem.newest.number %>
+    </text>
+    <text x="86" id="vText" y="12" class="tMove">
+      <%= @gem.newest.number %>
+    </text>
+  </g>
+</svg>
