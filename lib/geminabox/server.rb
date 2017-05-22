@@ -48,12 +48,23 @@ module Geminabox
         @post_reset_hook_applied = true
       end
 
-      def reindex(force_rebuild = false)
+      MAX_RETRIES = 5
+
+      def reindex(force_rebuild = false, retries = 0)
+        return if retries > MAX_RETRIES
         fixup_bundler_rubygems!
         force_rebuild = true unless incremental_updates
         if force_rebuild
-          indexer.generate_index
-          dependency_cache.flush
+          begin
+            indexer.generate_index
+            dependency_cache.flush
+          rescue Errno::ENOENT
+            reindex(:force_rebuild, retires + 1)
+          rescue => e
+            puts "#{e.class}:#{e.message}"
+            puts e.backtrace.join("\n")
+            reindex(:force_rebuild, retries + 1)
+          end
         else
           begin
             require 'geminabox/indexer'
@@ -63,11 +74,11 @@ module Geminabox
             indexer.update_index
             updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
           rescue Errno::ENOENT
-            reindex(:force_rebuild)
+            reindex(:force_rebuild, 1)
           rescue => e
             puts "#{e.class}:#{e.message}"
             puts e.backtrace.join("\n")
-            reindex(:force_rebuild)
+            reindex(:force_rebuild, 1)
           end
         end
       rescue Gem::SystemExitException
