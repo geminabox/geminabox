@@ -1,3 +1,9 @@
+# 0.13.6 (2017-05-24)
+
+Fixes:
+
+* Restricts sinatra version to avoid incompatibility with ruby versions < 2.2.2.
+
 # 0.13.5 (2017-01-14)
 
 Fixes:
