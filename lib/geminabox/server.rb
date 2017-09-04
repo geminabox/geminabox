@@ -63,11 +63,11 @@ module Geminabox
             indexer.update_index
             updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
           rescue Errno::ENOENT
-            reindex(:force_rebuild)
+            with_lock { reindex(:force_rebuild) }
           rescue => e
             puts "#{e.class}:#{e.message}"
             puts e.backtrace.join("\n")
-            reindex(:force_rebuild)
+            with_lock { reindex(:force_rebuild) }
           end
         end
       rescue Gem::SystemExitException
