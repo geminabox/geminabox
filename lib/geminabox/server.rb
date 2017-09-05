@@ -82,8 +82,22 @@ module Geminabox
       def dependency_cache
         @dependency_cache ||= Geminabox::DiskCache.new(File.join(data, "_cache"))
       end
-    end
 
+      def with_reentrant_lock(&block)
+        file_class.open(settings.lockfile, File::RDWR | File::CREAT) do |f|
+          ReentrantFlock.synchronize(f, File::LOCK_EX | File::LOCK_NB, &block)
+        end
+      end
+
+      # This method provides a test hook, as stubbing File is painful...
+      def file_class
+        @file_class ||= File
+      end
+
+      def file_class=(klass)
+        @file_class = klass
+      end
+    end
 
 
     before do
@@ -191,14 +205,7 @@ module Geminabox
     end
 
     def with_reentrant_lock(&block)
-      file_class.open(settings.lockfile, File::RDWR | File::CREAT) do |f|
-        ReentrantFlock.synchronize(File::LOCK_EX | File::LOCK_NB, &block)
-      end
-    end
-
-    # This method provides a test hook, as stubbing File is painful...
-    def file_class
-      File
+      self.class.with_reentrant_lock(&block)
     end
 
     def handle_incoming_gem(gem)

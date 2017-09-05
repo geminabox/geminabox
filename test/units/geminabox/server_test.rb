@@ -15,11 +15,12 @@ module Geminabox
       attr_reader :mock_file
 
       def initialize(flock_return)
-        @mock_file = Minitest::Mock.new
-        mock_file.expect(:flock, flock_return, [File::LOCK_EX | File::LOCK_NB])
+        @mock_file = Object.new
+        mock_file.define_singleton_method(:flock) {|operator| flock_return }
       end
 
       def open(name, mode)
+        mock_file.define_singleton_method(:path) { name }
         yield mock_file
       end
     end
@@ -31,7 +32,7 @@ module Geminabox
         @server = Geminabox::Server.new.instance_variable_get(:@instance)
         # ivar for the tests.  Local variable for the define_method.  <sigh>
         fake_file_class = @fake_file_class = klass.new(flock_return)
-        server.singleton_class.send(:define_method, :file_class){ fake_file_class }
+        Geminabox::Server.file_class = fake_file_class
         @mock_file = fake_file_class.mock_file
       end
     end
@@ -39,25 +40,20 @@ module Geminabox
     def teardown
       Geminabox.http_adapter = HttpClientAdapter.new
       Geminabox.allow_remote_failure = false
+      Geminabox::Server.file_class = File
     end
 
-    describe "#with_lock" do
+    describe "#with_reentrant_lock" do
       include PrepServer
 
       def do_call
-        server.send(:with_lock) { @called = true }
+        server.send(:with_reentrant_lock) { @called = true }
       end
 
       def test_it_yields
         prep_server(FileOpenYields, true)
         do_call
         assert_equal true, @called
-      end
-
-      def test_it_calls_flock_on_the_yielded_value_exclusive_nonblocking
-        prep_server(FileOpenYields, true)
-        do_call
-        assert mock_file.verify
       end
 
       def test_it_blows_up_if_it_cannot_obtain_lock
@@ -83,8 +79,8 @@ module Geminabox
         end
       end
 
-      def test_block_passed_to_with_lock
-        def @server.with_lock(&block)
+      def test_block_passed_to_with_reentrant_lock
+        def @server.with_reentrant_lock(&block)
           @args = block
         end
 
@@ -93,8 +89,8 @@ module Geminabox
         assert_equal blk, @server.args
       end
 
-      def test_alreadylocked_in_with_lock_invokes_halt
-        def @server.with_lock(&block)
+      def test_alreadylocked_in_with_reentrant_lock_invokes_halt
+        def @server.with_reentrant_lock(&block)
           raise ReentrantFlock::AlreadyLocked
         end
 
