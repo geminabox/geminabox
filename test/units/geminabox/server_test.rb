@@ -43,11 +43,11 @@ module Geminabox
       Geminabox::Server.file_class = File
     end
 
-    describe "#with_reentrant_lock" do
+    describe "#with_rlock" do
       include PrepServer
 
       def do_call
-        server.send(:with_reentrant_lock) { @called = true }
+        server.send(:with_rlock) { @called = true }
       end
 
       def test_it_yields
@@ -79,8 +79,8 @@ module Geminabox
         end
       end
 
-      def test_block_passed_to_with_reentrant_lock
-        def @server.with_reentrant_lock(&block)
+      def test_block_passed_to_with_rlock
+        def @server.with_rlock(&block)
           @args = block
         end
 
@@ -89,8 +89,8 @@ module Geminabox
         assert_equal blk, @server.args
       end
 
-      def test_alreadylocked_in_with_reentrant_lock_invokes_halt
-        def @server.with_reentrant_lock(&block)
+      def test_alreadylocked_in_with_rlock_invokes_halt
+        def @server.with_rlock(&block)
           raise ReentrantFlock::AlreadyLocked
         end
 

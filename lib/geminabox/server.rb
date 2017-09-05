@@ -65,11 +65,11 @@ module Geminabox
             indexer.update_index
             updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
           rescue Errno::ENOENT
-            with_reentrant_lock { reindex(:force_rebuild) }
+            with_rlock { reindex(:force_rebuild) }
           rescue => e
             puts "#{e.class}:#{e.message}"
             puts e.backtrace.join("\n")
-            with_reentrant_lock { reindex(:force_rebuild) }
+            with_rlock { reindex(:force_rebuild) }
           end
         end
       rescue Gem::SystemExitException
@@ -83,7 +83,7 @@ module Geminabox
         @dependency_cache ||= Geminabox::DiskCache.new(File.join(data, "_cache"))
       end
 
-      def with_reentrant_lock(&block)
+      def with_rlock(&block)
         file_class.open(settings.lockfile, File::RDWR | File::CREAT) do |f|
           ReentrantFlock.synchronize(f, File::LOCK_EX | File::LOCK_NB, &block)
         end
@@ -199,13 +199,13 @@ module Geminabox
   private
 
     def serialize_update(&block)
-      with_reentrant_lock(&block)
+      with_rlock(&block)
     rescue ReentrantFlock::AlreadyLocked
       halt 503, { 'Retry-After' => settings.retry_interval }, 'Repository lock is held by another process'
     end
 
-    def with_reentrant_lock(&block)
-      self.class.with_reentrant_lock(&block)
+    def with_rlock(&block)
+      self.class.with_rlock(&block)
     end
 
     def handle_incoming_gem(gem)
