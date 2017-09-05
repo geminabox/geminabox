@@ -62,7 +62,7 @@ module Geminabox
 
       def test_it_blows_up_if_it_cannot_obtain_lock
         prep_server(FileOpenYields, false)
-        assert_raises(AlreadyLocked) { do_call }
+        assert_raises(ReentrantFlock::AlreadyLocked) { do_call }
       end
 
       def test_it_calls_File_open_with_correct_args
@@ -93,9 +93,9 @@ module Geminabox
         assert_equal blk, @server.args
       end
 
-      def test_AlreadyLocked_in_with_lock_invokes_halt
+      def test_alreadylocked_in_with_lock_invokes_halt
         def @server.with_lock(&block)
-          raise AlreadyLocked
+          raise ReentrantFlock::AlreadyLocked
         end
 
         def @server.halt(code, headers, message)

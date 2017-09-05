@@ -13,7 +13,6 @@ require 'tilt/erb'
 module Geminabox
 
   class Error < StandardError ; end
-  class AlreadyLocked < Error ; end
 
   require_relative 'geminabox/version'
   require_relative 'geminabox/proxy'
