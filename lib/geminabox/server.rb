@@ -297,6 +297,10 @@ HTML
     end
 
     helpers do
+      def h(text)
+        Rack::Utils.escape_html(text)
+      end
+
       def spec_for(gem_name, version, platform = default_platform)
         filename = [gem_name, version]
         filename.push(platform) if platform != default_platform
