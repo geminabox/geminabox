@@ -1,8 +1,14 @@
+# 0.13.7 (2017-09-19)
+
+Fix vulnerabilities:
+
+* Fix CSRF vulnerabilities - CVE-2017-14506 (reported by Quitten)
+
 # 0.13.6 (2017-09-19)
 
 Fix vulnerabilities:
 
-* Fix XSS & CSRF vulnerabilities - CVE-2017-14506 (reported by Quitten)
+* Fix XSS vulnerabilities - CVE-2017-14506 (reported by Quitten)
 
 # 0.13.5 (2017-01-14)
 
