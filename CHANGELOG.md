@@ -1,3 +1,11 @@
+# 0.13.8 (2017-09-24)
+
+Fixes:
+
+* gem inabox command should unescape username/password of geminabox url
+* gem inabox command should get gemname from gemspec rather than directory name
+* Concurrent reindex(:force_rebuild) should be serialized
+
 # 0.13.7 (2017-09-23)
 
 Fix vulnerabilities:
