@@ -3,6 +3,7 @@ pkg
 tmp/restart.txt
 Gemfile.lock
 .bundle
+.byebug_history
 vendor/bundle
 .rbenv-version
 test/fixtures/fake_home_path/.gem/specs
