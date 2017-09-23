@@ -1,3 +1,5 @@
+require 'reentrant_flock'
+
 module Geminabox
 
   class Server < Sinatra::Base
@@ -65,11 +67,11 @@ module Geminabox
             indexer.update_index
             updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
           rescue Errno::ENOENT
-            reindex(:force_rebuild)
+            with_rlock { reindex(:force_rebuild) }
           rescue => e
             puts "#{e.class}:#{e.message}"
             puts e.backtrace.join("\n")
-            reindex(:force_rebuild)
+            with_rlock { reindex(:force_rebuild) }
           end
         end
       rescue Gem::SystemExitException
@@ -82,8 +84,22 @@ module Geminabox
       def dependency_cache
         @dependency_cache ||= Geminabox::DiskCache.new(File.join(data, "_cache"))
       end
-    end
 
+      def with_rlock(&block)
+        file_class.open(settings.lockfile, File::RDWR | File::CREAT) do |f|
+          ReentrantFlock.synchronize(f, File::LOCK_EX | File::LOCK_NB, &block)
+        end
+      end
+
+      # This method provides a test hook, as stubbing File is painful...
+      def file_class
+        @file_class ||= File
+      end
+
+      def file_class=(klass)
+        @file_class = klass
+      end
+    end
 
 
     before do
@@ -185,21 +201,13 @@ module Geminabox
   private
 
     def serialize_update(&block)
-      with_lock(&block)
-    rescue AlreadyLocked
+      with_rlock(&block)
+    rescue ReentrantFlock::AlreadyLocked
       halt 503, { 'Retry-After' => settings.retry_interval }, 'Repository lock is held by another process'
     end
 
-    def with_lock
-      file_class.open(settings.lockfile, File::RDWR | File::CREAT) do |f|
-        raise AlreadyLocked unless f.flock(File::LOCK_EX | File::LOCK_NB)
-        yield
-      end
-    end
-
-    # This method provides a test hook, as stubbing File is painful...
-    def file_class
-      File
+    def with_rlock(&block)
+      self.class.with_rlock(&block)
     end
 
     def handle_incoming_gem(gem)

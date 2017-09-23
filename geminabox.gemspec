@@ -22,4 +22,5 @@ Gem::Specification.new do |s|
   s.add_dependency('httpclient', [">= 2.2.7"])
   s.add_dependency('nesty')
   s.add_dependency('faraday')
+  s.add_dependency('reentrant_flock')
 end
