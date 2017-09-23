@@ -1,4 +1,5 @@
 require 'uri'
+require 'cgi'
 require 'geminabox'
 
 class GeminaboxClient
@@ -12,7 +13,8 @@ class GeminaboxClient
 
   def extract_username_and_password_from_url!(url)
     uri = URI.parse(url.to_s)
-    @username, @password = uri.user, uri.password
+    @username = CGI.unescape(uri.user) if uri.user
+    @password = CGI.unescape(uri.password) if uri.password
     uri.user = uri.password = nil
     uri.path = uri.path + "/" unless uri.path.end_with?("/")
     @url = uri.to_s
