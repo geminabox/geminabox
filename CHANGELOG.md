@@ -1,3 +1,9 @@
+# 0.13.9 (2017-09-25)
+
+Enhancements:
+
+* Make it be configurable HTTPClient options of Geminabox.http_adapter
+
 # 0.13.8 (2017-09-24)
 
 Fixes:
