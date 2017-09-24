@@ -55,6 +55,19 @@ If you want Geminabox to carry on providing gems when rubygems.org is unavailabl
 Geminabox uses the HTTPClient gem to manage its connections to remote resources.
 The relationship is managed via Geminabox::HttpClientAdapter.
 
+To configure options of HTTPClient, pass your own HTTPClient object in config.ru as:
+
+```ruby
+# Geminabox.http_adapter = Geminabox::HttpClientAdapter.new # default
+Geminabox.http_adapter.http_client = HTTPClient.new(ENV['http_proxy']).tap do |http_client|
+  http_client.transparent_gzip_decompression = true
+  http_client.keep_alive_timeout = 32 # sec
+  http_client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  http_client.send_timeout = 0
+  http_client.receive_timeout = 0
+end
+```
+
 If you would like to use an alternative HTTP gem, create your own adapter
 and specify it in config.ru:
 
