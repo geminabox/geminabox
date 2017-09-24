@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.authors           = ['Tom Lea', 'Jack Foy', 'Rob Nichols', 'Naotoshi Seo']
   s.email             = ['contrib@tomlea.co.uk', 'jack@foys.net', 'rob@undervale.co.uk', 'sonots@gmail.com']
   s.homepage          = 'http://tomlea.co.uk/p/gem-in-a-box'
+  s.metadata          = { "source_code_uri" => "https://github.com/geminabox/geminabox" }
 
   s.has_rdoc          = true
   s.extra_rdoc_files  = %w[README.md]
