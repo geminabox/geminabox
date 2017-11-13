@@ -1,3 +1,9 @@
+# 0.13.10 (2017-11-13)
+
+Fix vulnerabilities:
+
+* Fix stored XSS vulnerabilities - CVE-2017-16792 (reported by Yasin Soliman)
+
 # 0.13.9 (2017-09-25)
 
 Enhancements:
