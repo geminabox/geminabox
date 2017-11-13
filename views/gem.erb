@@ -27,7 +27,7 @@
           <%= spec.description %>
           <br/>
           <span class="author">– <%= spec.authors.map do |author|
-            "<a href='#{h(spec.homepage)}'>#{author}</a>"
+            "<a href='#{href(spec.homepage)}'>#{author}</a>"
           end.join(', ') %></span>
         <% end %>
         </p>

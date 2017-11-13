@@ -307,6 +307,15 @@ HTML
     end
 
     helpers do
+      def href(text)
+        escaped_text = Rack::Utils.escape_html(text)
+        if escaped_text.start_with?('http://') || escaped_text.start_with?('https://')
+          escaped_text
+        else
+          '#'
+        end
+      end
+
       def h(text)
         Rack::Utils.escape_html(text)
       end
