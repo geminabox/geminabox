@@ -1,3 +1,9 @@
+# 0.13.11 (2017-11-17)
+
+Fixes:
+
+* Fix \_cache file is not closed
+
 # 0.13.10 (2017-11-13)
 
 Fix vulnerabilities:
