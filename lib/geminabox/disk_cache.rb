@@ -57,7 +57,7 @@ module Geminabox
     def marshal_read(key_hash)
       read_int(key_hash) do |path|
         begin
-          Marshal.load(File.open(path))
+          File.open(path) {|fp| Marshal.load(fp) }
         rescue Errno::ENOENT, EOFError
           # There is a possibility that the file is removed by another process.
           # Marshal.load raises EOFError if the file is removed after File.open(path) succeeds.
