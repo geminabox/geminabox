@@ -308,9 +308,8 @@ HTML
 
     helpers do
       def href(text)
-        escaped_text = Rack::Utils.escape_html(text)
-        if escaped_text.start_with?('http://') || escaped_text.start_with?('https://')
-          escaped_text
+        if text.start_with?('http://') || text.start_with?('https://')
+          Rack::Utils.escape_html(text)
         else
           '#'
         end
