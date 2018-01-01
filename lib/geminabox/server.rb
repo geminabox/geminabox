@@ -156,7 +156,7 @@ module Geminabox
 
     delete '/gems/*.gem' do
       unless self.class.allow_delete?
-        error_response(403, 'Gem deletion is disabled - see https://github.com/cwninja/geminabox/issues/115')
+        error_response(403, 'Gem deletion is disabled - see https://github.com/geminabox/geminabox/issues/115')
       end
 
       serialize_update do
