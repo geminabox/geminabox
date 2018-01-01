@@ -13,11 +13,15 @@
           <small class="platform"><%= version.platform %></small>
         <% end %>
         </p>
-        <form class="delete-form" method="post" action="<%= url("/gems/#{version.gemfile_name}.gem") %>">
+        <div class="delete-form">
           <a class="download" href="<%= url("/gems/#{version.gemfile_name}.gem") %>">download</a>
-          <input type="hidden" name="_method" value="DELETE" />
-          <button type="submit">delete</button>
-        </form>
+          <% if @allow_delete %>
+          <form method="post" action="<%= url("/gems/#{version.gemfile_name}.gem") %>">
+            <input type="hidden" name="_method" value="DELETE" />
+            <button type="submit">delete</button>
+          </form>
+          <% end %>
+        </div>
       <% end %>
 
       <div class="details">
