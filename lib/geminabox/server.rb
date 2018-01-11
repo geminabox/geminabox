@@ -4,30 +4,13 @@ module Geminabox
 
   class Server < Sinatra::Base
     enable :static, :methodoverride
+    set :public_folder, Geminabox.public_folder
+    set :views, Geminabox.views
+
     use Rack::Session::Pool, :expire_after => Geminabox.session_expire_after
     use Rack::Protection
 
-    def self.delegate_to_geminabox(*delegate_methods)
-      delegate_methods.each{|m| set m, Geminabox.send(m)}
-    end
-
-    delegate_to_geminabox(
-      :public_folder,
-      :data,
-      :build_legacy,
-      :incremental_updates,
-      :views,
-      :allow_replace,
-      :gem_permissions,
-      :allow_delete,
-      :lockfile,
-      :retry_interval,
-      :rubygems_proxy,
-      :ruby_gems_url,
-      :allow_upload
-    )
-
-    if Server.rubygems_proxy
+    if Geminabox.rubygems_proxy
       use Proxy::Hostess
     else
       use Hostess
@@ -35,15 +18,15 @@ module Geminabox
 
     class << self
       def disallow_replace?
-        ! allow_replace
+        ! Geminabox.allow_replace
       end
 
       def allow_delete?
-        allow_delete
+        Geminabox.allow_delete
       end
 
       def allow_upload?
-        allow_upload
+        Geminabox.allow_upload
       end
 
       def fixup_bundler_rubygems!
@@ -54,7 +37,7 @@ module Geminabox
 
       def reindex(force_rebuild = false)
         fixup_bundler_rubygems!
-        force_rebuild = true unless incremental_updates
+        force_rebuild = true unless Geminabox.incremental_updates
         if force_rebuild
           indexer.generate_index
           dependency_cache.flush
@@ -78,15 +61,15 @@ module Geminabox
       end
 
       def indexer
-        Gem::Indexer.new(data, :build_legacy => build_legacy)
+        Gem::Indexer.new(Geminabox.data, :build_legacy => Geminabox.build_legacy)
       end
 
       def dependency_cache
-        @dependency_cache ||= Geminabox::DiskCache.new(File.join(data, "_cache"))
+        @dependency_cache ||= Geminabox::DiskCache.new(File.join(Geminabox.data, "_cache"))
       end
 
       def with_rlock(&block)
-        file_class.open(settings.lockfile, File::RDWR | File::CREAT) do |f|
+        file_class.open(Geminabox.lockfile, File::RDWR | File::CREAT) do |f|
           ReentrantFlock.synchronize(f, File::LOCK_EX | File::LOCK_NB, &block)
         end
       end
@@ -203,7 +186,7 @@ module Geminabox
     def serialize_update(&block)
       with_rlock(&block)
     rescue ReentrantFlock::AlreadyLocked
-      halt 503, { 'Retry-After' => settings.retry_interval }, 'Repository lock is held by another process'
+      halt 503, { 'Retry-After' => Geminabox.retry_interval }, 'Repository lock is held by another process'
     end
 
     def with_rlock(&block)
@@ -243,7 +226,7 @@ HTML
     end
 
     def file_path
-      File.expand_path(File.join(settings.data, *request.path_info))
+      File.expand_path(File.join(Geminabox.data, *request.path_info))
     end
 
     def dependency_cache
@@ -270,7 +253,7 @@ HTML
 
     def specs_files_paths
       specs_file_types.map do |specs_file_type|
-        File.join(settings.data, spec_file_name(specs_file_type))
+        File.join(Geminabox.data, spec_file_name(specs_file_type))
       end
     end
 
@@ -287,7 +270,7 @@ HTML
     end
 
     def gem_list
-      settings.rubygems_proxy ? combined_gem_list : local_gem_list
+      Geminabox.rubygems_proxy ? combined_gem_list : local_gem_list
     end
 
     def query_gems
@@ -322,7 +305,7 @@ HTML
       def spec_for(gem_name, version, platform = default_platform)
         filename = [gem_name, version]
         filename.push(platform) if platform != default_platform
-        spec_file = File.join(settings.data, "quick", "Marshal.#{Gem.marshal_version}", "#{filename.join("-")}.gemspec.rz")
+        spec_file = File.join(Geminabox.data, "quick", "Marshal.#{Gem.marshal_version}", "#{filename.join("-")}.gemspec.rz")
         File::open(spec_file, 'r') do |unzipped_spec_file|
           unzipped_spec_file.binmode
           Marshal.load(Gem.inflate(unzipped_spec_file.read))

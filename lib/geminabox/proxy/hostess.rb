@@ -9,7 +9,7 @@ module Geminabox
         if file_handler
           send_file file_handler.proxy_path
         else
-          send_file(File.expand_path(File.join(Server.data, *request.path_info)), :type => response['Content-Type'])
+          send_file(File.expand_path(File.join(Geminabox.data, *request.path_info)), :type => response['Content-Type'])
         end
       end
 
@@ -55,7 +55,7 @@ module Geminabox
       private
       def get_from_rubygems_if_not_local
 
-        file = File.expand_path(File.join(Server.data, *request.path_info))
+        file = File.expand_path(File.join(Geminabox.data, *request.path_info))
 
         unless File.exist?(file)
           ruby_gems_url = Geminabox.ruby_gems_url
