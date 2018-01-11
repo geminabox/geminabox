@@ -91,7 +91,7 @@ module Geminabox
       yield temp_file
       temp_file.close
       File.rename(temp_file.path, file_name)
-      File.chmod(Geminabox::Server.gem_permissions, file_name)
+      File.chmod(Geminabox.gem_permissions, file_name)
     end
 
   end

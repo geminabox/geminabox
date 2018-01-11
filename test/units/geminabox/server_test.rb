@@ -64,7 +64,7 @@ module Geminabox
       def test_it_calls_File_open_with_correct_args
         prep_server(FileOpenNoYield)
         do_call
-        assert_equal Geminabox.settings.lockfile, fake_file_class.name
+        assert_equal Geminabox.lockfile, fake_file_class.name
         assert_equal File::RDWR | File::CREAT, fake_file_class.mode
       end
     end
@@ -101,7 +101,7 @@ module Geminabox
         @server.send(:serialize_update){}
         expected_args = [
           503,
-          {'Retry-After' => Geminabox.settings.retry_interval},
+          {'Retry-After' => Geminabox.retry_interval},
           'Repository lock is held by another process'
         ]
         assert_equal expected_args, @server.args
