@@ -52,7 +52,8 @@ module Geminabox
       :allow_remote_failure,
       :ruby_gems_url,
       :bundler_ruby_gems_url,
-      :allow_upload
+      :allow_upload,
+      :session_expire_after,
     )
 
     def set_defaults(defaults)
@@ -87,7 +88,8 @@ module Geminabox
     allow_remote_failure:  false,
     ruby_gems_url:         'https://rubygems.org/',
     bundler_ruby_gems_url: 'https://bundler.rubygems.org/',
-    allow_upload:          true
+    allow_upload:          true,
+    session_expire_after:  1000, # sec
   )
     
 end

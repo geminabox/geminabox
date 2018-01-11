@@ -4,7 +4,7 @@ module Geminabox
 
   class Server < Sinatra::Base
     enable :static, :methodoverride
-    use Rack::Session::Pool, :expire_after => 2592000
+    use Rack::Session::Pool, :expire_after => Geminabox.session_expire_after
     use Rack::Protection
 
     def self.delegate_to_geminabox(*delegate_methods)
