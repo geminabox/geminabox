@@ -1,9 +1,13 @@
-# 0.13.12 (2018-01-11)
+# 0.13.13 (2018-01-11)
 
 Fixes:
 
 * Update link to issue shown at an error message (thanks to Tobias L. Maier)
 * Hide delete button if delete disabled in gem view (thanks to Tobias L. Maier)
+
+# 0.13.12
+
+yanked
 
 # 0.13.11 (2017-11-17)
 
