@@ -1,3 +1,33 @@
+# 0.13.14 (2018-01-25)
+
+Fixes:
+
+* Fix memory leak caused by Rack::Session::Pool
+
+Changes:
+
+* Rack::Session::Pool and Rack::Protection are not enabled as default now.
+
+Please note that Rack::Protection is not enabled as default now.
+To protect your geminabox from XSS and CSRF vulnerability,
+you have to embed Rack::Protection by yourself in your `config.ru` file as:
+
+```ruby
+require "geminabox"
+
+Geminabox.data = "/var/geminabox-data" # ... or wherever
+
+# Use Rack::Protection to prevent XSS and CSRF vulnerability if your geminabox server is open public.
+# Rack::Protection requires a session middleware, choose your favorite one such as Rack::Session::Memcache.
+# This example uses Rack::Session::Pool for simplicity, but please note that:
+# 1) Rack::Session::Pool is not available for multiprocess servers such as unicorn
+# 2) Rack::Session::Pool causes memory leak (it does not expire stored `@pool` hash)
+use Rack::Session::Pool, expire_after: 1000 # sec
+use Rack::Protection
+
+run Geminabox::Server
+```
+
 # 0.13.13 (2018-01-11)
 
 Fixes:
