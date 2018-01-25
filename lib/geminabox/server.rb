@@ -7,9 +7,6 @@ module Geminabox
     set :public_folder, Geminabox.public_folder
     set :views, Geminabox.views
 
-    use Rack::Session::Pool, :expire_after => Geminabox.session_expire_after
-    use Rack::Protection
-
     if Geminabox.rubygems_proxy
       use Proxy::Hostess
     else
