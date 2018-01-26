@@ -1,3 +1,9 @@
+# 0.13.15 (2018-01-26)
+
+Fixes:
+
+* Fix typo: avoid NameError - uninitialized constant Geminabox::Hostess::Gemianbox (thanks to Evgeni Golov)
+
 # 0.13.14 (2018-01-25)
 
 Fixes:
