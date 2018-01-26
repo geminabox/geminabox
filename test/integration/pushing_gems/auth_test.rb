@@ -12,4 +12,5 @@ class AuthTest < Geminabox::TestCase
   end
 
   should_push_gem
+  should_fetch_gem
 end

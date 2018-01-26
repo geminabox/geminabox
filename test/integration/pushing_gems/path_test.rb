@@ -10,6 +10,7 @@ class PathTest < Geminabox::TestCase
   end
 
   should_push_gem
+  should_fetch_gem
 end
 
 class PathWithTrailingSlashTest < Geminabox::TestCase
@@ -22,4 +23,5 @@ class PathWithTrailingSlashTest < Geminabox::TestCase
   end
 
   should_push_gem
+  should_fetch_gem
 end
