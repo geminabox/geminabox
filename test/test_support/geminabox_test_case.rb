@@ -42,6 +42,12 @@ class Geminabox::TestCase < Minitest::Test
       Rack::Builder.app(&app)
     end
 
+    def should_fetch_gem(gemname = :example, *args)
+      test("can fetch #{gemname}") do
+        assert_can_fetch(gemname, *args)
+      end
+    end
+
     def should_push_gem(gemname = :example, *args)
       test("can push #{gemname}") do
         assert_can_push(gemname, *args)
@@ -120,6 +126,14 @@ class Geminabox::TestCase < Minitest::Test
     File.chmod 0600, FIXTURES_PATH.join('fake_home_path/.gem/credentials')
   end
 
+  def gem_fetch(gemname)
+    Geminabox::TestCase.setup_fake_home!
+    fix_fixture_permissions!
+    home = FIXTURES_PATH.join('fake_home_path')
+    command = "GEM_HOME=#{FAKE_HOME} HOME=#{home} gem fetch #{gemname} --clear-sources --source '#{config.url_with_port(@test_server_port)}' 2>&1"
+    without_bundler { execute(command) }
+  end
+
   def gemcutter_push(gemfile)
     Geminabox::TestCase.setup_fake_home!
     fix_fixture_permissions!
@@ -132,6 +146,11 @@ class Geminabox::TestCase < Minitest::Test
     Geminabox::TestCase.setup_fake_home!
     command = "GEM_HOME=#{FAKE_HOME} gem inabox #{gemfile} -g '#{config.url_with_port(@test_server_port)}' 2>&1"
     execute(command)
+  end
+
+  def assert_can_fetch(gemname = :example, *args)
+    geminabox_push(gem_file(gemname, *args))
+    assert_match( /Downloaded #{gemname}/, gem_fetch(gemname))
   end
 
   def assert_can_push(gemname = :example, *args)
