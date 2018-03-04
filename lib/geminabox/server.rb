@@ -119,7 +119,7 @@ module Geminabox
       serialize_update do
         params[:force_rebuild] ||= 'true'
         unless %w(true false).include? params[:force_rebuild]
-          error_response(400, "force_rebuild parameter must be either of true or false, but was #{params[:force_rebuild]}")
+          error_response(400, "force_rebuild parameter must be either of true or false")
         end
         force_rebuild = params[:force_rebuild] == 'true'
         self.class.reindex(force_rebuild)
