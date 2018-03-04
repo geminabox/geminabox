@@ -1,3 +1,7 @@
+# 1.0.1 (2018-03-04)
+
+* Avoid XSS vulnerability on /reindex (reported by @ooooooo_q)
+
 # 1.0.0 (2018-02-01)
 
 Bump version to 1.0.0 :tada:
