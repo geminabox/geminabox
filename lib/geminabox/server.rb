@@ -195,6 +195,10 @@ module Geminabox
         GemStore.create(gem, params[:overwrite])
       rescue GemStoreError => error
         error_response error.code, error.reason
+      else
+        if Geminabox.on_gem_received
+          Geminabox.on_gem_received.call(gem)
+        end
       end
 
       if api_request?

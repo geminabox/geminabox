@@ -92,6 +92,21 @@ local systems SSL certificates.
 
 TemplateFaradayAdapter is provided as an example of an alternative HTTPAdapter.
 
+## Hooks
+
+You can add a hook (anything callable) which will be called when a gem is
+successfully received.
+
+```ruby
+Geminabox.on_gem_received = Proc.new do |gem|
+  puts "Gem received: #{gem.spec.name} #{gem.spec.version}"
+end
+```
+
+Typically you might use this to push a notification to your team chat. Any
+exceptions which occur within the hook will bubble up, so please ensure they
+are rescued if this is not desirable.
+
 ## Client Usage
 
 Since version 0.10, Geminabox supports the standard gemcutter push API:
