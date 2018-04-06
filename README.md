@@ -104,8 +104,11 @@ end
 ```
 
 Typically you might use this to push a notification to your team chat. Any
-exceptions which occur within the hook will bubble up, so please ensure they
-are rescued if this is not desirable.
+exceptions which occur within the hook is silently ignored, so please ensure they
+are handled properly if this is not desirable.
+
+Also, please note that this hook blocks `POST /upload` and `POST /api/v1/gems` APIs processing.
+Hook authors are responsible to perform any action non-blocking/async to avoid HTTP timeout.
 
 ## Client Usage
 
