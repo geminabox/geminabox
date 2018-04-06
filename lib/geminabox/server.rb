@@ -197,6 +197,12 @@ module Geminabox
         error_response error.code, error.reason
       end
 
+      begin
+        Geminabox.on_gem_received.call(gem) if Geminabox.on_gem_received
+      rescue => e
+        # ignore errors which occur within the hook
+      end
+
       if api_request?
         "Gem #{gem.name} received and indexed."
       else

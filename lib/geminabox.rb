@@ -53,6 +53,7 @@ module Geminabox
       :ruby_gems_url,
       :bundler_ruby_gems_url,
       :allow_upload,
+      :on_gem_received
     )
 
     def set_defaults(defaults)
@@ -88,6 +89,7 @@ module Geminabox
     ruby_gems_url:         'https://rubygems.org/',
     bundler_ruby_gems_url: 'https://bundler.rubygems.org/',
     allow_upload:          true,
+    on_gem_received:       nil
   )
     
 end
