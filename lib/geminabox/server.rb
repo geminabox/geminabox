@@ -199,7 +199,7 @@ module Geminabox
 
       begin
         Geminabox.on_gem_received.call(gem) if Geminabox.on_gem_received
-      rescue => e
+      rescue
         # ignore errors which occur within the hook
       end
 
