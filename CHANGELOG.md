@@ -1,4 +1,12 @@
+# 1.1.0 (2018-04-06)
+
+Enhancements:
+
+* Adds `on_gem_recievied` hook (thanks to Kris Leech)
+
 # 1.0.1 (2018-03-04)
+
+Fixes:
 
 * Avoid XSS vulnerability on /reindex (reported by @ooooooo_q)
 
