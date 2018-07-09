@@ -10,6 +10,7 @@ require 'tempfile'
 require 'json'
 require 'tilt/erb'
 require 'rack/protection'
+require 'cachy'
 
 module Geminabox
 
@@ -53,7 +54,8 @@ module Geminabox
       :ruby_gems_url,
       :bundler_ruby_gems_url,
       :allow_upload,
-      :on_gem_received
+      :on_gem_received,
+      :cache_store,
     )
 
     def set_defaults(defaults)
@@ -66,8 +68,9 @@ module Geminabox
     def settings
       Server.settings
     end
-    
+
     def call(env)
+      Cachy.cache_store = Geminabox.cache_store
       Server.call env
     end
   end
@@ -89,7 +92,7 @@ module Geminabox
     ruby_gems_url:         'https://rubygems.org/',
     bundler_ruby_gems_url: 'https://bundler.rubygems.org/',
     allow_upload:          true,
-    on_gem_received:       nil
+    on_gem_received:       nil,
+    cache_store:           nil,
   )
-    
 end

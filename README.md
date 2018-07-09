@@ -59,6 +59,20 @@ If you want Geminabox to carry on providing gems when rubygems.org is unavailabl
 
     Geminabox.allow_remote_failure = true
 
+### Index File Caching
+
+If Geminabox is configured to act as a proxy it will download the latest index file and merge it with the local
+index on every request. This may create some serious performance issues if multiple clients are using the service.
+
+To work around this it is possible to activate index file caching. To use it you will need a cache store that is
+compatible with 'cachy' like for example 'moneta' or 'memcached'.
+
+To configure a simple moneta file cache store add the following to the config.ru:
+
+```ruby
+Geminabox.cache_store = Moneta.new(:File, dir: File.join('/path/to/data/dir/_index_cache'), expires: 1800)
+```
+
 ## HTTP adapter
 
 Geminabox uses the HTTPClient gem to manage its connections to remote resources.

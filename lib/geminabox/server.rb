@@ -13,6 +13,10 @@ module Geminabox
       use Hostess
     end
 
+    if Geminabox.cache_store
+      Cachy.cache_store = Geminabox.cache_store
+    end
+
     class << self
       def disallow_replace?
         ! Geminabox.allow_replace

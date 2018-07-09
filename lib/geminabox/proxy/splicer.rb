@@ -7,8 +7,18 @@ module Geminabox
 
       def self.make(file_name)
         splicer = new(file_name)
-        splicer.create
-        splicer
+        cached(:file_handler, splicer) do
+          splicer.create
+          splicer
+        end
+      end
+
+      def self.cached(*args)
+        if Geminabox.cache_store
+          Cachy.cache(*args){ yield }
+        else
+          yield
+        end
       end
 
       def create
@@ -41,6 +51,12 @@ module Geminabox
 
       def splice_file_exists?
         file_exists? splice_path
+      end
+
+      def remote_content
+        Splicer.cached(:remote_content, @file_name) do
+          super
+        end
       end
 
       def merge_content

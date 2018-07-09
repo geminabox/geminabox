@@ -57,6 +57,14 @@ module Geminabox
         File.read(local_path).force_encoding(encoding)
       end
 
+      def mtime
+        File.mtime(local_path)
+      end
+
+      def cache_key
+        "#{file_name} #{mtime}"
+      end
+
       private
       def encoding
         "UTF-8"

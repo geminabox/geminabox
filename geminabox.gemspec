@@ -23,4 +23,5 @@ Gem::Specification.new do |s|
   s.add_dependency('nesty')
   s.add_dependency('faraday')
   s.add_dependency('reentrant_flock')
+  s.add_dependency('cachy')
 end
