@@ -13,3 +13,4 @@ test/fixtures/fake_home_path/.gem/specs
 .bin
 *.gem
 test/fixtures/*.fixture
+.rake_tasks~

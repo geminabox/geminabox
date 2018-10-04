@@ -147,6 +147,23 @@ module Geminabox
 
     end
 
+    delete '/api/v1/gems/yank' do
+      unless self.class.allow_delete?
+        error_response(403, 'Gem deletion is disabled')
+      end
+
+      file_path = File.join(Geminabox.data, 'gems', [[params['gem_name'], params['version']].join('-'), '.gem'].join)
+      if File.exist? file_path
+        serialize_update do
+          File.delete file_path
+          self.class.reindex(:force_rebuild)
+          "Gem #{params['gem_name']} #{params['version']} deleted"
+        end
+      else
+        "Gem #{params['gem_name']} #{params['version']} not found"
+      end
+    end
+
     post '/upload' do
       unless self.class.allow_upload?
         error_response(403, 'Gem uploading is disabled')

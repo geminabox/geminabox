@@ -57,6 +57,20 @@ class Geminabox::TestCase < Minitest::Test
       end
     end
 
+    def should_yank_gem(gemname = :example, *args)
+      test("can yank #{gemname} 1.0.0") do
+        skip('gem yank does not trust the self-signed certificate, so this test will fail') if config.ssl
+
+        gem_file = gem_file(gemname, *args)
+        gemcutter_push(gem_file)
+
+        assert_can_yank(gemname, *args)
+
+        gem_path = File.join(config.data, "gems", File.basename(gem_file(gemname, *args)) )
+        assert !File.exist?( gem_path ), "Gemfile present in data dir."
+      end
+    end
+
     def should_push_gem_over_gemcutter_api(gemname = :example, *args)
       test("can push #{gemname}") do
         gem_file = gem_file(gemname, *args)
@@ -134,6 +148,14 @@ class Geminabox::TestCase < Minitest::Test
     without_bundler { execute(command) }
   end
 
+  def gem_yank(gemname, gemversion = '1.0.0')
+    Geminabox::TestCase.setup_fake_home!
+    fix_fixture_permissions!
+    home = FIXTURES_PATH.join('fake_home_path')
+    command = "GEM_HOME=#{FAKE_HOME} HOME=#{home} gem yank #{gemname} -v #{gemversion} --host '#{config.url_with_port(@test_server_port)}' 2>&1"
+    without_bundler { execute(command) }
+  end
+
   def gemcutter_push(gemfile)
     Geminabox::TestCase.setup_fake_home!
     fix_fixture_permissions!
@@ -155,6 +177,10 @@ class Geminabox::TestCase < Minitest::Test
 
   def assert_can_push(gemname = :example, *args)
     assert_match( /Gem .* received and indexed./, geminabox_push(gem_file(gemname, *args)))
+  end
+
+  def assert_can_yank(gemname = :example, *args)
+    assert_match( /Gem .* deleted/, gem_yank(gemname))
   end
 
   def find_free_port
@@ -239,5 +265,3 @@ class Geminabox::TestCase < Minitest::Test
   end
 
 end
-
-
