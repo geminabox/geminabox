@@ -130,6 +130,7 @@ module Geminabox
     get '/gems/:gemname' do
       gems = Hash[load_gems.by_name]
       @gem = gems[params[:gemname]]
+      @allow_delete = self.class.allow_delete?
       halt 404 unless @gem
       erb :gem
     end
