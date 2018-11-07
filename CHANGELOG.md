@@ -1,3 +1,9 @@
+# 1.1.1 (2018-11-08)
+
+Fixes:
+
+* Fix a delete buton not showing up on gem page even if `delete` is allowed (thanks to Edward Rudd)
+
 # 1.1.0 (2018-04-06)
 
 Enhancements:
