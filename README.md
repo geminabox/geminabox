@@ -107,7 +107,19 @@ Typically you might use this to push a notification to your team chat. Any
 exceptions which occur within the hook is silently ignored, so please ensure they
 are handled properly if this is not desirable.
 
-Also, please note that this hook blocks `POST /upload` and `POST /api/v1/gems` APIs processing.
+Another hook allows you to pre-validate the gem. It will be called in the correct
+api context which allows you to directly deal with the request. Instead of mentioned
+hook above there wouldn't be any exception captured, you're responsible to handle them.
+
+```ruby
+Geminabox.before_gem_received = Proc.new do |gem|
+  next if gem.spec.name.match? /^company-.*/
+
+  error_response(409, "Gem doesn't match the requirements.")
+end
+```
+
+Also, please note that this hooks are blocking `POST /upload` and `POST /api/v1/gems` APIs processing.
 Hook authors are responsible to perform any action non-blocking/async to avoid HTTP timeout.
 
 ## Client Usage

@@ -192,6 +192,8 @@ module Geminabox
     end
 
     def handle_incoming_gem(gem)
+      instance_exec(gem, &Geminabox.before_gem_received) if Geminabox.before_gem_received
+
       begin
         GemStore.create(gem, params[:overwrite])
       rescue GemStoreError => error
