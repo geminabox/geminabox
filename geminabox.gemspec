@@ -10,7 +10,6 @@ Gem::Specification.new do |s|
   s.homepage          = 'http://tomlea.co.uk/p/gem-in-a-box'
   s.metadata          = { "source_code_uri" => "https://github.com/geminabox/geminabox" }
 
-  s.has_rdoc          = true
   s.extra_rdoc_files  = %w[README.md]
   s.rdoc_options      = %w[--main README.md]
 
