@@ -122,6 +122,10 @@ You can also use the gem plugin:
 
     gem inabox pkg/my-awesome-gem-1.0.gem
 
+And since version 1.2.0, Geminabox supports the standard gemcutter yank API:
+
+    gem yank my-awesome-gem -v 1.0 --host HOST
+
 Configure Gem in a box (interactive prompt to specify where to upload to):
 
     gem inabox -c

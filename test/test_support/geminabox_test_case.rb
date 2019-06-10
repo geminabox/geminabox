@@ -67,6 +67,16 @@ class Geminabox::TestCase < Minitest::Test
       end
     end
 
+    def should_yank_gem_over_gemcutter_api(gemname = :example, version = '1.0.0', *args)
+      test("can yank #{gemname}") do
+        gem_file = gem_file(gemname, *args)
+        gemcutter_push(gem_file)
+        gemcutter_yank(gemname, version)
+        gem_path = File.join(config.data, "gems", File.basename(gem_file) )
+        assert !File.exist?( gem_path ), "Gemfile in data dir."
+      end
+    end
+
     def url_with_port(port)
       uri = URI.parse url
       uri.port = port
@@ -139,6 +149,14 @@ class Geminabox::TestCase < Minitest::Test
     fix_fixture_permissions!
     home = FIXTURES_PATH.join('fake_home_path')
     command = "GEM_HOME=#{FAKE_HOME} HOME=#{home} gem push #{gemfile} --host '#{config.url_with_port(@test_server_port)}' 2>&1"
+    without_bundler { execute(command) }
+  end
+
+  def gemcutter_yank(gemname, version)
+    Geminabox::TestCase.setup_fake_home!
+    fix_fixture_permissions!
+    home = FIXTURES_PATH.join('fake_home_path')
+    command = "GEM_HOME=#{FAKE_HOME} HOME=#{home} gem yank #{gemname} -v #{version} --host '#{config.url_with_port(@test_server_port)}' 2>&1"
     without_bundler { execute(command) }
   end
 
