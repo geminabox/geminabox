@@ -1,7 +1,5 @@
 FROM ruby:2.4.3
 
-RUN bundle config --global frozen 1
-
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
