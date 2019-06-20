@@ -148,6 +148,27 @@ module Geminabox
 
     end
 
+    delete '/api/v1/gems/yank' do
+      unless self.class.allow_delete?
+        error_response(403, 'Gem deletion is disabled')
+      end
+
+      halt 400 unless request.form_data?
+
+      serialize_update do
+        gems = load_gems.select { |gem| request['gem_name'] == gem.name and
+                                  request['version'] == gem.number.version }
+        halt 404, 'Gem not found' if gems.size == 0
+        gems.each do |gem|
+          gem_path = File.expand_path(File.join(Geminabox.data, 'gems',
+                                                "#{gem.gemfile_name}.gem"))
+          File.delete gem_path if File.exists? gem_path
+        end
+        self.class.reindex(:force_rebuild)
+        return 200, 'Yanked gem and reindexed'
+      end
+    end
+
     post '/upload' do
       unless self.class.allow_upload?
         error_response(403, 'Gem uploading is disabled')
