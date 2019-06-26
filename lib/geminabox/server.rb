@@ -1,4 +1,5 @@
 require 'reentrant_flock'
+require 'rubygems/util'
 
 module Geminabox
 
