@@ -22,8 +22,8 @@ module Geminabox
       def test_spliced_file_created_from_remote
         test_create
         assert_equal(
-          Marshal.load(Gem.gunzip remote_content),
-          Marshal.load(Gem.gunzip File.read(splice.splice_path))
+          Marshal.load(Gem::Util.gunzip remote_content),
+          Marshal.load(Gem::Util.gunzip File.read(splice.splice_path))
         )
       end
 
@@ -32,8 +32,8 @@ module Geminabox
         create_local_content
         test_create
         assert_equal(
-          Marshal.load(Gem.gunzip merged_content),
-          Marshal.load(Gem.gunzip File.read(splice.splice_path))
+          Marshal.load(Gem::Util.gunzip merged_content),
+          Marshal.load(Gem::Util.gunzip File.read(splice.splice_path))
         )
       end
 
@@ -92,7 +92,7 @@ module Geminabox
       end
 
       def remote_content
-        @remote_content ||= Gem.gzip(Marshal.dump(raw_remote_content))
+        @remote_content ||= Gem::Util.gzip(Marshal.dump(raw_remote_content))
       end
 
       def raw_remote_content
@@ -100,7 +100,7 @@ module Geminabox
       end
 
       def local_content
-        @local_content ||= Gem.gzip(Marshal.dump(raw_local_content))
+        @local_content ||= Gem::Util.gzip(Marshal.dump(raw_local_content))
       end
 
       def raw_local_content
@@ -108,7 +108,7 @@ module Geminabox
       end
 
       def merged_content
-        @merged_content ||= Gem.gzip(Marshal.dump(raw_local_content | raw_remote_content))
+        @merged_content ||= Gem::Util.gzip(Marshal.dump(raw_local_content | raw_remote_content))
       end
 
       def create_local_content

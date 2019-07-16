@@ -1,5 +1,6 @@
 require 'tempfile'
 require 'fileutils'
+require 'rubygems/util'
 
 module Geminabox
   module Proxy
@@ -65,11 +66,11 @@ module Geminabox
       end
 
       def unpackage(content)
-        Marshal.load(Gem.gunzip(content))
+        Marshal.load(Gem::Util.gunzip(content))
       end
 
       def package(content)
-        Gem.gzip(Marshal.dump(content))
+        Gem::Util.gzip(Marshal.dump(content))
       end
 
       def merge_text_content
