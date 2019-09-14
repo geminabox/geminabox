@@ -1,42 +1,41 @@
-<p>
-<a href="/">Back to Gem Index</a>
-</p>
+<div class="container mt-3">
+  <div class="row justify-content-md-center">
+    <div class="col-6 ml-3">
+        <% @gem.by_name do |name, versions| %>
+          <div class="card">
+            <div class="card-body">
+              <h2 class="card-title"><%= name %> (<%= versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}" %>)</h2>
+              <% versions.each.reverse_each do |version| %>
+                <p>
+                <code>gem install <%= version.name %> <%= "--prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= version.number %>"</code>
+                <% unless version.platform =~ /^ruby/i %>
+                  <small class="platform"><%= version.platform %></small>
+                <% end %>
+                </p>
+                <div class="btn-group">
+                  <a class="btn btn-sm btn-primary" href="<%= url("/gems/#{version.gemfile_name}.gem") %>">download</a>
+                  <% if @allow_delete %>
+                  <a href="<%= url("/gems/#{version.gemfile_name}.gem") %>" class="btn btn-sm btn-danger rest-delete force-white">delete</a>
+                  <% end %>
+                </div>
+              <% end %>
 
-<ul class="gemlist">
-  <% @gem.by_name do |name, versions| %>
-    <li class="gem-version">
-      <h2><%= name %> (<%= versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}" %>)</h2>
-      <% versions.each.reverse_each do |version| %>
-        <p>
-        <code>gem install <%= version.name %> <%= "--prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= version.number %>"</code>
-        <% unless version.platform =~ /^ruby/i %>
-          <small class="platform"><%= version.platform %></small>
+              <div class="details">
+                <p>
+                <% newest_gem = versions.newest %>
+                <% if spec = spec_for(name, newest_gem.number, newest_gem.platform) %>
+                  <%= spec.description %>
+                  <br/>
+                  <span class="author">– <%= spec.authors.map do |author|
+                    "<a href='#{href(spec.homepage)}'>#{author}</a>"
+                  end.join(', ') %></span>
+                <% end %>
+                </p>
+              </div>
+            </div>
+
+          </div>
         <% end %>
-        </p>
-        <div class="delete-form">
-          <a class="download" href="<%= url("/gems/#{version.gemfile_name}.gem") %>">download</a>
-          <% if @allow_delete %>
-          <form method="post" action="<%= url("/gems/#{version.gemfile_name}.gem") %>">
-            <input type="hidden" name="_method" value="DELETE" />
-            <button type="submit">delete</button>
-          </form>
-          <% end %>
-        </div>
-      <% end %>
-
-      <div class="details">
-        <p>
-        <% newest_gem = versions.newest %>
-        <% if spec = spec_for(name, newest_gem.number, newest_gem.platform) %>
-          <%= spec.description %>
-          <br/>
-          <span class="author">– <%= spec.authors.map do |author|
-            "<a href='#{href(spec.homepage)}'>#{author}</a>"
-          end.join(', ') %></span>
-        <% end %>
-        </p>
-      </div>
-
-    </li>
-  <% end %>
-</ul>
+    </div>
+  </div>
+</div>

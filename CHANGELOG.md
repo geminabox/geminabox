@@ -1,3 +1,9 @@
+# 1.1.2 (2019-09-13)
+
+Enhancements:
+
+* Updated UI to Boostrap 4 (thanks to Andrei Merlescu)
+
 # 1.1.1 (2018-11-08)
 
 Fixes:
