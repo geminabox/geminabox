@@ -2,15 +2,37 @@
 <html>
   <head>
     <title>Gem in a Box</title>
+    <link rel="stylesheet" href="<%= url "/bootstrap.css", false %>" type="text/css" media="screen">
+    <link rel="stylesheet" href="<%= url "/datatables.css", false %>" type="text/css" media="screen">
     <link rel="stylesheet" href="<%= url "/master.css", false %>" type="text/css" media="screen">
     <link href="<%= url "/atom.xml", false %>" type="application/atom+xml" rel="alternate" title="Atom Feed">
   </head>
   <body>
-    <div id="content">
-      <h1>Gem in a Box</h1>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <a class="navbar-brand" href="#">Gem in a Box</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="navbar-item">
+          <a class="nav-link" href="<%= url("/upload") %>">Upload Gem</a>
+        </li>
+      </ul>
+    </nav>
+    <div class="container-fluid">
       <%= yield %>
     </div>
     <script type="text/javascript" src="<%= url "/jquery.js", false %>"></script>
+    <script type="text/javascript" src="<%= url "/popper.js", false %>"></script>
+    <script type="text/javascript" src="<%= url "/bootstrap.js", false %>"></script>
+    <script type="text/javascript" src="<%= url "/datatables.js", false %>"></script>
+    <script type="text/javascript" src="<%= url "/datatables.bootstrap4.js", false %>"></script>
+    <script type="text/javascript" src="<%= url "/restfulizer.js", false %>"></script>
     <script type="text/javascript" src="<%= url "/master.js", false %>"></script>
   </body>
 </html>

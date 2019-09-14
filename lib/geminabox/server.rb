@@ -160,9 +160,8 @@ module Geminabox
         gems = load_gems.select { |gem| request['gem_name'] == gem.name and
                                   request['version'] == gem.number.version }
         halt 404, 'Gem not found' if gems.size == 0
-        gems.each do |gem|
-          gem_path = File.expand_path(File.join(Geminabox.data, 'gems',
-                                                "#{gem.gemfile_name}.gem"))
+        gems.each do |g|
+          gem_path = File.expand_path(File.join(Geminabox.data, 'gems', "#{g.gemfile_name}.g" ))
           File.delete gem_path if File.exists? gem_path
         end
         self.class.reindex(:force_rebuild)
@@ -177,7 +176,7 @@ module Geminabox
 
       if params[:file] && params[:file][:filename] && (tmpfile = params[:file][:tempfile])
         serialize_update do
-          handle_incoming_gem(Geminabox::IncomingGem.new(tmpfile))
+          handle_incoming_gem(Geminabox::IncomingGem.new(tmpfile), true)
         end
       else
         @error = "No file selected"
@@ -192,7 +191,7 @@ module Geminabox
 
       begin
         serialize_update do
-          handle_incoming_gem(Geminabox::IncomingGem.new(request.body))
+          handle_incoming_gem(Geminabox::IncomingGem.new(request.body), false)
         end
       rescue Object => o
         File.open "/tmp/debug.txt", "a" do |io|
@@ -213,28 +212,28 @@ module Geminabox
       self.class.with_rlock(&block)
     end
 
-    def handle_incoming_gem(gem)
+    def handle_incoming_gem(g, redirect=false)
       begin
-        GemStore.create(gem, params[:overwrite])
+        GemStore.create(g, params[:overwrite])
       rescue GemStoreError => error
         error_response error.code, error.reason
       end
 
       begin
-        Geminabox.on_gem_received.call(gem) if Geminabox.on_gem_received
+        Geminabox.on_gem_received.call(g) if Geminabox.on_gem_received
       rescue
         # ignore errors which occur within the hook
       end
 
-      if api_request?
-        "Gem #{gem.name} received and indexed."
+      if redirect == false
+        "Gem #{g.name} received and indexed."
       else
         redirect url("/")
       end
     end
 
     def api_request?
-      request.accept.first.to_s != "text/html"
+      request.accept.include?("text/html")
     end
 
     def error_response(code, message)

@@ -1,5 +1,7 @@
 FROM ruby:2.4.3
 
+RUN gem install bundler
+
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
