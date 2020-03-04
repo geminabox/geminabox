@@ -1,3 +1,19 @@
+# 1.2.0 (2020-03-05)
+
+Enhancements:
+
+* Support gemcutter yank API (thanks to Chuck Wilson)
+
+Fixes:
+
+* Fix dockerfile (thanks to Chuck Wilson)
+
+Maintenances:
+
+* Gem.gzip/gunzip are deprecated. Use Gem::Util.gzip/gunzip (thanks to krororo)
+* Fix deprecation warning of Gem::Specification#has_rdoc (thanks to krororo)
+* Update .travis.yml (thanks to krororo)
+
 # 1.1.1 (2018-11-08)
 
 Fixes:
