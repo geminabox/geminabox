@@ -312,7 +312,7 @@ HTML
     end
 
     def combined_gem_list
-      GemListMerge.from(local_gem_list, remote_gem_list)
+      GemListMerge.merge(local_gem_list, remote_gem_list, strategy: Geminabox.rubygems_proxy_merge_strategy)
     end
 
     helpers do
