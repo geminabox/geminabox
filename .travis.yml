@@ -6,6 +6,8 @@ rvm:
   - 2.4.6
   - 2.5.4
   - 2.6.2
+  - 2.7.2
+  - 3.0.0
 
 before_install:
   - gem update --system $gemver
