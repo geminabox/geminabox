@@ -46,6 +46,7 @@ module Geminabox
       :gem_permissions,
       :allow_delete,
       :rubygems_proxy,
+      :rubygems_proxy_merge_strategy,
       :http_adapter,
       :lockfile,
       :retry_interval,
@@ -73,23 +74,24 @@ module Geminabox
   end
 
   set_defaults(
-    data:                  File.join(File.dirname(__FILE__), *%w[.. data]),
-    public_folder:         File.join(File.dirname(__FILE__), *%w[.. public]),
-    build_legacy:          false,
-    incremental_updates:   true,
-    views:                 File.join(File.dirname(__FILE__), *%w[.. views]),
-    allow_replace:         false,
-    gem_permissions:       0644,
-    rubygems_proxy:        (ENV['RUBYGEMS_PROXY'] == 'true'),
-    allow_delete:          true,
-    http_adapter:          HttpClientAdapter.new,
-    lockfile:              '/tmp/geminabox.lockfile',
-    retry_interval:        60,
-    allow_remote_failure:  false,
-    ruby_gems_url:         'https://rubygems.org/',
-    bundler_ruby_gems_url: 'https://bundler.rubygems.org/',
-    allow_upload:          true,
-    on_gem_received:       nil
+    data:                           File.join(File.dirname(__FILE__), *%w[.. data]),
+    public_folder:                  File.join(File.dirname(__FILE__), *%w[.. public]),
+    build_legacy:                   false,
+    incremental_updates:            true,
+    views:                          File.join(File.dirname(__FILE__), *%w[.. views]),
+    allow_replace:                  false,
+    gem_permissions:                0644,
+    rubygems_proxy:                 (ENV['RUBYGEMS_PROXY'] == 'true'),
+    rubygems_proxy_merge_strategy:  ENV.fetch('RUBYGEMS_PROXY_MERGE_STRATEGY') { :local_gems_take_precedence_over_remote_gems }.to_sym,
+    allow_delete:                   true,
+    http_adapter:                   HttpClientAdapter.new,
+    lockfile:                       '/tmp/geminabox.lockfile',
+    retry_interval:                 60,
+    allow_remote_failure:           false,
+    ruby_gems_url:                  'https://rubygems.org/',
+    bundler_ruby_gems_url:          'https://bundler.rubygems.org/',
+    allow_upload:                   true,
+    on_gem_received:                nil
   )
     
 end
