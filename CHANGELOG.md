@@ -1,3 +1,9 @@
+# 1.3.0 (2021-03-18)
+
+Enhancements:
+
+* Prevent "dependency confusion" resulting in a malicious upstream gem taking precedence over a local gem
+
 # 1.2.0 (2020-03-05)
 
 Enhancements:
