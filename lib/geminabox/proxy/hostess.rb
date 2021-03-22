@@ -48,24 +48,11 @@ module Geminabox
       end
 
       get "/gems/*.gem" do
-        get_from_rubygems_if_not_local
+        copy_file request.path_info[1..-1]
         serve
       end
 
       private
-      def get_from_rubygems_if_not_local
-
-        file = File.expand_path(File.join(Geminabox.data, *request.path_info))
-
-        unless File.exist?(file)
-          ruby_gems_url = Geminabox.ruby_gems_url
-          path = File.join(ruby_gems_url, *request.path_info)
-          content = Geminabox.http_adapter.get_content(path)
-          GemStore.create(IncomingGem.new(StringIO.new(content)))
-        end
-
-      end
-
       def splice_file(file_name)
         self.file_handler = Splicer.make(file_name)
       end
