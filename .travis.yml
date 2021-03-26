@@ -12,4 +12,4 @@ before_install:
   - gem --version
 
 env:
-  - gemver=2.7.9 TMPDIR=/tmp
+  - gemver: 2.7.9
