@@ -13,3 +13,4 @@ before_install:
 
 env:
   - gemver: 2.7.9
+  - TMDIR: '/tmp'
