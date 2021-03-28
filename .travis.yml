@@ -15,3 +15,13 @@ before_install:
 
 env:
   - gemver: 2.7.9
+  - gemver: 3.2.3
+
+jobs:
+  exclude:
+    # rubygems-update v3.0.0+ requires ruby 2.3.0+
+    - rvm: 2.2.10
+      env: gemver=3.2.3
+
+    - rvm: 3.0.0
+      env: gemver=2.7.9
