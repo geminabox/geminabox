@@ -120,7 +120,16 @@ class Geminabox::TestCase < Minitest::Test
   end
 
   def without_bundler
-    defined?(Bundler) ? Bundler.with_clean_env { yield } : yield
+    if defined?(Bundler)
+      if Bundler.respond_to?(:with_unbundled_env)
+        Bundler.with_unbundled_env { yield }
+      else
+        # NOTE: Bundler.with_clean_env is deprecated since bundler v2
+        Bundler.with_clean_env { yield }
+      end
+    else
+      yield
+    end
   end
 
   def execute(command)
