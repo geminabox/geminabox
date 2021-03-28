@@ -1,5 +1,5 @@
 language: ruby
-bundler_args: --without development
+bundler_args: --without development --path vendor/bundle
 rvm:
   - 2.2.10
   - 2.3.8
