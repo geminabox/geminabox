@@ -206,7 +206,7 @@ module Geminabox
     def serialize_update(&block)
       with_rlock(&block)
     rescue ReentrantFlock::AlreadyLocked
-      halt 503, { 'Retry-After' => Geminabox.retry_interval }, 'Repository lock is held by another process'
+      halt 503, { 'Retry-After' => Geminabox.retry_interval.to_s }, 'Repository lock is held by another process'
     end
 
     def with_rlock(&block)
