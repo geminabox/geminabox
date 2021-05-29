@@ -1,3 +1,9 @@
+# 1.4.0 (2021-05-30)
+
+Enhancements:
+
+* Support ruby 3.0 (thanks to sue445)
+
 # 1.3.1 (2021-05-30)
 
 Fixes:
