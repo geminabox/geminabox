@@ -1,3 +1,10 @@
+# 1.4.1 (2021-05-30)
+
+Fixes:
+
+* Fix rendering of 503 error when lock is still held (thanks to NobodysNightmare)
+* Use environmental TMPDIR for lockfile, and add 'rss' as dependency. (thanks to jubishop)
+
 # 1.4.0 (2021-05-30)
 
 Enhancements:
