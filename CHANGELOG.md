@@ -1,3 +1,9 @@
+# 1.3.1 (2021-05-30)
+
+Fixes:
+
+* Avoid possible XSS vulnerability on each view (thanks to @ooooooo-q)
+
 # 1.3.0 (2021-03-18)
 
 Enhancements:
