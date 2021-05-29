@@ -10,12 +10,12 @@
   <% newest_gem = versions.newest %>
     <% spec = spec_for(name, newest_gem.number, newest_gem.platform) %>
     <entry>
-      <id><%= name %></id>
+      <id><%= h(name) %></id>
       <updated><%= spec.date.w3cdtf %></updated>
-      <title><%= name %> (<%= versions.size == 1 ? versions.oldest.number : "#{versions.oldest.number} - #{versions.newest.number}" %>)</title>
-      <author><name><%= spec.authors.join(", ") %></name></author>
+      <title><%= h(name) %> (<%= h(versions.size == 1 ? versions.oldest.number : "#{versions.oldest.number} - #{versions.newest.number}") %>)</title>
+      <author><name><%= h(spec.authors.join(", ")) %></name></author>
       <% versions.each do |version| %>
-        <link href="<%= url "/gems/#{version.gemfile_name}.gem" %>" />
+        <link href="<%= h(url "/gems/#{version.gemfile_name}.gem") %>" />
       <% end %>
     </entry>
   <% end %>

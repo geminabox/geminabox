@@ -18,16 +18,16 @@
 
     <% @gems.by_name do |name, versions| %>
       <li <%= %{id="jump_#{name[0..0].downcase}"} if @index_gems.delete(name[0..0].downcase) %> class="gem-version">
-        <h2><%= name %> (<%= versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}" %>)</h2>
+        <h2><%= h(name) %> (<%= h(versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}") %>)</h2>
         <% versions.each.reverse_each.first(5).each do |version| %>
           <p>
-            <code>gem install <%= version.name %> <%= "--prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= version.number %>"</code>
+            <code>gem install <%= h(version.name) %> <%= "--prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= h(version.number) %>"</code>
             <% unless version.platform =~ /^ruby/i %>
-              <small class="platform"><%= version.platform %></small>
+              <small class="platform"><%= h(version.platform) %></small>
             <% end %>
           </p>
-          <form class="delete-form" method="post" action="<%= url("/gems/#{version.gemfile_name}.gem") %>">
-            <a class="download" href="<%= url("/gems/#{version.gemfile_name}.gem") %>">download</a>
+          <form class="delete-form" method="post" action="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">
+            <a class="download" href="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">download</a>
             <% if @allow_delete %>
             <input type="hidden" name="_method" value="DELETE" />
             <button type="submit">delete</button>
@@ -36,17 +36,17 @@
         <% end %>
 
         <% if versions.count > 5 %>
-          <a href="<%= url("/gems/#{name}") %>" id="more_link">Older versions...</a>
+          <a href="<%= h(url("/gems/#{name}")) %>" id="more_link">Older versions...</a>
         <% end %>
 
         <div class="details">
           <p>
             <% newest_gem = versions.newest %>
             <% if spec = spec_for(name, newest_gem.number, newest_gem.platform) %>
-              <%= spec.description %>
+              <%= h(spec.description) %>
               <br/>
               <span class="author">– <%= spec.authors.map do |author|
-                "<a href='#{href(spec.homepage)}'>#{author}</a>"
+                "<a href='#{href(spec.homepage)}'>#{h(author)}</a>"
               end.join(', ') %></span>
             <% end %>
           </p>
