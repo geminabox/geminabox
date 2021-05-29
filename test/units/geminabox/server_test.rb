@@ -101,7 +101,7 @@ module Geminabox
         @server.send(:serialize_update){}
         expected_args = [
           503,
-          {'Retry-After' => Geminabox.retry_interval},
+          { 'Retry-After' => Geminabox.retry_interval.to_s },
           'Repository lock is held by another process'
         ]
         assert_equal expected_args, @server.args
