@@ -35,6 +35,10 @@ module Geminabox
       @gems.each(&block)
     end
 
+    def list
+      @gems.map(&:name).sort
+    end
+
     # The collection can contain gems of different names, this method groups them
     # by name, and then sorts the different version of each name by version and
     # platform.
