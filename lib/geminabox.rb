@@ -28,12 +28,16 @@ module Geminabox
   autoload :GemStore,               geminabox_path('gem_store')
   autoload :GemStoreError,          geminabox_path('gem_store_error')
   autoload :RubygemsDependency,     geminabox_path('rubygems_dependency')
+  autoload :RubygemsVersions,       geminabox_path('rubygems_versions')
+  autoload :RubygemsInfo,           geminabox_path('rubygems_info')
   autoload :GemListMerge,           geminabox_path('gem_list_merge')
+  autoload :GemVersionsMerge,       geminabox_path('gem_versions_merge')
   autoload :GemVersion,             geminabox_path('gem_version')
   autoload :GemVersionCollection,   geminabox_path('gem_version_collection')
   autoload :Server,                 geminabox_path('server')
   autoload :DiskCache,              geminabox_path('disk_cache')
   autoload :IncomingGem,            geminabox_path('incoming_gem')
+  autoload :CompactIndexer,         geminabox_path('compact_indexer')
 
   class << self
 
@@ -47,6 +51,7 @@ module Geminabox
       :allow_delete,
       :rubygems_proxy,
       :rubygems_proxy_merge_strategy,
+      :index_format,
       :http_adapter,
       :lockfile,
       :retry_interval,
@@ -91,6 +96,7 @@ module Geminabox
     gem_permissions:                0644,
     rubygems_proxy:                 (ENV['RUBYGEMS_PROXY'] == 'true'),
     rubygems_proxy_merge_strategy:  ENV.fetch('RUBYGEMS_PROXY_MERGE_STRATEGY') { :local_gems_take_precedence_over_remote_gems }.to_sym,
+    index_format:                   true,
     allow_delete:                   true,
     http_adapter:                   HttpClientAdapter.new,
     lockfile:                       File.join(ENV.fetch('TMPDIR', Dir.tmpdir), 'geminabox.lockfile'),
