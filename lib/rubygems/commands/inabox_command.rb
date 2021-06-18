@@ -74,7 +74,7 @@ class Gem::Commands::InaboxCommand < Gem::Command
   def configure
     say "Enter the root url for your personal geminabox instance (e.g. http://gems/)."
     host = ask("Host:")
-    self.geminabox_host = host
+    self.geminabox_host = host.strip
   end
 
   def geminabox_host
