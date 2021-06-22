@@ -7,7 +7,6 @@ Gem::Specification.new do |s|
   s.email             = 'contrib@tomlea.co.uk'
   s.homepage          = 'http://tomlea.co.uk/p/gem-in-a-box'
 
-  s.has_rdoc          = true
   s.extra_rdoc_files  = %w[README.markdown]
   s.rdoc_options      = %w[--main README.markdown]
 
