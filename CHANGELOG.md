@@ -1,3 +1,7 @@
+Enhancements:
+
+* Improve performance by using frozen string literals
+
 # 1.4.1 (2021-05-30)
 
 Fixes:

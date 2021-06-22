@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Geminabox
 
   # This class represents a sorted collection of Geminabox::GemVersion objects.

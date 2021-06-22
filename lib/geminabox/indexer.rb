@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 # This module addresses Geminabox issue
 # https://github.com/cwninja/geminabox/issues/70
