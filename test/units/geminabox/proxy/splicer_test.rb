@@ -23,7 +23,7 @@ module Geminabox
         test_create
         assert_equal(
           Marshal.load(Gem::Util.gunzip remote_content),
-          Marshal.load(Gem::Util.gunzip File.read(splice.splice_path))
+          Marshal.load(Gem::Util.gunzip File.binread(splice.splice_path))
         )
       end
 
@@ -33,7 +33,7 @@ module Geminabox
         test_create
         assert_equal(
           Marshal.load(Gem::Util.gunzip merged_content),
-          Marshal.load(Gem::Util.gunzip File.read(splice.splice_path))
+          Marshal.load(Gem::Util.gunzip File.binread(splice.splice_path))
         )
       end
 
@@ -41,8 +41,8 @@ module Geminabox
         create_local_content
         test_create
         assert_equal(
-          local_content.force_encoding("UTF-8").to_s + remote_content.force_encoding("UTF-8").to_s,
-          File.read(splice.splice_path)
+          local_content.to_s + remote_content.to_s,
+          File.binread(splice.splice_path)
         )
       end
 
@@ -112,7 +112,7 @@ module Geminabox
       end
 
       def create_local_content
-        File.open(splice.local_path, 'w'){|f| f.write(local_content)}
+        File.open(splice.local_path, 'wb'){|f| f.write(local_content)}
       end
 
       def stub_request_for_file(file_name)
