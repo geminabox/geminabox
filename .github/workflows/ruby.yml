@@ -12,22 +12,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby-version: [2.3.8, 2.4.6, 2.5.4, 2.6.2, 2.7.2, '3.0.0']
-        gem-version: [3.2.3]
+        ruby-version: [2.3.8, 2.4.10, 2.5.9, 2.6.10, 2.7.6, 3.0.4, 3.1.2]
+        gem-version: [3.3.15]
         include:
           - ruby-version: 2.2.10
-            gem-version: 2.7.9
+            gem-version: 2.7.11
           - ruby-version: 2.3.8
-            gem-version: 2.7.9
-          - ruby-version: 2.4.6
-            gem-version: 2.7.9
-          - ruby-version: 2.5.4
-            gem-version: 2.7.9
+            gem-version: 2.7.11
+          - ruby-version: 2.4.10
+            gem-version: 2.7.11
+          - ruby-version: 2.5.9
+            gem-version: 2.7.11
 
     steps:
     - uses: actions/checkout@v2
     - name: Set up Ruby
-      uses: ruby/setup-ruby@477b21f02be01bcb8030d50f37cfec92bfa615b6
+      uses: ruby/setup-ruby@v1.110.0
       with:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true
