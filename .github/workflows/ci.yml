@@ -1,0 +1,54 @@
+name: ci
+
+on:
+  pull_request:
+
+  push:
+    branches:
+      - master
+
+jobs:
+  ci:
+    name: Run tests
+
+    runs-on: ubuntu-20.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby:
+          - 2.3.8
+          - 2.4.6
+          - 2.5.4
+          - 2.6.2
+          - 2.7.2
+          - 3.0.0
+
+        gemver:
+          - 2.7.9
+          - 3.2.3
+
+        exclude:
+          - ruby: 3.0.0
+            gemver: 2.7.9
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler: none
+
+      - name: Install rubygems
+        run: gem update --system ${{ matrix.gemver }}
+
+      - name: Check rubygems version
+        run: gem --version
+
+      - name: Install dependencies
+        run: bundle install --without development --path vendor/bundle
+
+      - name: Run tests
+        run: bundle exec rake
