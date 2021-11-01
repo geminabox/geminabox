@@ -5,6 +5,7 @@ on:
 
   push:
     branches:
+      - github_actions
       - master
 
 jobs:
