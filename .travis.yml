@@ -1,7 +1,6 @@
 language: ruby
 bundler_args: --without development --path vendor/bundle
 rvm:
-  - 2.2.10
   - 2.3.8
   - 2.4.6
   - 2.5.4
@@ -19,9 +18,5 @@ env:
 
 jobs:
   exclude:
-    # rubygems-update v3.0.0+ requires ruby 2.3.0+
-    - rvm: 2.2.10
-      env: gemver=3.2.3
-
     - rvm: 3.0.0
       env: gemver=2.7.9
