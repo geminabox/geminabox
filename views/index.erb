@@ -1,8 +1,8 @@
 <p>
 <small>If you did not need any credentials to get to this page</small>
-  <pre><code>gem sources -a <%= url "/" %></code></pre>
+  <pre><code>gem sources -a <%= url "#{@base_path}/" %></code></pre>
 <small>If you needed some credentials to get to this page</small>
-  <pre><code>gem sources -a <%= url.to_s.gsub('://','://username:password@') %></code></pre>
+  <pre><code>gem sources -a <%= "#{url.to_s.gsub('://','://username:password@')}#{@base_path.gsub(/^\//,'')}/" %></code></pre>
 <% if @allow_upload %>
 <small>and then ...</small>
   <pre><code>gem install geminabox<br />gem inabox [gemfile]</code></pre>
@@ -10,7 +10,7 @@
 </p>
 
 <% if @gems.any? %>
-  <% if @allow_upload %><a href="<%= url("/upload") %>">Upload Another Gem</a><% end %>
+  <% if @allow_upload %><a href="<%= url("#{@base_path}/upload") %>">Upload Another Gem</a><% end %>
 
   <div id="alpha_index"><%= ("a".."z").map{|i| @index_gems.include?(i) ? "<a href='#jump_#{i}'>#{i}</a>" : i }.join(" - ") %></div>
 
@@ -26,8 +26,8 @@
               <small class="platform"><%= h(version.platform) %></small>
             <% end %>
           </p>
-          <form class="delete-form" method="post" action="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">
-            <a class="download" href="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">download</a>
+          <form class="delete-form" method="post" action="<%= h(url("#{@base_path}/gems/#{version.gemfile_name}.gem")) %>">
+            <a class="download" href="<%= h(url("#{@base_path}/gems/#{version.gemfile_name}.gem")) %>">download</a>
             <% if @allow_delete %>
             <input type="hidden" name="_method" value="DELETE" />
             <button type="submit">delete</button>
@@ -36,7 +36,7 @@
         <% end %>
 
         <% if versions.count > 5 %>
-          <a href="<%= h(url("/gems/#{name}")) %>" id="more_link">Older versions...</a>
+          <a href="<%= h(url("#{@base_path}/gems/#{name}")) %>" id="more_link">Older versions...</a>
         <% end %>
 
         <div class="details">
@@ -57,6 +57,6 @@
   </ul>
 <% end %>
 
-<% if @allow_upload %><a href="<%= url("/upload") %>">Upload Another Gem</a><% end %>
+<% if @allow_upload %><a href="<%= url("#{@base_path}/upload") %>">Upload Another Gem</a><% end %>
 
-<script type="text/javascript" src="<%= url "/master.js", false %>"></script>
+<script type="text/javascript" src="<%= url "#{@base_path}/master.js", false %>"></script>

@@ -2,8 +2,9 @@
 <html>
   <head>
     <title>Gem in a Box</title>
-    <link rel="stylesheet" href="<%= url "/master.css", false %>" type="text/css" media="screen">
-    <link href="<%= url "/atom.xml", false %>" type="application/atom+xml" rel="alternate" title="Atom Feed">
+    <link rel="shortcut icon" href="<%= url "#{@base_path}/favicon.ico" %>" type="image/vnd.microsoft.icon" />
+    <link rel="stylesheet" href="<%= url "#{@base_path}/master.css", false %>" type="text/css" media="screen">
+    <link href="<%= url "#{@base_path}/atom.xml", false %>" type="application/atom+xml" rel="alternate" title="Atom Feed">
   </head>
   <body>
     <div id="content">

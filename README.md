@@ -40,6 +40,52 @@ Create a config.ru as follows:
 
 Start your gem server with 'rackup' to run WEBrick or hook up the config.ru as you normally would ([passenger](https://www.phusionpassenger.com/), [thin](http://code.macournoyer.com/thin/), [unicorn](https://bogomips.org/unicorn/), whatever floats your boat).
 
+## Reverse proxy
+
+Proxing geminabox through services like Nginx requires additional configuration.
+
+### Nginx
+
+```conf
+server {
+    server_name domain;
+    listen 80;
+    listen [::]:80;
+    access_log /var/log/nginx/reverse-access.log;
+    error_log /var/log/nginx/reverse-error.log;
+
+    client_max_body_size 50m; # maximum artifact upload size
+
+    location / {
+        proxy_pass http://127.0.0.1:9292;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+    }
+}
+```
+
+To use custom base path (e.g. /ruby), modify the nginx configuration just like this:
+
+```conf
+    location /ruby/ {
+        proxy_pass http://127.0.0.1:9292/;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+    }
+```
+
+And update the base path in config.ru configuration:
+
+```conf
+Geminabox.base_path = '/ruby'
+```
+
 ## RubyGems Proxy
 
 Geminabox can be configured to pull gems, it does not currently have, from rubygems.org. To enable this mode you can either:

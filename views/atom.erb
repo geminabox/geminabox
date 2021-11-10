@@ -2,10 +2,10 @@
 
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>Gem in a Box</title>
-  <link href="<%= url '/atom.xml' %>" rel="self" />
-  <link href="<%= url '/' %>" />
+  <link href="<%= url "#{@base_path}/atom.xml" %>" rel="self" />
+  <link href="<%= url "#{@base_path}/" %>" />
   <author><name>Gem in a Box</name></author>
-  <id><%= url '/atom.xml' %></id>
+  <id><%= url "#{@base_path}/atom.xml" %></id>
   <% @gems.by_name do |name, versions| %>
   <% newest_gem = versions.newest %>
     <% spec = spec_for(name, newest_gem.number, newest_gem.platform) %>
@@ -15,7 +15,7 @@
       <title><%= h(name) %> (<%= h(versions.size == 1 ? versions.oldest.number : "#{versions.oldest.number} - #{versions.newest.number}") %>)</title>
       <author><name><%= h(spec.authors.join(", ")) %></name></author>
       <% versions.each do |version| %>
-        <link href="<%= h(url "/gems/#{version.gemfile_name}.gem") %>" />
+        <link href="<%= h(url "#{@base_path}/gems/#{version.gemfile_name}.gem") %>" />
       <% end %>
     </entry>
   <% end %>
