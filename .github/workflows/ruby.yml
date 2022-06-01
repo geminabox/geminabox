@@ -1,0 +1,41 @@
+name: Ruby
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version: [2.3.8, 2.4.6, 2.5.4, 2.6.2, 2.7.2, '3.0.0']
+        gem-version: [3.2.3]
+        include:
+          - ruby-version: 2.2.10
+            gem-version: 2.7.9
+          - ruby-version: 2.3.8
+            gem-version: 2.7.9
+          - ruby-version: 2.4.6
+            gem-version: 2.7.9
+          - ruby-version: 2.5.4
+            gem-version: 2.7.9
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@477b21f02be01bcb8030d50f37cfec92bfa615b6
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+        bundler-cache: true
+    - name: Use RubyGems with the specific version
+      env:
+        gemver: ${{ matrix.gem-version }}
+      run: |
+        gem update --system $gemver
+        gem --version
+    - name: Run tests
+      run: bundle exec rake

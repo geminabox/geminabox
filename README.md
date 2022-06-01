@@ -1,5 +1,5 @@
 # Gem in a Box – Really simple rubygem hosting
-[![Build Status](https://secure.travis-ci.org/geminabox/geminabox.png)](http://travis-ci.org/geminabox/geminabox)
+[![Ruby](https://github.com/tnir/geminabox/actions/workflows/ruby.yml/badge.svg)](https://github.com/geminabox/geminabox/actions/workflows/ruby.yml?query=branch%3Amaster)
 [![Gem Version](https://badge.fury.io/rb/geminabox.png)](http://badge.fury.io/rb/geminabox)
 [![Code Climate](https://codeclimate.com/github/geminabox/geminabox/badges/gpa.svg)](https://codeclimate.com/github/geminabox/geminabox)
 
@@ -12,7 +12,7 @@ For basic auth, try [Rack::Auth](http://www.rubydoc.info/github/rack/rack/Rack/A
 
 ## System Requirements
 
-See [.travis.yml](./.travis.yml) for supported ruby versions
+See [.github/workflows/ruby.yml](.github/workflows/ruby.yml) for supported ruby versions
 
 ## Server Setup
 
