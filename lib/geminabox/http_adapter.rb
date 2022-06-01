@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'http_adapter_config_error'
 
 module Geminabox

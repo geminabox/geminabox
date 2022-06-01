@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'reentrant_flock'
 require 'rubygems/util'
 

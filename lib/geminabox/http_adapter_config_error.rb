@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Geminabox
   class HttpAdapterConfigError < StandardError
     def initialize(method_name, returns)
