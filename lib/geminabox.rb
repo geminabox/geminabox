@@ -41,7 +41,6 @@ module Geminabox
     attr_accessor(
       :data,
       :public_folder,
-      :build_legacy,
       :incremental_updates,
       :views,
       :allow_replace,
@@ -58,6 +57,14 @@ module Geminabox
       :allow_upload,
       :on_gem_received
     )
+
+    attr_reader :build_legacy
+
+    def build_legacy=(value)
+      warn "Setting `Geminabox.build_legacy` is deprecated and will be removed in the future. Geminbox will always build modern indices"
+
+      @build_legacy = value
+    end
 
     def set_defaults(defaults)
       defaults.each do |method, default|

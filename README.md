@@ -37,12 +37,6 @@ Create a config.ru as follows:
 
 Start your gem server with 'rackup' to run WEBrick or hook up the config.ru as you normally would ([passenger](https://www.phusionpassenger.com/), [thin](http://code.macournoyer.com/thin/), [unicorn](https://bogomips.org/unicorn/), whatever floats your boat).
 
-## Legacy RubyGems index
-
-RubyGems supports generating indexes for the so called legacy versions (< 1.2), and since it is very rare to use such versions nowadays, it can be disabled, thus improving indexing times for large repositories. If it's safe for your application, you can disable support for these legacy versions by adding the following configuration to your config.ru file:
-
-    Geminabox.build_legacy = false
-
 ## RubyGems Proxy
 
 Geminabox can be configured to pull gems, it does not currently have, from rubygems.org. To enable this mode you can either:
