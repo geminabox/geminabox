@@ -7,6 +7,7 @@ Gemfile.lock
 vendor/bundle
 .rbenv-version
 test/fixtures/fake_home_path/.gem/specs
+test/fixtures/fake_home_path/.local/share/gem/specs
 .idea
 .rvmrc
 .ruby-*
