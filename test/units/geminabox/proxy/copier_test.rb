@@ -16,7 +16,7 @@ module Geminabox
             copier.get_remote
           rescue
           end
-          assert(!File.exists?(copier.proxy_path), "Cached file should not exist")
+          assert(!File.exist?(copier.proxy_path), "Cached file should not exist")
         end
       end
 
