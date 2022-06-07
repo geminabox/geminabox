@@ -27,7 +27,7 @@ module Geminabox
         faraday.adapter http_engine
         faraday.proxy(ENV['http_proxy']) if ENV['http_proxy']
       end
-      connection.basic_auth username, password if username
+      connection.request(:basic_auth, username, password) if username
       connection
     end
 
