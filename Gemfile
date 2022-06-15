@@ -13,7 +13,7 @@ group :test do
     gem 'capybara-mechanize'
     gem 'capybara', '~> 3.36.0' # Pin to 3.36.x
   else
-    gem 'capybara-mechanize', '1.10.0'
+    gem 'capybara-mechanize', '1.12.0'
   end
 
   # Pin multipart-post 2.1.x on Ruby 2.2 or earlier.
