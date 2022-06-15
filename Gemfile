@@ -16,5 +16,13 @@ group :test do
     gem 'capybara-mechanize', '1.10.0'
   end
 
+  # Pin multipart-post 2.1.x on Ruby 2.2 or earlier.
+  # You can remove this block when multipart-post 2.2.0 is yanked
+  # from RubyGems.org.
+  # https://github.com/socketry/multipart-post/issues/92#issuecomment-1147101121
+  if Gem::Version.create(RUBY_VERSION) < Gem::Version.create("2.3.0")
+    gem 'multipart-post', '~> 2.1.1'
+  end
+
   gem 'webmock'
 end
