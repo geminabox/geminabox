@@ -10,7 +10,7 @@ module Geminabox
       end
 
       def test_remote_content_failure
-        raise_stub = proc { puts caller.join("\n") ; raise }
+        raise_stub = proc { raise }
         copier.stub :remote_content, raise_stub do
           begin
             copier.get_remote
