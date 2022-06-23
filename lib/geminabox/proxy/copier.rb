@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 
 
 module Geminabox
@@ -26,7 +27,7 @@ module Geminabox
             File.open(proxy_path, 'w'){|f| f.write(rc) }
           end
         rescue
-          File.unlink(proxy_path) if File.exists?(proxy_path)
+          File.unlink(proxy_path) if File.exist?(proxy_path)
           raise $!
         end
       end

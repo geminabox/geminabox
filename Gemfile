@@ -9,12 +9,17 @@ group :test do
   gem 'rack-test'
   gem 'minitest'
 
-  if Gem::Version.create(RUBY_VERSION) >= Gem::Version.create("3.0.0")
-    # FIXME: test is failed on Ruby 3.0+
-    # c.f. https://github.com/jeroenvandijk/capybara-mechanize/issues/68
-    gem 'capybara-mechanize', github: 'tomstuart/capybara-mechanize', ref: '64073e9'
-  else
-    gem 'capybara-mechanize', '1.10.0'
+  gem 'capybara-mechanize'
+  # Pin capybara to 3.36.x or earlier as 3.37.x does not work with Ruby 2.7/3.0/3.1
+  # see https://github.com/teamcapybara/capybara/pull/2546
+  gem 'capybara', '< 3.37.0'
+
+  # Pin multipart-post 2.1.x on Ruby 2.2 or earlier.
+  # You can remove this block when multipart-post 2.2.0 is yanked
+  # from RubyGems.org.
+  # https://github.com/socketry/multipart-post/issues/92#issuecomment-1147101121
+  if Gem::Version.create(RUBY_VERSION) < Gem::Version.create("2.3.0")
+    gem 'multipart-post', '~> 2.1.1'
   end
 
   gem 'webmock'

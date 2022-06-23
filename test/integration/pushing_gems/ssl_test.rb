@@ -1,7 +1,7 @@
 require_relative '../../test_helper'
 
 class SSLTest < Geminabox::TestCase
-  url "https://127.0.0.1/"
+  url "https://localhost/"
   ssl true
   should_push_gem
   # test "s" do

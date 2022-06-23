@@ -1,0 +1,24 @@
+inherit_from: .rubocop_todo.yml
+
+AllCops:
+  TargetRubyVersion: 2.2
+  NewCops: enable
+  SuggestExtensions: false
+
+Layout/SpaceBeforeBlockBraces:
+  Exclude:
+    - 'lib/geminabox_client.rb'
+    - 'lib/geminabox/gem_version_collection.rb'
+    - 'lib/geminabox/proxy/copier.rb'
+    - 'lib/geminabox/server.rb'
+    - 'test/integration/web_interface/large_gem_list_test.rb'
+    - 'test/test_support/geminabox_test_case.rb'
+    - 'test/units/geminabox/disk_cache_test.rb'
+    - 'test/units/geminabox/gem_list_merge_test.rb'
+    - 'test/units/geminabox/proxy/copier_test.rb'
+    - 'test/units/geminabox/proxy/file_handler_test.rb'
+    - 'test/units/geminabox/proxy/splicer_test.rb'
+
+Naming/MethodName:
+  Exclude:
+    - 'test/units/geminabox/server_test.rb'

@@ -1,65 +1,42 @@
+See https://github.com/geminabox/geminabox/releases.
+
+- https://github.com/geminabox/geminabox/releases/tag/v1.4.3
+- https://github.com/geminabox/geminabox/releases/tag/v1.4.2
+
 # 1.4.1 (2021-05-30)
 
-Fixes:
-
-* Fix rendering of 503 error when lock is still held (thanks to NobodysNightmare)
-* Use environmental TMPDIR for lockfile, and add 'rss' as dependency. (thanks to jubishop)
-
+- https://github.com/geminabox/geminabox/releases/tag/v1.4.1
 # 1.4.0 (2021-05-30)
 
-Enhancements:
-
-* Support ruby 3.0 (thanks to sue445)
+- https://github.com/geminabox/geminabox/releases/tag/v1.4.0
 
 # 1.3.1 (2021-05-30)
 
-Fixes:
-
-* Avoid possible XSS vulnerability on each view (thanks to @ooooooo-q)
+- https://github.com/geminabox/geminabox/releases/tag/v1.3.1
 
 # 1.3.0 (2021-03-18)
 
-Enhancements:
-
-* Prevent "dependency confusion" resulting in a malicious upstream gem taking precedence over a local gem
+- https://github.com/geminabox/geminabox/releases/tag/v1.3.0
 
 # 1.2.0 (2020-03-05)
 
-Enhancements:
-
-* Support gemcutter yank API (thanks to Chuck Wilson)
-
-Fixes:
-
-* Fix dockerfile (thanks to Chuck Wilson)
-
-Maintenances:
-
-* Gem.gzip/gunzip are deprecated. Use Gem::Util.gzip/gunzip (thanks to krororo)
-* Fix deprecation warning of Gem::Specification#has_rdoc (thanks to krororo)
-* Update .travis.yml (thanks to krororo)
+- https://github.com/geminabox/geminabox/releases/tag/v1.2.0
 
 # 1.1.1 (2018-11-08)
 
-Fixes:
-
-* Fix a delete buton not showing up on gem page even if `delete` is allowed (thanks to Edward Rudd)
+- https://github.com/geminabox/geminabox/releases/tag/v1.1.1
 
 # 1.1.0 (2018-04-06)
 
-Enhancements:
-
-* Adds `on_gem_recievied` hook (thanks to Kris Leech)
+- https://github.com/geminabox/geminabox/releases/tag/v1.1.1
 
 # 1.0.1 (2018-03-04)
 
-Fixes:
-
-* Avoid XSS vulnerability on /reindex (reported by @ooooooo_q)
+- https://github.com/geminabox/geminabox/releases/tag/v1.0.1
 
 # 1.0.0 (2018-02-01)
 
-Bump version to 1.0.0 :tada:
+- https://github.com/geminabox/geminabox/releases/tag/v1.0.0
 
 # 0.13.15 (2018-01-26)
 

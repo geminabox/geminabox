@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require "fileutils"
 module Geminabox
   class Geminabox::DiskCache

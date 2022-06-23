@@ -1,6 +1,6 @@
 # Gem in a Box – Really simple rubygem hosting
-[![Build Status](https://secure.travis-ci.org/geminabox/geminabox.png)](http://travis-ci.org/geminabox/geminabox)
-[![Gem Version](https://badge.fury.io/rb/geminabox.png)](http://badge.fury.io/rb/geminabox)
+[![Ruby](https://github.com/geminabox/geminabox/actions/workflows/ruby.yml/badge.svg)](https://github.com/geminabox/geminabox/actions/workflows/ruby.yml?query=branch%3Amaster)
+[![Gem Version](https://badge.fury.io/rb/geminabox.svg)](http://badge.fury.io/rb/geminabox)
 [![Code Climate](https://codeclimate.com/github/geminabox/geminabox/badges/gpa.svg)](https://codeclimate.com/github/geminabox/geminabox)
 
 Geminabox lets you host your own gems, and push new gems to it just like with rubygems.org.
@@ -12,7 +12,7 @@ For basic auth, try [Rack::Auth](http://www.rubydoc.info/github/rack/rack/Rack/A
 
 ## System Requirements
 
-See [.travis.yml](./.travis.yml) for supported ruby versions
+See [.github/workflows/ruby.yml](.github/workflows/ruby.yml) for supported ruby versions
 
 ## Server Setup
 
@@ -36,12 +36,6 @@ Create a config.ru as follows:
     run Geminabox::Server
 
 Start your gem server with 'rackup' to run WEBrick or hook up the config.ru as you normally would ([passenger](https://www.phusionpassenger.com/), [thin](http://code.macournoyer.com/thin/), [unicorn](https://bogomips.org/unicorn/), whatever floats your boat).
-
-## Legacy RubyGems index
-
-RubyGems supports generating indexes for the so called legacy versions (< 1.2), and since it is very rare to use such versions nowadays, it can be disabled, thus improving indexing times for large repositories. If it's safe for your application, you can disable support for these legacy versions by adding the following configuration to your config.ru file:
-
-    Geminabox.build_legacy = false
 
 ## RubyGems Proxy
 

@@ -185,7 +185,7 @@ class Geminabox::TestCase < Minitest::Test
   end
 
   def find_free_port
-    server = TCPServer.new('127.0.0.1', 0)
+    server = TCPServer.new('localhost', 0)
     port = server.addr[1]
     server.close
     port
@@ -228,9 +228,9 @@ class Geminabox::TestCase < Minitest::Test
       server_options.merge!(
         :SSLEnable => true,
         :SSLVerifyClient => OpenSSL::SSL::VERIFY_NONE,
-        :SSLPrivateKey => OpenSSL::PKey::RSA.new(File.read(fixture("127.0.0.1.key"))),
-        :SSLCertificate => OpenSSL::X509::Certificate.new(File.read(fixture("127.0.0.1.crt"))),
-        :SSLCertName => [["CN", "127.0.0.1"]]
+        :SSLPrivateKey => OpenSSL::PKey::RSA.new(File.read(fixture("localhost.key"))),
+        :SSLCertificate => OpenSSL::X509::Certificate.new(File.read(fixture("localhost.crt"))),
+        :SSLCertName => [["CN", "localhost"]]
       )
     end
 
@@ -248,7 +248,7 @@ class Geminabox::TestCase < Minitest::Test
     Timeout.timeout(10) do
       begin
         Timeout.timeout(1) do
-          TCPSocket.open("127.0.0.1", @test_server_port).close
+          TCPSocket.open("localhost", @test_server_port).close
         end
       rescue Errno::ECONNREFUSED
         sleep 0.10
