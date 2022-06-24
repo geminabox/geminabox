@@ -23,21 +23,24 @@ jobs:
             gem-version: 2.7.11
           - ruby-version: 2.5.9
             gem-version: 2.7.11
-          # RubyGems 1.8 should be tested
+          # Test with RubyGems 2.4.8 as it is specified in gemspec
           - ruby-version: 2.2.10
-            gem-version: 1.8.25
+            gem-version: 2.4.8
             continue-on-error: true
           - ruby-version: 2.3.8
-            gem-version: 1.8.25
+            gem-version: 2.4.8
             continue-on-error: true
           - ruby-version: 2.4.10
-            gem-version: 1.8.25
+            gem-version: 2.4.8
             continue-on-error: true
           - ruby-version: 2.5.9
-            gem-version: 1.8.25
+            gem-version: 2.4.8
             continue-on-error: true
           - ruby-version: 2.6.10
-            gem-version: 1.8.25
+            gem-version: 2.4.8
+            continue-on-error: true
+          - ruby-version: 2.7.6
+            gem-version: 2.4.8
             continue-on-error: true
 
     steps:
@@ -53,15 +56,11 @@ jobs:
       run: |
         gem update --system $gemver
         gem --version
-    # TODO: remove this step when RubyGems 1.8 support is dropped
-    # RubyGems 1.8 does not support Gem::Specification#metadata=, so removing the line
-    # https://github.com/rubygems/rubygems/commit/be483b99d8a53bce3e6faf9e6f3c3a5df452974e
-    # or https://github.com/rubygems/rubygems/pull/38
-    # Use Bundler 1.17 when using RubyGems 1.8
-    - name: Tweak gemspec fixtures for testing and use Bundler 1.x
-      if: startsWith(matrix.gem-version, '1.')
+    # TODO: remove this step when RubyGems 2.4 support is dropped
+    # Use Bundler 1.17 when using RubyGems 1.x and 2.0-2.4
+    - name: Install Bundler 1.x for RubyGems 2.4
+      if: startsWith(matrix.gem-version, '2.4')
       run: |
-        sed -i -e "/metadata/d" geminabox.gemspec
         gem uninstall bundler
         gem install bundler --version "< 2"
         sed -i -e "/^BUNDLED WITH/ {n; s/.*/  1.17.3/} " Gemfile.lock
