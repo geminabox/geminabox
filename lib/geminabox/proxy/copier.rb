@@ -24,7 +24,7 @@ module Geminabox
       def get_remote
         begin
           if rc = remote_content
-            File.open(proxy_path, 'w'){|f| f.write(rc) }
+            File.open(proxy_path, 'wb'){|f| f.write(rc) }
           end
         rescue
           File.unlink(proxy_path) if File.exist?(proxy_path)
