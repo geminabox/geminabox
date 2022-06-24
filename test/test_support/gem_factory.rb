@@ -40,6 +40,7 @@ class GemFactory
           s.email             = 'fake@fake.fake'
           s.homepage          = 'http://fake.fake/fake'
           s.licenses          = ['Nonstandard']
+          s.metadata          = { "rubygems_mfa_required" => "true" }
           #{dependencies}
         end
       }
