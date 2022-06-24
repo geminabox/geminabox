@@ -47,10 +47,11 @@ module Geminabox
 
     test "#hexdigest" do
       file_name = GemFactory.gem_file(:example)
-      file = File.open(file_name)
-      subject = Geminabox::IncomingGem.new(file)
+      File.open(file_name) do |file|
+        subject = Geminabox::IncomingGem.new(file)
 
-      assert_equal Digest::SHA1.hexdigest(File.read(file_name)), subject.hexdigest
+        assert_equal Digest::SHA1.hexdigest(File.binread(file_name)), subject.hexdigest
+      end
     end
 
   end
