@@ -3,7 +3,7 @@ require_relative '../../test_helper'
 module Geminabox
 
   class DiskCacheTest < Minitest::Test
-    DIR = "/tmp/geminabox-disk-cache-test"
+    DIR = File.join(Dir.tmpdir, "geminabox-disk-cache-test")
     def setup
       FileUtils.rm_rf(DIR)
     end

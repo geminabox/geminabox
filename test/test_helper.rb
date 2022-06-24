@@ -27,7 +27,7 @@ end
 class Minitest::Test
   extend TestMethodMagic
 
-  TEST_DATA_DIR="/tmp/geminabox-test-data"
+  TEST_DATA_DIR=File.join(Dir.tmpdir, "geminabox-test-data")
   def clean_data_dir
     FileUtils.rm_rf(TEST_DATA_DIR)
     FileUtils.mkdir(TEST_DATA_DIR)
@@ -45,7 +45,7 @@ class Minitest::Test
 
   def silence_stream(stream)
     old_stream = stream.dup
-    stream.reopen('/dev/null')
+    stream.reopen(File::NULL)
     stream.sync = true
     yield
   ensure

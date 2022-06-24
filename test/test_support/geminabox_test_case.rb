@@ -27,7 +27,7 @@ class Geminabox::TestCase < Minitest::Test
     end
 
     def data(data = nil)
-      @data ||= data || "/tmp/geminabox-test-data"
+      @data ||= data || File.join(Dir.tmpdir, "geminabox-test-data")
     end
 
     def gem_permissions
@@ -107,7 +107,7 @@ class Geminabox::TestCase < Minitest::Test
     @url_with_port + path
   end
 
-  FAKE_HOME = "/tmp/geminabox-test-home"
+  FAKE_HOME = File.join(Dir.tmpdir, "geminabox-test-home")
   def self.setup_fake_home!
     return if @setup_fake_home
     @setup_fake_home = true
@@ -221,7 +221,7 @@ class Geminabox::TestCase < Minitest::Test
       :app => config.to_app,
       :Port => @test_server_port,
       :AccessLog => [],
-      :Logger => WEBrick::Log::new("/dev/null", 7)
+      :Logger => WEBrick::Log::new(File::NULL, 7)
     }
 
     if config.ssl
@@ -237,8 +237,8 @@ class Geminabox::TestCase < Minitest::Test
     @app_server = fork do
       begin
         Geminabox.data = config.data
-        STDERR.reopen("/dev/null")
-        STDOUT.reopen("/dev/null")
+        STDERR.reopen(File::NULL)
+        STDOUT.reopen(File::NULL)
         Rack::Server.start(server_options)
       ensure
         exit

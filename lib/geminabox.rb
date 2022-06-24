@@ -94,7 +94,7 @@ module Geminabox
     rubygems_proxy_merge_strategy:  ENV.fetch('RUBYGEMS_PROXY_MERGE_STRATEGY') { :local_gems_take_precedence_over_remote_gems }.to_sym,
     allow_delete:                   true,
     http_adapter:                   HttpClientAdapter.new,
-    lockfile:                       File.join(ENV.fetch('TMPDIR', '/tmp'), 'geminabox.lockfile'),
+    lockfile:                       File.join(ENV.fetch('TMPDIR', Dir.tmpdir), 'geminabox.lockfile'),
     retry_interval:                 60,
     allow_remote_failure:           false,
     ruby_gems_url:                  'https://rubygems.org/',

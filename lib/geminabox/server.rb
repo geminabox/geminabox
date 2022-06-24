@@ -197,7 +197,7 @@ module Geminabox
           handle_incoming_gem(Geminabox::IncomingGem.new(request.body))
         end
       rescue Object => o
-        File.open "/tmp/debug.txt", "a" do |io|
+        File.open File.join(Dir::tmpdir, "debug.txt"), "a" do |io|
           io.puts o, o.backtrace
         end
       end
