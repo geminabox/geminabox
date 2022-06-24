@@ -23,22 +23,17 @@ jobs:
             gem-version: 2.7.11
           - ruby-version: 2.5.9
             gem-version: 2.7.11
-          # RubyGems 1.8 should be tested
+          # RubyGems 2.0.0 should be tested
           - ruby-version: 2.2.10
-            gem-version: 1.8.25
-            continue-on-error: true
+            gem-version: 2.0.0
           - ruby-version: 2.3.8
-            gem-version: 1.8.25
-            continue-on-error: true
+            gem-version: 2.0.0
           - ruby-version: 2.4.10
-            gem-version: 1.8.25
-            continue-on-error: true
+            gem-version: 2.0.0
           - ruby-version: 2.5.9
-            gem-version: 1.8.25
-            continue-on-error: true
+            gem-version: 2.0.0
           - ruby-version: 2.6.10
-            gem-version: 1.8.25
-            continue-on-error: true
+            gem-version: 2.0.0
 
     steps:
     - uses: actions/checkout@v3
