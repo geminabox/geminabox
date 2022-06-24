@@ -23,6 +23,16 @@ jobs:
             gem-version: 2.7.11
           - ruby-version: 2.5.9
             gem-version: 2.7.11
+          - ruby-version: 2.2.10
+            gem-version: 1.8.25
+          - ruby-version: 2.3.8
+            gem-version: 1.8.25
+          - ruby-version: 2.4.10
+            gem-version: 1.8.25
+          - ruby-version: 2.5.9
+            gem-version: 1.8.25
+          - ruby-version: 2.6.10
+            gem-version: 1.8.25
 
     steps:
     - uses: actions/checkout@v3
@@ -37,6 +47,8 @@ jobs:
       run: |
         gem update --system $gemver
         gem --version
+    - if: startsWith(matrix.gem-version, '1.')
+      run: sed -i -e "/metadata/d" geminabox.gemspec
     - name: Run tests
       run: bundle exec rake
 
