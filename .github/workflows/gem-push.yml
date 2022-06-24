@@ -1,0 +1,33 @@
+name: Ruby Gem
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    name: Build + Publish
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Ruby 3.1
+      uses: ruby/setup-ruby@v1.110.0
+      with:
+        ruby-version: 3.1.2
+
+    - name: Publish a pre package to GitHub Packages
+      run: |
+        mkdir -p $HOME/.gem
+        touch $HOME/.gem/credentials
+        chmod 0600 $HOME/.gem/credentials
+        printf -- "---\n:github: ${GEM_HOST_API_KEY}\n" > $HOME/.gem/credentials
+        sed -i -e "/^\s*VERSION = .*pre/ s/pre/pre.$(date +%Y%m%d.%H%M).$(git rev-parse --short HEAD)/" lib/geminabox/version.rb
+        gem build *.gemspec
+        gem push --KEY github --host https://rubygems.pkg.github.com/${OWNER} *.gem
+      env:
+        GEM_HOST_API_KEY: "Bearer ${{secrets.GITHUB_TOKEN}}"
+        OWNER: ${{ github.repository_owner }}
