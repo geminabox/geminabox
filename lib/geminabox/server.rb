@@ -46,7 +46,6 @@ module Geminabox
             require 'geminabox/indexer'
             updated_gemspecs = Geminabox::Indexer.updated_gemspecs(indexer)
             return if updated_gemspecs.empty?
-            Geminabox::Indexer.patch_rubygems_update_index_pre_1_8_25(indexer)
             indexer.update_index
             updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
           rescue Errno::ENOENT
