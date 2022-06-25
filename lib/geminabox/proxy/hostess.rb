@@ -8,6 +8,7 @@ module Geminabox
     class Hostess < Sinatra::Base
       attr_accessor :file_handler
       def serve
+        headers["Cache-Control"] = 'no-transform'
         if file_handler
           send_file file_handler.proxy_path
         else
