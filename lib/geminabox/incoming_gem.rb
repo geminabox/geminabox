@@ -9,11 +9,7 @@ module Geminabox
       end
 
       digest = Digest::SHA1.new
-      if RbConfig::CONFIG["MAJOR"].to_i <= 1 and RbConfig::CONFIG["MINOR"].to_i <= 8
-        @tempfile = Tempfile.new("gem")
-      else
-        @tempfile = Tempfile.new("gem", :encoding => 'binary', :binmode => true)
-      end
+      @tempfile = Tempfile.new("gem", encoding: "binary", binmode: true)
 
       while data = gem_data.read(1024**2)
         @tempfile.write data
