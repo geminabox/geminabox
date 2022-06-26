@@ -13,6 +13,13 @@ require_relative 'test_support/http_socket_error_dummy'
 require 'capybara/mechanize'
 require 'capybara/dsl'
 
+require 'minitest/reporters'
+if ENV['MINITEST_REPORTER']
+  Minitest::Reporters.use!
+else
+  Minitest::Reporters.use!([Minitest::Reporters::DefaultReporter.new])
+end
+
 require 'webmock/minitest'
 WebMock.disable_net_connect!(:allow_localhost => true)
 
@@ -68,4 +75,3 @@ class Minitest::Test
   end
 
 end
-

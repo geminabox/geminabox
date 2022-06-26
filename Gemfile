@@ -8,6 +8,7 @@ group :test do
   gem 'rake'
   gem 'rack-test'
   gem 'minitest'
+  gem 'minitest-reporters'
 
   gem 'capybara-mechanize'
   # Pin capybara to 3.36.x or earlier as 3.37.x does not work with Ruby 2.7/3.0/3.1

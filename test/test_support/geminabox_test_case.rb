@@ -214,14 +214,19 @@ class Geminabox::TestCase < Minitest::Test
     end
   end
 
+  def log_to_stdout?
+    Minitest::Reporters.reporters.any?{|reporter| reporter.instance_of?(Minitest::Reporters::SpecReporter)}
+  end
+
   def start_app!
     clean_data_dir
     @test_server_port = find_free_port
+    log_output = log_to_stdout? ? STDOUT : File::NULL
     server_options = {
       :app => config.to_app,
       :Port => @test_server_port,
       :AccessLog => [],
-      :Logger => WEBrick::Log::new(File::NULL, 7)
+      :Logger => WEBrick::Log::new( log_output, Logger::INFO)
     }
 
     if config.ssl
@@ -237,8 +242,10 @@ class Geminabox::TestCase < Minitest::Test
     @app_server = fork do
       begin
         Geminabox.data = config.data
-        STDERR.reopen(File::NULL)
-        STDOUT.reopen(File::NULL)
+        unless log_to_stdout?
+          STDERR.reopen(File::NULL)
+          STDOUT.reopen(File::NULL)
+        end
         Rack::Server.start(server_options)
       ensure
         exit
