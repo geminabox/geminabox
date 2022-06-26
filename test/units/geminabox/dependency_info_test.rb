@@ -2,18 +2,16 @@ require_relative '../../test_helper'
 module Geminabox
   class DependencyInfoTest < Minitest::Test
 
-    # rubocop:disable Lint/Syntax
     def content
-      <<~DATA
----
-4.0.0 cucumber:< 4.0&>= 2.0,gherkin:< 6.0&>= 4.0,yard:>= 0.8.1&~> 0.8 |checksum:e6804d824830d345f065c55c667f9b9b52e4edd775b3396940cc51d4b0dd4d22
-5.0.0 cucumber:< 4.0&>= 2.0,gherkin:< 6.0&>= 4.0,yard:>= 0.8.1&~> 0.8 |checksum:e75e01a40c87215d75f6523e13c7ec4af4018297c82de642b9c5f8f94e19072d
-5.0.1 cucumber:>= 0,gherkin:>= 0,yard:>= 0 |checksum:237c67ccba4d74905a3839bad4e50912023e03cc25273bca72887492254fb5dd
-5.1.0.pre.mrt cucumber:>= 0,gherkin:>= 0,yard:>= 0 |checksum:8d3e29663c5db65e2f10d8b4622685aa8a29e1465530b6f47be62ef891160415,rubygems:> 1.3.1
-5.2.1 |checksum:8d3e29663c5db65e2f10d8b4622685aa8a29e1465530b6f47be62ef891160415
-      DATA
+      [
+        "---",
+        "4.0.0 cucumber:< 4.0&>= 2.0,gherkin:< 6.0&>= 4.0,yard:>= 0.8.1&~> 0.8 |checksum:e6804d824830d345f065c55c667f9b9b52e4edd775b3396940cc51d4b0dd4d22",
+        "5.0.0 cucumber:< 4.0&>= 2.0,gherkin:< 6.0&>= 4.0,yard:>= 0.8.1&~> 0.8 |checksum:e75e01a40c87215d75f6523e13c7ec4af4018297c82de642b9c5f8f94e19072d",
+        "5.0.1 cucumber:>= 0,gherkin:>= 0,yard:>= 0 |checksum:237c67ccba4d74905a3839bad4e50912023e03cc25273bca72887492254fb5dd",
+        "5.1.0.pre.mrt cucumber:>= 0,gherkin:>= 0,yard:>= 0 |checksum:8d3e29663c5db65e2f10d8b4622685aa8a29e1465530b6f47be62ef891160415,rubygems:> 1.3.1",
+        "5.2.1 |checksum:8d3e29663c5db65e2f10d8b4622685aa8a29e1465530b6f47be62ef891160415"
+      ].join("\n") << "\n"
     end
-    # rubocop:enable Lint/Syntax
 
     def versions
       [
