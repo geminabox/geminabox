@@ -213,10 +213,6 @@ module Geminabox
       Indexer.new.reindex(force_rebuild)
     end
 
-    def reindex_compact_index(force_rebuild = false)
-      CompactIndexer.new.reindex(force_rebuild)
-    end
-
     def serialize_update(&block)
       with_rlock(&block)
     rescue ReentrantFlock::AlreadyLocked
@@ -253,10 +249,8 @@ module Geminabox
     end
 
     def local_versions
-      versions = CompactIndexer.fetch_versions
-      return versions if versions
-      serialize_update do
-        reindex_compact_index(:force_rebuild)
+      CompactIndexer.fetch_versions || serialize_update do
+        CompactIndexer.new.reindex(:force_rebuild)
         CompactIndexer.fetch_versions
       end
     end
@@ -266,14 +260,7 @@ module Geminabox
     end
 
     def local_gem_info(name)
-      gem = find_gem(name)
-      return nil unless gem
-      info = CompactIndexer.fetch_info(name)
-      return info if info
-      serialize_update do
-        reindex_compact_index(:force_rebuild)
-        CompactIndexer.fetch_info(name)
-      end
+      CompactIndexer.fetch_info(name)
     end
 
     def find_gem(name)

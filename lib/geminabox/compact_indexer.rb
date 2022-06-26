@@ -37,13 +37,6 @@ module Geminabox
       end
     end
 
-    def initialize
-      @directory = Dir.mktmpdir("geminabox-compact-index")
-      @compact_index_path = CompactIndexer.compact_index_path(@directory)
-      @info_path = CompactIndexer.info_path(@compact_index_path)
-      FileUtils.mkdir_p(@info_path)
-    end
-
     def log_time(text)
       start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       yield
@@ -53,6 +46,11 @@ module Geminabox
     end
 
     def incremental_reindex(gem_specs)
+      directory = Dir.mktmpdir("geminabox-compact-index")
+      compact_index_path = CompactIndexer.compact_index_path(directory)
+      info_path = CompactIndexer.info_path(compact_index_path)
+      FileUtils.mkdir_p(info_path)
+
       updated_files = []
 
       version_info = VersionInfo.new
@@ -67,19 +65,21 @@ module Geminabox
           checksum = Specs.checksum_for_version(gem_version)
           info.add_gem_spec_and_gem_checksum(spec, checksum)
         end
-        file = CompactIndexer.info_name_path(name, @info_path)
+        file = CompactIndexer.info_name_path(name, info_path)
         updated_files << [file, CompactIndexer.info_name_path(name)]
         File.binwrite(file, info.content)
         version_info.update_gem_versions(info)
       end
 
-      file = CompactIndexer.versions_path(@compact_index_path)
+      file = CompactIndexer.versions_path(compact_index_path)
       updated_files << [file, CompactIndexer.versions_path]
       version_info.write(file)
 
       updated_files.each do |src, dest|
         FileUtils.mv(src, dest)
       end
+    ensure
+      FileUtils.rm_rf(directory)
     end
 
     def all_specs
@@ -115,8 +115,6 @@ module Geminabox
     rescue SystemCallError => e
       CompactIndexer.clear_index
       puts "Compact index error #{e.message}\n"
-    ensure
-      FileUtils.rm_rf(@directory)
     end
 
     def dependency_info(gem)
