@@ -5,7 +5,6 @@ require 'rubygems/util'
 
 module Geminabox
 
-  # rubocop:disable Metrics/ClassLength
   class Server < Sinatra::Base
     enable :static, :methodoverride
     set :public_folder, Geminabox.public_folder
@@ -28,12 +27,6 @@ module Geminabox
 
       def allow_upload?
         Geminabox.allow_upload
-      end
-
-      def fixup_bundler_rubygems!
-        return if @post_reset_hook_applied
-        Gem.post_reset{ Gem::Specification.all = nil } if defined? Bundler and Gem.respond_to? :post_reset
-        @post_reset_hook_applied = true
       end
 
       def dependency_cache
@@ -217,35 +210,7 @@ module Geminabox
   private
 
     def reindex(force_rebuild = false)
-      self.class.fixup_bundler_rubygems!
-      force_rebuild = true unless Geminabox.incremental_updates
-      if force_rebuild
-        indexer.generate_index
-        dependency_cache.flush
-        reindex_compact_cache
-      else
-        begin
-          require 'geminabox/indexer'
-          updated_gemspecs = Geminabox::Indexer.updated_gemspecs(indexer)
-          return if updated_gemspecs.empty?
-          indexer.update_index
-          updated_gemspecs.each do |spec|
-            dependency_cache.flush_key(spec.name)
-          end
-          reindex_compact_cache(updated_gemspecs)
-        rescue Errno::ENOENT
-          with_rlock { reindex(:force_rebuild) }
-        rescue => e
-          puts "#{e.class}:#{e.message}"
-          puts e.backtrace.join("\n")
-          with_rlock { reindex(:force_rebuild) }
-        end
-      end
-    rescue Gem::SystemExitException
-    end
-
-    def indexer
-      @indexer ||= Gem::Indexer.new(Geminabox.data, :build_legacy => Geminabox.build_legacy)
+      Indexer.new.reindex(force_rebuild)
     end
 
     def serialize_update(&block)
@@ -277,52 +242,6 @@ module Geminabox
       else
         redirect url("/")
       end
-    end
-
-    def incremental_reindex_compact_cache(specs)
-      version_info = VersionInfo.new
-      version_info.load_versions
-
-      specs.group_by(&:name).each do |name, gem_specs|
-        info = DependencyInfo.new(name)
-        data = CompactIndexer.fetch_info(name)
-        info.content = data if data
-        gem_specs.each do |spec|
-          gem_version = GemVersion.new(name, spec.version, spec.platform)
-          checksum = checksum_for_version(gem_version)
-          info.add_gem_spec_and_gem_checksum(spec, checksum)
-        end
-        CompactIndexer.reindex_info(name, info.content)
-        version_info.update_gem_versions(info)
-      end
-
-      version_info.write
-    end
-
-    def full_reindex_compact_cache
-      CompactIndexer.clear_index
-      version_info = VersionInfo.new
-
-      Hash[load_gems.by_name].each do |name, versions|
-        info = info_template(versions)
-        CompactIndexer.reindex_info(name, info.content)
-        version_info.update_gem_versions(info)
-      end
-
-      version_info.write
-    end
-
-    def reindex_compact_cache(specs = nil)
-      return unless Geminabox.index_format
-
-      if specs && File.exist?(CompactIndexer.versions_path)
-        incremental_reindex_compact_cache(specs)
-        return
-      end
-
-      full_reindex_compact_cache
-    rescue SystemCallError => e
-      puts "Compact index error #{e.message}\n"
     end
 
     def remote_versions
@@ -383,36 +302,8 @@ HTML
       self.class.dependency_cache
     end
 
-    def all_gems
-      all_gems_with_duplicates.inject(:|)
-    end
-
-    def all_gems_with_duplicates
-      specs_files_paths.map do |specs_file_path|
-        if File.exist?(specs_file_path)
-          Marshal.load(Gem::Util.gunzip(Gem.read_binary(specs_file_path)))
-        else
-          []
-        end
-      end
-    end
-
-    def specs_file_types
-      [:specs, :prerelease_specs]
-    end
-
-    def specs_files_paths
-      specs_file_types.map do |specs_file_type|
-        File.join(Geminabox.data, spec_file_name(specs_file_type))
-      end
-    end
-
-    def spec_file_name(specs_file_type)
-      [specs_file_type, Gem.marshal_version, 'gz'].join('.')
-    end
-
     def load_gems
-      @loaded_gems ||= Geminabox::GemVersionCollection.new(all_gems)
+      @loaded_gems ||= Geminabox::GemVersionCollection.new(Specs.all_gems)
     end
 
     def index_gems(gems)
@@ -439,50 +330,6 @@ HTML
       GemListMerge.merge(local_gem_list, remote_gem_list, strategy: Geminabox.rubygems_proxy_merge_strategy)
     end
 
-    def checksum_for_version(version)
-      filename = "#{version.gemfile_name}.gem"
-      gem_file = File.join(Geminabox.data, "gems", filename)
-      Digest::SHA256.file(gem_file).hexdigest if File.exist?(gem_file)
-    end
-
-    def spec_for_version(version)
-      filename = version.gemfile_name
-      spec_file = File.join(Geminabox.data, "quick", "Marshal.#{Gem.marshal_version}", "#{filename}.gemspec.rz")
-      File::open(spec_file, 'r') do |unzipped_spec_file|
-        unzipped_spec_file.binmode
-        Marshal.load(Gem::Util.inflate(unzipped_spec_file.read))
-      end if File.exist? spec_file
-    end
-
-    def info_template(gem)
-      DependencyInfo.new(gem.first.name) do |info|
-        gem.by_name do |_name, versions|
-          versions.each do |version|
-            spec = spec_for_version(version)
-            next unless spec
-            checksum = checksum_for_version(version)
-            next unless checksum
-            info.add_gem_spec_and_gem_checksum(spec, checksum)
-          end
-        end
-      end
-    end
-
-    def versions_template
-      str = "created_at: #{Time.now.utc.strftime('%Y-%m-%dT%H:%M:%S.%L%z')}\n".dup
-      str << "---\n"
-      gems = load_gems
-      lookup = Hash[gems.by_name]
-      gems.by_name do |name, versions|
-        str << "#{name} "
-        str << versions.map(&:version_name_with_platform).join(",")
-        str << " "
-        str << info_template(lookup[name]).digest
-        str << "\n"
-      end
-      str
-    end
-
     helpers do
       def href(text)
         if text && (text.start_with?('http://') || text.start_with?('https://'))
@@ -497,7 +344,7 @@ HTML
       end
 
       def spec_for(gem_name, version, platform = default_platform)
-        spec_for_version(GemVersion.new(gem_name, version, platform))
+        Specs.spec_for_version(GemVersion.new(gem_name, version, platform))
       end
 
       def default_platform
@@ -509,7 +356,7 @@ HTML
         dependency_cache.marshal_cache(gem_name) do
           load_gems.
             select { |gem| gem_name == gem.name }.
-            map    { |gem| [gem, spec_for_version(gem)] }.
+            map    { |gem| [gem, Specs.spec_for_version(gem)] }.
             reject { |(_, spec)| spec.nil? }.
             map do |(gem, spec)|
               {
@@ -521,8 +368,6 @@ HTML
             end
         end
       end
-
-
 
       def runtime_dependencies(spec)
         spec.
@@ -537,6 +382,5 @@ HTML
       end
     end
   end
-  # rubocop:enable Metrics/ClassLength
 
 end

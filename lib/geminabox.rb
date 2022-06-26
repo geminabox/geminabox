@@ -40,6 +40,8 @@ module Geminabox
   autoload :CompactIndexer,         geminabox_path('compact_indexer')
   autoload :DependencyInfo,         geminabox_path('dependency_info')
   autoload :VersionInfo,            geminabox_path('version_info')
+  autoload :Specs,                  geminabox_path('specs')
+  autoload :Indexer,                geminabox_path('indexer')
 
   class << self
 
