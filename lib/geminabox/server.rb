@@ -109,6 +109,28 @@ module Geminabox
       query_gems.any? ? gem_list.to_json : {}
     end
 
+    get '/versions' do
+      content_type 'text/plain'
+
+      return halt(404) if Geminabox.rubygems_proxy_merge_strategy == :combine_local_and_remote_gem_versions || !Geminabox.index_format
+      if Geminabox.rubygems_proxy
+        GemVersionsMerge.merge(local_versions, remote_versions, strategy: Geminabox.rubygems_proxy_merge_strategy)
+      else
+        local_versions
+      end
+    end
+
+    get '/names' do
+      content_type 'text/plain'
+
+      return halt(404) if Geminabox.rubygems_proxy_merge_strategy == :combine_local_and_remote_gem_versions || !Geminabox.index_format
+      if Geminabox.rubygems_proxy
+        error_response(404, 'Not implemented')
+      else
+        ["---", load_gems.list].join("\n")
+      end
+    end
+
     get '/upload' do
       unless self.class.allow_upload?
         error_response(403, 'Gem uploading is disabled')
@@ -125,13 +147,30 @@ module Geminabox
         end
         force_rebuild = params[:force_rebuild] == 'true'
         self.class.reindex(force_rebuild)
+        reindex_compact_cache
         redirect url("/")
       end
     end
 
+    get '/info/:gemname' do
+      content_type 'text/plain'
+
+      return halt(404) if Geminabox.rubygems_proxy_merge_strategy == :combine_local_and_remote_gem_versions || !Geminabox.index_format
+      name = params[:gemname]
+      info = if Geminabox.rubygems_proxy
+               if Geminabox.rubygems_proxy_merge_strategy == :local_gems_take_precedence_over_remote_gems
+                 local_gem_info(name) || remote_gem_info(name)
+               else
+                 remote_gem_info(name) || local_gem_info(name)
+               end
+             else
+               local_gem_info(name)
+             end
+      info || halt(404)
+    end
+
     get '/gems/:gemname' do
-      gems = Hash[load_gems.by_name]
-      @gem = gems[params[:gemname]]
+      @gem = find_gem(params[:gemname])
       @allow_delete = self.class.allow_delete?
       halt 404 unless @gem
       erb :gem
@@ -145,6 +184,7 @@ module Geminabox
       serialize_update do
         File.delete file_path if File.exist? file_path
         self.class.reindex(:force_rebuild)
+        reindex_compact_cache
         redirect url("/")
       end
 
@@ -167,6 +207,7 @@ module Geminabox
           File.delete gem_path if File.exists? gem_path
         end
         self.class.reindex(:force_rebuild)
+        reindex_compact_cache
         return 200, 'Yanked gem and reindexed'
       end
     end
@@ -217,6 +258,7 @@ module Geminabox
     def handle_incoming_gem(gem)
       begin
         GemStore.create(gem, params[:overwrite])
+        reindex_compact_cache
       rescue GemStoreError => error
         error_response error.code, error.reason
       end
@@ -232,6 +274,38 @@ module Geminabox
       else
         redirect url("/")
       end
+    end
+
+    def reindex_compact_cache
+      return unless Geminabox.index_format
+      CompactIndexer.clear_index
+      CompactIndexer.reindex_versions(versions_template)
+      Hash[load_gems.by_name].each do |name, versions|
+        CompactIndexer.reindex_info(name, info_template(versions))
+      end
+    rescue SystemCallError => e
+      puts "Compact index error #{e.message}\n"
+    end
+
+    def remote_versions
+      RubygemsVersions.fetch
+    end
+
+    def local_versions
+      CompactIndexer.fetch_versions || versions_template
+    end
+
+    def remote_gem_info(name)
+      RubygemsInfo.fetch(name)
+    end
+
+    def local_gem_info(name)
+      gem = find_gem(name)
+      CompactIndexer.fetch_info(name) || info_template(gem) if gem
+    end
+
+    def find_gem(name)
+      Hash[load_gems.by_name][name]
     end
 
     def api_request?
@@ -316,6 +390,78 @@ HTML
       GemListMerge.merge(local_gem_list, remote_gem_list, strategy: Geminabox.rubygems_proxy_merge_strategy)
     end
 
+    def platform_name(_gem_name, version, platform)
+      name = version.to_s
+      name << "-#{platform}" if platform != default_platform
+      name
+    end
+
+    def gem_platform_name(gem_name, version, platform)
+      "#{gem_name}-#{platform_name(gem_name, version, platform)}"
+    end
+
+    def checksum_for(gem_name, version, platform = default_platform)
+      filename = gem_platform_name(gem_name, version, platform)
+      filename = "#{filename}.gem"
+      file = File.join(Geminabox.data, "gems", filename)
+      Digest::SHA256.file(file).hexdigest if File.exist? file
+    end
+
+    def info_template(gem)
+      str = "---\n".dup
+      gem.by_name do |name, versions|
+        versions.each do |version|
+          str << version_info(name, version)
+          str << "\n"
+        end
+      end
+      str
+    end
+
+    def versions_template
+      str = "created_at: #{Time.now.utc.strftime('%Y-%m-%dT%H:%M:%S.%L%z')}\n".dup
+      str << "---\n"
+      gems = load_gems
+      lookup = Hash[gems.by_name]
+      gems.by_name do |name, versions|
+        str << "#{name} "
+        str << versions.map{ |version| platform_name(name, version.number, version.platform) }.join(",")
+        str << " "
+        str << Digest::MD5.hexdigest(info_template(lookup[name]))
+        str << "\n"
+      end
+      str
+    end
+
+    def version_info(name, version)
+      platform = version.platform || default_platform
+      spec = spec_for(name, version.number, platform)
+      "#{platform_name(name, version.number, platform)} #{dependencies_for(name, version.number, spec, platform)} " \
+        "|checksum:#{checksum_for(name, version.number, platform)}" \
+        "#{ruby_requirements_for(name, version.number, spec, platform)}#{rubygems_requirements_for(name, version.number, spec, platform)}"
+    end
+
+    def ruby_requirements_for(_gem_name, _version, spec, _platform = default_platform)
+      required_ruby_version = spec.required_ruby_version
+      ",ruby:#{required_ruby_version.requirements.sort.map{|requirement|
+ requirement.join(" ")}.join("&")}" unless required_ruby_version <=> without_ruby_requirement
+    end
+
+    def rubygems_requirements_for(_gem_name, _version, spec, _platform = default_platform)
+      required_rubygems_version = spec.required_rubygems_version
+      ",rubygems:#{required_rubygems_version.requirements.sort.map{|requirement|
+ requirement.join(" ")}.join("&")}" unless required_rubygems_version <=> without_ruby_requirement
+    end
+
+    def dependencies_for(_gem_name, _version, spec, _platform = default_platform)
+      spec.runtime_dependencies.sort.map { |dependency| [dependency.name, dependency.requirement.requirements.sort.map{ |requirement|
+ requirement.join(" ")}.join("&")].join(":") }.join(",")
+    end
+
+    def without_ruby_requirement
+      @without_ruby_requirement ||= Gem::Requirement.new([">= 0"])
+    end
+
     helpers do
       def href(text)
         if text && (text.start_with?('http://') || text.start_with?('https://'))
@@ -330,9 +476,8 @@ HTML
       end
 
       def spec_for(gem_name, version, platform = default_platform)
-        filename = [gem_name, version]
-        filename.push(platform) if platform != default_platform
-        spec_file = File.join(Geminabox.data, "quick", "Marshal.#{Gem.marshal_version}", "#{filename.join("-")}.gemspec.rz")
+        filename = gem_platform_name(gem_name, version, platform)
+        spec_file = File.join(Geminabox.data, "quick", "Marshal.#{Gem.marshal_version}", "#{filename}.gemspec.rz")
         File::open(spec_file, 'r') do |unzipped_spec_file|
           unzipped_spec_file.binmode
           Marshal.load(Gem::Util.inflate(unzipped_spec_file.read))
