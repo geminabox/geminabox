@@ -226,7 +226,6 @@ module Geminabox
     def handle_incoming_gem(gem)
       begin
         GemStore.create(gem, params[:overwrite])
-        reindex
       rescue GemStoreError => error
         error_response error.code, error.reason
       end

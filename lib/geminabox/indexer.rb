@@ -34,7 +34,7 @@ module Geminabox
 
     attr_reader :indexer
 
-    def reindex(force_rebuild)
+    def reindex(force_rebuild = nil)
       self.class.fixup_bundler_rubygems!
       force_rebuild = true unless Geminabox.incremental_updates
       if force_rebuild
