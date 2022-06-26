@@ -390,28 +390,26 @@ HTML
       GemListMerge.merge(local_gem_list, remote_gem_list, strategy: Geminabox.rubygems_proxy_merge_strategy)
     end
 
-    def platform_name(_gem_name, version, platform)
-      name = version.to_s
-      name << "-#{platform}" if platform != default_platform
-      name
+    def checksum_for_version(version)
+      filename = "#{version.gemfile_name}.gem"
+      gem_file = File.join(Geminabox.data, "gems", filename)
+      Digest::SHA256.file(gem_file).hexdigest if File.exist?(gem_file)
     end
 
-    def gem_platform_name(gem_name, version, platform)
-      "#{gem_name}-#{platform_name(gem_name, version, platform)}"
-    end
-
-    def checksum_for(gem_name, version, platform = default_platform)
-      filename = gem_platform_name(gem_name, version, platform)
-      filename = "#{filename}.gem"
-      file = File.join(Geminabox.data, "gems", filename)
-      Digest::SHA256.file(file).hexdigest if File.exist? file
+    def spec_for_version(version)
+      filename = version.gemfile_name
+      spec_file = File.join(Geminabox.data, "quick", "Marshal.#{Gem.marshal_version}", "#{filename}.gemspec.rz")
+      File::open(spec_file, 'r') do |unzipped_spec_file|
+        unzipped_spec_file.binmode
+        Marshal.load(Gem::Util.inflate(unzipped_spec_file.read))
+      end if File.exist? spec_file
     end
 
     def info_template(gem)
       str = "---\n".dup
-      gem.by_name do |name, versions|
+      gem.by_name do |_name, versions|
         versions.each do |version|
-          str << version_info(name, version)
+          str << version_info(version)
           str << "\n"
         end
       end
@@ -425,7 +423,7 @@ HTML
       lookup = Hash[gems.by_name]
       gems.by_name do |name, versions|
         str << "#{name} "
-        str << versions.map{ |version| platform_name(name, version.number, version.platform) }.join(",")
+        str << versions.map(&:version_name_with_platform).join(",")
         str << " "
         str << Digest::MD5.hexdigest(info_template(lookup[name]))
         str << "\n"
@@ -433,27 +431,26 @@ HTML
       str
     end
 
-    def version_info(name, version)
-      platform = version.platform || default_platform
-      spec = spec_for(name, version.number, platform)
-      "#{platform_name(name, version.number, platform)} #{dependencies_for(name, version.number, spec, platform)} " \
-        "|checksum:#{checksum_for(name, version.number, platform)}" \
-        "#{ruby_requirements_for(name, version.number, spec, platform)}#{rubygems_requirements_for(name, version.number, spec, platform)}"
+    def version_info(version)
+      spec = spec_for_version(version)
+      "#{version.version_name_with_platform} #{dependencies_for(spec)} " \
+        "|checksum:#{checksum_for_version(version)}" \
+        "#{ruby_requirements_for(spec)}#{rubygems_requirements_for(spec)}"
     end
 
-    def ruby_requirements_for(_gem_name, _version, spec, _platform = default_platform)
+    def ruby_requirements_for(spec)
       required_ruby_version = spec.required_ruby_version
       ",ruby:#{required_ruby_version.requirements.sort.map{|requirement|
  requirement.join(" ")}.join("&")}" unless required_ruby_version <=> without_ruby_requirement
     end
 
-    def rubygems_requirements_for(_gem_name, _version, spec, _platform = default_platform)
+    def rubygems_requirements_for(spec)
       required_rubygems_version = spec.required_rubygems_version
       ",rubygems:#{required_rubygems_version.requirements.sort.map{|requirement|
  requirement.join(" ")}.join("&")}" unless required_rubygems_version <=> without_ruby_requirement
     end
 
-    def dependencies_for(_gem_name, _version, spec, _platform = default_platform)
+    def dependencies_for(spec)
       spec.runtime_dependencies.sort.map { |dependency| [dependency.name, dependency.requirement.requirements.sort.map{ |requirement|
  requirement.join(" ")}.join("&")].join(":") }.join(",")
     end
@@ -476,12 +473,7 @@ HTML
       end
 
       def spec_for(gem_name, version, platform = default_platform)
-        filename = gem_platform_name(gem_name, version, platform)
-        spec_file = File.join(Geminabox.data, "quick", "Marshal.#{Gem.marshal_version}", "#{filename}.gemspec.rz")
-        File::open(spec_file, 'r') do |unzipped_spec_file|
-          unzipped_spec_file.binmode
-          Marshal.load(Gem::Util.inflate(unzipped_spec_file.read))
-        end if File.exist? spec_file
+        spec_for_version(GemVersion.new(gem_name, version, platform))
       end
 
       def default_platform
@@ -493,7 +485,7 @@ HTML
         dependency_cache.marshal_cache(gem_name) do
           load_gems.
             select { |gem| gem_name == gem.name }.
-            map    { |gem| [gem, spec_for(gem.name, gem.number, gem.platform)] }.
+            map    { |gem| [gem, spec_for_version(gem)] }.
             reject { |(_, spec)| spec.nil? }.
             map do |(gem, spec)|
               {
