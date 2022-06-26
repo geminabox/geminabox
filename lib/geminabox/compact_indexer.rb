@@ -37,8 +37,9 @@ module Geminabox
       end
     end
 
-    def initialize(indexer)
-      @compact_index_path = CompactIndexer.compact_index_path(indexer.directory)
+    def initialize
+      @directory = Dir.mktmpdir("geminabox-compact-index")
+      @compact_index_path = CompactIndexer.compact_index_path(@directory)
       @info_path = CompactIndexer.info_path(@compact_index_path)
       FileUtils.mkdir_p(@info_path)
     end
@@ -51,7 +52,7 @@ module Geminabox
       printf("%s: %.2f seconds\n", text, end_time - start_time)
     end
 
-    def incremental_reindex_compact_cache(gem_specs)
+    def incremental_reindex(gem_specs)
       updated_files = []
 
       version_info = VersionInfo.new
@@ -79,14 +80,13 @@ module Geminabox
       updated_files.each do |src, dest|
         FileUtils.mv(src, dest)
       end
-      FileUtils.rm_rf(@compact_index_path)
     end
 
     def all_specs
       Geminabox::GemVersionCollection.new(Specs.all_gems)
     end
 
-    def full_reindex_compact_cache
+    def full_reindex
       CompactIndexer.clear_index
       version_info = VersionInfo.new
 
@@ -100,21 +100,23 @@ module Geminabox
       version_info.write
     end
 
-    def reindex_compact_cache(specs = nil)
+    def reindex(specs = nil)
       return unless Geminabox.index_format
 
       if specs && File.exist?(CompactIndexer.versions_path)
         log_time("compact index incremental reindex") do
-          incremental_reindex_compact_cache(specs)
+          incremental_reindex(specs)
         end
       else
         log_time("compact index full rebuild") do
-          full_reindex_compact_cache
+          full_reindex
         end
       end
     rescue SystemCallError => e
       CompactIndexer.clear_index
       puts "Compact index error #{e.message}\n"
+    ensure
+      FileUtils.rm_rf(@directory)
     end
 
     def dependency_info(gem)

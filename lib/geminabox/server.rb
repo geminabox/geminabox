@@ -209,16 +209,12 @@ module Geminabox
 
   private
 
-    def indexer
-      @indexer ||= Gem::Indexer.new(Geminabox.data, :build_legacy => Geminabox.build_legacy)
-    end
-
     def reindex(force_rebuild = false)
-      Indexer.new(indexer).reindex(force_rebuild)
+      Indexer.new.reindex(force_rebuild)
     end
 
-    def reindex_compact_cache(force_rebuild = false)
-      CompactIndexer.new(indexer).reindex_compact_cache(force_rebuild)
+    def reindex_compact_index(force_rebuild = false)
+      CompactIndexer.new.reindex(force_rebuild)
     end
 
     def serialize_update(&block)
@@ -260,7 +256,7 @@ module Geminabox
       versions = CompactIndexer.fetch_versions
       return versions if versions
       serialize_update do
-        reindex_compact_cache(:force_rebuild)
+        reindex_compact_index(:force_rebuild)
         CompactIndexer.fetch_versions
       end
     end
@@ -275,7 +271,7 @@ module Geminabox
       info = CompactIndexer.fetch_info(name)
       return info if info
       serialize_update do
-        reindex_compact_cache(:force_rebuild)
+        reindex_compact_index(:force_rebuild)
         CompactIndexer.fetch_info(name)
       end
     end
