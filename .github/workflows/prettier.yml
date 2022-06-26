@@ -15,4 +15,4 @@ jobs:
     - name: Prettier JS
       run: |
         npm install prettier
-        npx prettier --check public/**/*.js
+        npx prettier --check public/**/*.js public/**/*.css

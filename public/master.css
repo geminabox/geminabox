@@ -1,11 +1,10 @@
 @import "https://fonts.googleapis.com/css?family=Droid+Sans+Mono";
 
-
 body {
   background: #ddd;
   color: #444;
   font-size: 1.2em;
-  font-family: "helvetica neue",  sans-serif;
+  font-family: "helvetica neue", sans-serif;
   margin: 0;
 }
 
@@ -13,7 +12,6 @@ small {
   color: #999;
   font-size: 60%;
 }
-
 
 a {
   text-decoration: none;
@@ -60,10 +58,12 @@ h2 {
   font-weight: 200;
   font-size: 1em;
   color: #000;
-  margin: 0 0 .5em 0;
+  margin: 0 0 0.5em 0;
   padding: 0.3em 0;
   background: #aaa;
-  border-radius: .5em .5em 0 0; -moz-border-radius: .5em .5em 0 0; -webkit-border-radius: .5em .5em 0 0;
+  border-radius: 0.5em 0.5em 0 0;
+  -moz-border-radius: 0.5em 0.5em 0 0;
+  -webkit-border-radius: 0.5em 0.5em 0 0;
 }
 
 ul.gemlist {
@@ -78,7 +78,9 @@ ul.gemlist {
 ul.gemlist li {
   margin: 1em;
   background: #eee;
-  border-radius: .5em; -moz-border-radius: .5em; -webkit-border-radius: .5em;
+  border-radius: 0.5em;
+  -moz-border-radius: 0.5em;
+  -webkit-border-radius: 0.5em;
   position: relative;
   overflow: hidden;
 }
@@ -93,13 +95,14 @@ ul.gemlist li .delete-form {
   margin: 2px 0;
 }
 ul.gemlist li button,
-ul.gemlist li a.download
-{
+ul.gemlist li a.download {
   display: none;
   position: absolute;
   right: 0;
   bottom: 0;
-  border-radius: .5em 0 0 .5em; -moz-border-radius: .5em 0 0 .5em; -webkit-border-radius: .5em 0 0 .5em;
+  border-radius: 0.5em 0 0 0.5em;
+  -moz-border-radius: 0.5em 0 0 0.5em;
+  -webkit-border-radius: 0.5em 0 0 0.5em;
   background: #c55;
   border: 0;
   color: #fff;
@@ -111,7 +114,9 @@ ul.gemlist li a.download
 
 ul.gemlist li a.download {
   background: #5c5;
-  border-radius: .5em 0 0 .5em; -moz-border-radius: .5em 0 0 .5em; -webkit-border-radius:  0 .5em .5em 0;
+  border-radius: 0.5em 0 0 0.5em;
+  -moz-border-radius: 0.5em 0 0 0.5em;
+  -webkit-border-radius: 0 0.5em 0.5em 0;
   left: 0;
   right: auto;
 }
@@ -127,17 +132,18 @@ ul.gemlist li:hover a.download {
   overflow: hidden;
   margin-top: 1em;
   font-size: 0.7em;
-  border-radius: 0 0 .5em .5em; -moz-border-radius: 0 0 .5em .5em; -webkit-border-radius: 0 0 .5em .5em;
+  border-radius: 0 0 0.5em 0.5em;
+  -moz-border-radius: 0 0 0.5em 0.5em;
+  -webkit-border-radius: 0 0 0.5em 0.5em;
   border-top: 1px dashed #ddd;
   background: #ddd;
 }
 
 #alpha_index {
   font-size: 0.8em;
-  margin-top: 1.0em;
+  margin-top: 1em;
   color: #aaa;
 }
-
 
 .gem-version p {
   margin: 0;
