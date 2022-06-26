@@ -28,9 +28,11 @@ module Geminabox
 
     end
 
-    def indexer
-      @indexer ||= Gem::Indexer.new(Geminabox.data, :build_legacy => Geminabox.build_legacy)
+    def initialize(indexer)
+      @indexer = indexer
     end
+
+    attr_reader :indexer
 
     def reindex(force_rebuild)
       self.class.fixup_bundler_rubygems!
@@ -38,7 +40,7 @@ module Geminabox
       if force_rebuild
         indexer.generate_index
         Server.dependency_cache.flush
-        CompactIndexer.reindex_compact_cache
+        CompactIndexer.new(indexer).reindex_compact_cache
       else
         begin
           updated_gemspecs = self.class.updated_gemspecs(indexer)
@@ -48,7 +50,7 @@ module Geminabox
           updated_gemspecs.each do |spec|
             Server.dependency_cache.flush_key(spec.name)
           end
-          CompactIndexer.reindex_compact_cache(updated_gemspecs)
+          CompactIndexer.new(indexer).reindex_compact_cache(updated_gemspecs)
         rescue Errno::ENOENT
           Server.with_rlock { reindex(:force_rebuild) }
         rescue StandardError => e

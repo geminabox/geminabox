@@ -209,8 +209,16 @@ module Geminabox
 
   private
 
+    def indexer
+      @indexer ||= Gem::Indexer.new(Geminabox.data, :build_legacy => Geminabox.build_legacy)
+    end
+
     def reindex(force_rebuild = false)
-      Indexer.new.reindex(force_rebuild)
+      Indexer.new(indexer).reindex(force_rebuild)
+    end
+
+    def reindex_compact_cache(force_rebuild = false)
+      CompactIndexer.new(indexer).reindex_compact_cache(force_rebuild)
     end
 
     def serialize_update(&block)
