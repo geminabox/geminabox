@@ -81,7 +81,8 @@ module Geminabox
           f << blk
         end
       end
-      Geminabox::Server.reindex
+      # TODO: activate this again once reindexing has been extracted from the server context
+      # Geminabox::Server.reindex
     end
 
     # based on http://as.rubyonrails.org/classes/File.html

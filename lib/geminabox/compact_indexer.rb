@@ -27,8 +27,6 @@ module Geminabox
         File.binread(path) if File.exist?(path)
       end
 
-      private
-
       def compact_index_path
         File.expand_path(File.join(Geminabox.data, 'compact_index'))
       end

@@ -5,6 +5,7 @@ require 'rubygems/util'
 
 module Geminabox
 
+  # rubocop:disable Metrics/ClassLength
   class Server < Sinatra::Base
     enable :static, :methodoverride
     set :public_folder, Geminabox.public_folder
@@ -33,34 +34,6 @@ module Geminabox
         return if @post_reset_hook_applied
         Gem.post_reset{ Gem::Specification.all = nil } if defined? Bundler and Gem.respond_to? :post_reset
         @post_reset_hook_applied = true
-      end
-
-      def reindex(force_rebuild = false)
-        fixup_bundler_rubygems!
-        force_rebuild = true unless Geminabox.incremental_updates
-        if force_rebuild
-          indexer.generate_index
-          dependency_cache.flush
-        else
-          begin
-            require 'geminabox/indexer'
-            updated_gemspecs = Geminabox::Indexer.updated_gemspecs(indexer)
-            return if updated_gemspecs.empty?
-            indexer.update_index
-            updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
-          rescue Errno::ENOENT
-            with_rlock { reindex(:force_rebuild) }
-          rescue => e
-            puts "#{e.class}:#{e.message}"
-            puts e.backtrace.join("\n")
-            with_rlock { reindex(:force_rebuild) }
-          end
-        end
-      rescue Gem::SystemExitException
-      end
-
-      def indexer
-        Gem::Indexer.new(Geminabox.data, :build_legacy => Geminabox.build_legacy)
       end
 
       def dependency_cache
@@ -146,8 +119,7 @@ module Geminabox
           error_response(400, "force_rebuild parameter must be either of true or false")
         end
         force_rebuild = params[:force_rebuild] == 'true'
-        self.class.reindex(force_rebuild)
-        reindex_compact_cache
+        reindex(force_rebuild)
         redirect url("/")
       end
     end
@@ -183,8 +155,7 @@ module Geminabox
 
       serialize_update do
         File.delete file_path if File.exist? file_path
-        self.class.reindex(:force_rebuild)
-        reindex_compact_cache
+        reindex(:force_rebuild)
         redirect url("/")
       end
 
@@ -204,10 +175,10 @@ module Geminabox
         gems.each do |gem|
           gem_path = File.expand_path(File.join(Geminabox.data, 'gems',
                                                 "#{gem.gemfile_name}.gem"))
+          load_gems.delete(gem)
           File.delete gem_path if File.exists? gem_path
         end
-        self.class.reindex(:force_rebuild)
-        reindex_compact_cache
+        reindex(:force_rebuild)
         return 200, 'Yanked gem and reindexed'
       end
     end
@@ -245,6 +216,38 @@ module Geminabox
 
   private
 
+    def reindex(force_rebuild = false)
+      self.class.fixup_bundler_rubygems!
+      force_rebuild = true unless Geminabox.incremental_updates
+      if force_rebuild
+        indexer.generate_index
+        dependency_cache.flush
+        reindex_compact_cache
+      else
+        begin
+          require 'geminabox/indexer'
+          updated_gemspecs = Geminabox::Indexer.updated_gemspecs(indexer)
+          return if updated_gemspecs.empty?
+          indexer.update_index
+          updated_gemspecs.each do |spec|
+            dependency_cache.flush_key(spec.name)
+          end
+          reindex_compact_cache(updated_gemspecs)
+        rescue Errno::ENOENT
+          with_rlock { reindex(:force_rebuild) }
+        rescue => e
+          puts "#{e.class}:#{e.message}"
+          puts e.backtrace.join("\n")
+          with_rlock { reindex(:force_rebuild) }
+        end
+      end
+    rescue Gem::SystemExitException
+    end
+
+    def indexer
+      @indexer ||= Gem::Indexer.new(Geminabox.data, :build_legacy => Geminabox.build_legacy)
+    end
+
     def serialize_update(&block)
       with_rlock(&block)
     rescue ReentrantFlock::AlreadyLocked
@@ -258,7 +261,7 @@ module Geminabox
     def handle_incoming_gem(gem)
       begin
         GemStore.create(gem, params[:overwrite])
-        reindex_compact_cache
+        reindex
       rescue GemStoreError => error
         error_response error.code, error.reason
       end
@@ -276,13 +279,48 @@ module Geminabox
       end
     end
 
-    def reindex_compact_cache
-      return unless Geminabox.index_format
-      CompactIndexer.clear_index
-      CompactIndexer.reindex_versions(versions_template)
-      Hash[load_gems.by_name].each do |name, versions|
-        CompactIndexer.reindex_info(name, info_template(versions).content)
+    def incremental_reindex_compact_cache(specs)
+      version_info = VersionInfo.new
+      version_info.load_versions
+
+      specs.group_by(&:name).each do |name, gem_specs|
+        info = DependencyInfo.new(name)
+        data = CompactIndexer.fetch_info(name)
+        info.content = data if data
+        gem_specs.each do |spec|
+          gem_version = GemVersion.new(name, spec.version, spec.platform)
+          checksum = checksum_for_version(gem_version)
+          info.add_gem_spec_and_gem_checksum(spec, checksum)
+        end
+        CompactIndexer.reindex_info(name, info.content)
+        version_info.update_gem_versions(info)
       end
+
+      version_info.write
+    end
+
+    def full_reindex_compact_cache
+      CompactIndexer.clear_index
+      version_info = VersionInfo.new
+
+      Hash[load_gems.by_name].each do |name, versions|
+        info = info_template(versions)
+        CompactIndexer.reindex_info(name, info.content)
+        version_info.update_gem_versions(info)
+      end
+
+      version_info.write
+    end
+
+    def reindex_compact_cache(specs = nil)
+      return unless Geminabox.index_format
+
+      if specs && File.exist?(CompactIndexer.versions_path)
+        incremental_reindex_compact_cache(specs)
+        return
+      end
+
+      full_reindex_compact_cache
     rescue SystemCallError => e
       puts "Compact index error #{e.message}\n"
     end
@@ -292,7 +330,12 @@ module Geminabox
     end
 
     def local_versions
-      CompactIndexer.fetch_versions || versions_template
+      versions = CompactIndexer.fetch_versions
+      return versions if versions
+      serialize_update do
+        reindex_compact_cache(:force_rebuild)
+        CompactIndexer.fetch_versions
+      end
     end
 
     def remote_gem_info(name)
@@ -301,7 +344,13 @@ module Geminabox
 
     def local_gem_info(name)
       gem = find_gem(name)
-      CompactIndexer.fetch_info(name) || info_template(gem).content if gem
+      return nil unless gem
+      info = CompactIndexer.fetch_info(name)
+      return info if info
+      serialize_update do
+        reindex_compact_cache(:force_rebuild)
+        CompactIndexer.fetch_info(name)
+      end
     end
 
     def find_gem(name)
@@ -488,5 +537,6 @@ HTML
       end
     end
   end
+  # rubocop:enable Metrics/ClassLength
 
 end

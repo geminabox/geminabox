@@ -71,6 +71,8 @@ class Geminabox::TestCase < Minitest::Test
       test("can yank #{gemname}") do
         gem_file = gem_file(gemname, *args)
         gemcutter_push(gem_file)
+        gem_path = File.join(config.data, "gems", File.basename(gem_file) )
+        assert File.exist?( gem_path ), "Gemfile not in data dir."
         gemcutter_yank(gemname, version)
         gem_path = File.join(config.data, "gems", File.basename(gem_file) )
         assert !File.exist?( gem_path ), "Gemfile in data dir."

@@ -39,6 +39,7 @@ module Geminabox
   autoload :IncomingGem,            geminabox_path('incoming_gem')
   autoload :CompactIndexer,         geminabox_path('compact_indexer')
   autoload :DependencyInfo,         geminabox_path('dependency_info')
+  autoload :VersionInfo,            geminabox_path('version_info')
 
   class << self
 
