@@ -38,6 +38,7 @@ module Geminabox
   autoload :DiskCache,              geminabox_path('disk_cache')
   autoload :IncomingGem,            geminabox_path('incoming_gem')
   autoload :CompactIndexer,         geminabox_path('compact_indexer')
+  autoload :DependencyInfo,         geminabox_path('dependency_info')
 
   class << self
 

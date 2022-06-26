@@ -281,7 +281,7 @@ module Geminabox
       CompactIndexer.clear_index
       CompactIndexer.reindex_versions(versions_template)
       Hash[load_gems.by_name].each do |name, versions|
-        CompactIndexer.reindex_info(name, info_template(versions))
+        CompactIndexer.reindex_info(name, info_template(versions).content)
       end
     rescue SystemCallError => e
       puts "Compact index error #{e.message}\n"
@@ -301,7 +301,7 @@ module Geminabox
 
     def local_gem_info(name)
       gem = find_gem(name)
-      CompactIndexer.fetch_info(name) || info_template(gem) if gem
+      CompactIndexer.fetch_info(name) || info_template(gem).content if gem
     end
 
     def find_gem(name)
@@ -406,14 +406,17 @@ HTML
     end
 
     def info_template(gem)
-      str = "---\n".dup
-      gem.by_name do |_name, versions|
-        versions.each do |version|
-          str << version_info(version)
-          str << "\n"
+      DependencyInfo.new(gem.first.name) do |info|
+        gem.by_name do |_name, versions|
+          versions.each do |version|
+            spec = spec_for_version(version)
+            next unless spec
+            checksum = checksum_for_version(version)
+            next unless checksum
+            info.add_gem_spec_and_gem_checksum(spec, checksum)
+          end
         end
       end
-      str
     end
 
     def versions_template
@@ -425,38 +428,10 @@ HTML
         str << "#{name} "
         str << versions.map(&:version_name_with_platform).join(",")
         str << " "
-        str << Digest::MD5.hexdigest(info_template(lookup[name]))
+        str << info_template(lookup[name]).digest
         str << "\n"
       end
       str
-    end
-
-    def version_info(version)
-      spec = spec_for_version(version)
-      "#{version.version_name_with_platform} #{dependencies_for(spec)} " \
-        "|checksum:#{checksum_for_version(version)}" \
-        "#{ruby_requirements_for(spec)}#{rubygems_requirements_for(spec)}"
-    end
-
-    def ruby_requirements_for(spec)
-      required_ruby_version = spec.required_ruby_version
-      ",ruby:#{required_ruby_version.requirements.sort.map{|requirement|
- requirement.join(" ")}.join("&")}" unless required_ruby_version <=> without_ruby_requirement
-    end
-
-    def rubygems_requirements_for(spec)
-      required_rubygems_version = spec.required_rubygems_version
-      ",rubygems:#{required_rubygems_version.requirements.sort.map{|requirement|
- requirement.join(" ")}.join("&")}" unless required_rubygems_version <=> without_ruby_requirement
-    end
-
-    def dependencies_for(spec)
-      spec.runtime_dependencies.sort.map { |dependency| [dependency.name, dependency.requirement.requirements.sort.map{ |requirement|
- requirement.join(" ")}.join("&")].join(":") }.join(",")
-    end
-
-    def without_ruby_requirement
-      @without_ruby_requirement ||= Gem::Requirement.new([">= 0"])
     end
 
     helpers do
