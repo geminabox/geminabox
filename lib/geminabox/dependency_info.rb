@@ -51,12 +51,14 @@ module Geminabox
 
     private
 
+    PREAMBLE = "---\n"
+
     def decode(content = @content)
-      content.to_s.each_line.grep_v(/^--/).map { |line| parse_line(line.chomp) }
+      content.to_s.each_line.map { |line| parse_line(line.chomp) unless line == PREAMBLE }.compact
     end
 
     def encode(versions = @versions)
-      str = "---\n".dup
+      str = PREAMBLE.dup
       if versions
         versions.each do |version, platform, dependencies, requirements|
           str << version_name(version, platform)
