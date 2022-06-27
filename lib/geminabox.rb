@@ -81,6 +81,10 @@ module Geminabox
       end
     end
 
+    def supported_compact_index_configuration?
+      compact_index && rubygems_proxy_merge_strategy != :combine_local_and_remote_gem_versions
+    end
+
     def settings
       Server.settings
     end

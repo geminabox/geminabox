@@ -77,8 +77,8 @@ module Geminabox
 
     get '/versions' do
       content_type 'text/plain'
+      return halt(404) unless Geminabox.supported_compact_index_configuration?
 
-      return halt(404) if Geminabox.rubygems_proxy_merge_strategy == :combine_local_and_remote_gem_versions || !Geminabox.compact_index
       if Geminabox.rubygems_proxy
         GemVersionsMerge.merge(local_versions, remote_versions, strategy: Geminabox.rubygems_proxy_merge_strategy)
       else
@@ -88,8 +88,8 @@ module Geminabox
 
     get '/names' do
       content_type 'text/plain'
+      return halt(404) unless Geminabox.supported_compact_index_configuration?
 
-      return halt(404) if Geminabox.rubygems_proxy_merge_strategy == :combine_local_and_remote_gem_versions || !Geminabox.compact_index
       if Geminabox.rubygems_proxy
         error_response(404, 'Not implemented')
       else
@@ -119,8 +119,8 @@ module Geminabox
 
     get '/info/:gemname' do
       content_type 'text/plain'
+      return halt(404) unless Geminabox.supported_compact_index_configuration?
 
-      return halt(404) if Geminabox.rubygems_proxy_merge_strategy == :combine_local_and_remote_gem_versions || !Geminabox.compact_index
       name = params[:gemname]
       info = if Geminabox.rubygems_proxy
                if Geminabox.rubygems_proxy_merge_strategy == :local_gems_take_precedence_over_remote_gems
