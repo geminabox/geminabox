@@ -43,6 +43,23 @@ Create a config.ru as follows:
 
 Start your gem server with 'rackup' to run WEBrick or hook up the config.ru as you normally would ([passenger](https://www.phusionpassenger.com/), [thin](http://code.macournoyer.com/thin/), [unicorn](https://bogomips.org/unicorn/), whatever floats your boat).
 
+## Configuration
+
+Mode of operation of a Geminabox server is controlled through the following boolean attributes on
+class `Geminabox`:
+
+|----------------------------------|------------------------------------------------------------------------------------------------|
+| allow\_upload                    | allow uploads of gems to the server                                                            |
+| allow\_replace                   | allow local gems to be replaced with new versions (this is insecure, use at your own risk)     |
+| allow\_delete                    | allow deletions of local gems                                                                  |
+| compact\_index                   | build compact index and support compact index API                                              |
+| incremental\_updates             | build gem indexes incrementally                                                                |
+| rubygems\_proxy                  | whether gems from an upstream rubygems server should be fetched and added to the local index   |
+| rubygems\_proxy\_merge\_strategy | how local gems and upstream gems should be combined                                            |
+| allow\_remote\_failure           | whether the server should serve locally stored gems in case the upstream server is unavaliable |
+|----------------------------------|------------------------------------------------------------------------------------------------|
+
+
 ## RubyGems Proxy
 
 Geminabox can be configured to pull gems, it does not currently have, from rubygems.org. To enable this mode you can either:
@@ -58,6 +75,37 @@ Or in config.ru (before the run command), set:
 If you want Geminabox to carry on providing gems when rubygems.org is unavailable, add this to config.ru:
 
     Geminabox.allow_remote_failure = true
+
+### RubyGems Proxy Merge Strategy
+
+When running a proxy, there are three strategies to chose from:
+
+#### local_gems_take_precedence_over_remote_gems
+
+When serving gem index information, the list of versions for a particular gem consists of
+either the versions in the local index or the versions in the remote index, where the
+local version list for the given gem overwrites the remote version list. Unfortunately, it
+has the undesirable consequence that once a proxied gem has been added to the local index,
+its version list is reduced to just that version and remote updates will no longer be
+retrieved. See https://github.com/geminabox/geminabox/pull/345 for some discussion on this
+this topic.
+
+#### remote_gems_take_precedence_over_local_gems
+
+When serving gem index information, the list of versions for a particular gem consists of
+either the versions in the local index or the versions in the remote index, where the
+remote version list overwrites the local version list. Note that this option is rather
+insecure, especially if you host in-house gems on your server: Given that your in-house
+gems are not on rugymes.org, an attacker can easily replace any of these gems by uploading
+a changed gem for an existing version or a gem with a higher version to rubygems.org.
+
+#### combine_local_and_remote_gem_versions
+
+When serving gem index information, combine local versions and remote versions. This
+strategy is also insecure, buts was the only one available up to and including Geminabox
+version 1.2.0. It has the unfortunate side effect of disabling the compact index which is
+paramount for bundler to work efficiently.
+
 
 ## HTTP adapter
 
