@@ -1,50 +1,59 @@
+# Changelog for the latest release
+
 See https://github.com/geminabox/geminabox/releases.
 
+# 1.4.2 - 1.5.0
+
+- https://github.com/geminabox/geminabox/releases/tag/v1.5.0
 - https://github.com/geminabox/geminabox/releases/tag/v1.4.3
 - https://github.com/geminabox/geminabox/releases/tag/v1.4.2
 
-# 1.4.1 (2021-05-30)
+# 1.0.0 - 1.4.1
+
+###### 1.4.1 (2021-05-30)
 
 - https://github.com/geminabox/geminabox/releases/tag/v1.4.1
-# 1.4.0 (2021-05-30)
+###### 1.4.0 (2021-05-30)
 
 - https://github.com/geminabox/geminabox/releases/tag/v1.4.0
 
-# 1.3.1 (2021-05-30)
+###### 1.3.1 (2021-05-30)
 
 - https://github.com/geminabox/geminabox/releases/tag/v1.3.1
 
-# 1.3.0 (2021-03-18)
+###### 1.3.0 (2021-03-18)
 
 - https://github.com/geminabox/geminabox/releases/tag/v1.3.0
 
-# 1.2.0 (2020-03-05)
+###### 1.2.0 (2020-03-05)
 
 - https://github.com/geminabox/geminabox/releases/tag/v1.2.0
 
-# 1.1.1 (2018-11-08)
+###### 1.1.1 (2018-11-08)
 
 - https://github.com/geminabox/geminabox/releases/tag/v1.1.1
 
-# 1.1.0 (2018-04-06)
+###### 1.1.0 (2018-04-06)
 
 - https://github.com/geminabox/geminabox/releases/tag/v1.1.1
 
-# 1.0.1 (2018-03-04)
+###### 1.0.1 (2018-03-04)
 
 - https://github.com/geminabox/geminabox/releases/tag/v1.0.1
 
-# 1.0.0 (2018-02-01)
+###### 1.0.0 (2018-02-01)
 
 - https://github.com/geminabox/geminabox/releases/tag/v1.0.0
 
-# 0.13.15 (2018-01-26)
+# 0.13.x
+
+###### 0.13.15 (2018-01-26)
 
 Fixes:
 
 * Fix typo: avoid NameError - uninitialized constant Geminabox::Hostess::Gemianbox (thanks to Evgeni Golov)
 
-# 0.13.14 (2018-01-25)
+###### 0.13.14 (2018-01-25)
 
 Fixes:
 
@@ -74,36 +83,36 @@ use Rack::Protection
 run Geminabox::Server
 ```
 
-# 0.13.13 (2018-01-11)
+###### 0.13.13 (2018-01-11)
 
 Fixes:
 
 * Update link to issue shown at an error message (thanks to Tobias L. Maier)
 * Hide delete button if delete disabled in gem view (thanks to Tobias L. Maier)
 
-# 0.13.12
+###### 0.13.12
 
 yanked
 
-# 0.13.11 (2017-11-17)
+###### 0.13.11 (2017-11-17)
 
 Fixes:
 
 * Fix \_cache file is not closed
 
-# 0.13.10 (2017-11-13)
+###### 0.13.10 (2017-11-13)
 
 Fix vulnerabilities:
 
 * Fix stored XSS vulnerabilities - CVE-2017-16792 (reported by Yasin Soliman)
 
-# 0.13.9 (2017-09-25)
+###### 0.13.9 (2017-09-25)
 
 Enhancements:
 
 * Make it be configurable HTTPClient options of Geminabox.http_adapter
 
-# 0.13.8 (2017-09-24)
+###### 0.13.8 (2017-09-24)
 
 Fixes:
 
@@ -111,37 +120,37 @@ Fixes:
 * gem inabox command should get gemname from gemspec rather than directory name
 * Concurrent reindex(:force_rebuild) should be serialized
 
-# 0.13.7 (2017-09-23)
+###### 0.13.7 (2017-09-23)
 
 Fix vulnerabilities:
 
 * Fix CSRF vulnerabilities - CVE-2017-14683 (reported by Barak Tawily)
 
-# 0.13.6 (2017-09-19)
+###### 0.13.6 (2017-09-19)
 
 Fix vulnerabilities:
 
 * Fix XSS vulnerabilities - CVE-2017-14506 (reported by Barak Tawily)
 
-# 0.13.5 (2017-01-14)
+###### 0.13.5 (2017-01-14)
 
 Fixes:
 
 * disk_cache.rb: ignore Errno::ENOENT, and EOFError. There is a possibility that the file is removed by another process after checking File.exist?.
 
-# 0.13.4 (2016-10-25)
+###### 0.13.4 (2016-10-25)
 
 Fixes:
 
 * Fix allow_remote_failure was not working in proxy/file_handler
 
-# 0.13.3 (2016-10-13)
+###### 0.13.3 (2016-10-13)
 
 Enhancements:
 
 * Add force_rebuild query parameter option to reindex route #244 (thanks to kbacha)
 
-# 0.13.2 (2016-10-13)
+###### 0.13.2 (2016-10-13)
 
 Enhancements:
 
