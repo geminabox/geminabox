@@ -101,7 +101,7 @@ module Geminabox
     end
 
     def reindex(specs = nil)
-      return unless Geminabox.index_format
+      return unless Geminabox.compact_index
 
       if specs && File.exist?(CompactIndexer.versions_path)
         log_time("compact index incremental reindex") do
