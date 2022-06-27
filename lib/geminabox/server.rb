@@ -2,6 +2,7 @@
 
 require 'reentrant_flock'
 require 'rubygems/util'
+require 'set'
 
 module Geminabox
 
@@ -90,11 +91,14 @@ module Geminabox
       content_type 'text/plain'
       return halt(404) unless Geminabox.supported_compact_index_configuration?
 
-      if Geminabox.rubygems_proxy
-        error_response(404, 'Not implemented')
-      else
-        ["---", load_gems.list].join("\n")
-      end
+      return ["---", load_gems.list].join("\n") unless Geminabox.rubygems_proxy
+
+      gem_names = Set.new(load_gems.list)
+      remote_names = RubygemsNames.fetch.to_s.split("\n")
+      remote_names.shift if remote_names.first == "---"
+      gem_names.merge(remote_names)
+
+      ["---", gem_names.to_a.sort].join("\n")
     end
 
     get '/upload' do

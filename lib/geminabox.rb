@@ -29,6 +29,7 @@ module Geminabox
   autoload :GemStoreError,          geminabox_path('gem_store_error')
   autoload :RubygemsDependency,     geminabox_path('rubygems_dependency')
   autoload :RubygemsVersions,       geminabox_path('rubygems_versions')
+  autoload :RubygemsNames,          geminabox_path('rubygems_names')
   autoload :RubygemsInfo,           geminabox_path('rubygems_info')
   autoload :GemListMerge,           geminabox_path('gem_list_merge')
   autoload :GemVersionsMerge,       geminabox_path('gem_versions_merge')
