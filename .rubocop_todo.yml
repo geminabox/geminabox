@@ -188,13 +188,6 @@ Layout/EmptyLinesAroundModuleBody:
     - 'test/units/geminabox/disk_cache_test.rb'
     - 'test/units/geminabox/rubygems_dependency_test.rb'
 
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowForAlignment, AllowBeforeTrailingComments, ForceEqualSignAlignment.
-Layout/ExtraSpacing:
-  Exclude:
-    - 'geminabox.gemspec'
-
 # Offense count: 6
 # This cop supports safe autocorrection (--autocorrect).
 # Configuration parameters: IndentationWidth.
@@ -514,14 +507,6 @@ Naming/RescuedExceptionsVariableName:
     - 'test/units/geminabox/gem_store_error_test.rb'
     - 'test/units/geminabox/gem_store_test.rb'
 
-# Offense count: 3
-# Configuration parameters: EnforcedStyle, CheckMethodNames, CheckSymbols, AllowedIdentifiers, AllowedPatterns.
-# SupportedStyles: snake_case, normalcase, non_integer
-# AllowedIdentifiers: capture3, iso8601, rfc1123_date, rfc822, rfc2822, rfc3339
-Naming/VariableNumber:
-  Exclude:
-    - 'lib/geminabox/indexer.rb'
-
 # Offense count: 1
 Security/Eval:
   Exclude:
@@ -589,14 +574,6 @@ Style/ColonMethodCall:
     - 'lib/geminabox/server.rb'
     - 'lib/geminabox_client.rb'
     - 'test/test_support/geminabox_test_case.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: EnforcedStyle, SingleLineConditionsOnly, IncludeTernaryExpressions.
-# SupportedStyles: assign_to_condition, assign_inside_condition
-Style/ConditionalAssignment:
-  Exclude:
-    - 'lib/geminabox/incoming_gem.rb'
 
 # Offense count: 26
 # Configuration parameters: AllowedConstants.
