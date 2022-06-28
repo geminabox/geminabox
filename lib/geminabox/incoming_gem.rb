@@ -33,17 +33,7 @@ module Geminabox
     end
 
     def spec
-      @spec ||= extract_spec
-    end
-
-    def extract_spec
-      if Gem::Package.respond_to? :open
-        Gem::Package.open(gem_data, "r", nil) do |pkg|
-          return pkg.metadata
-        end
-      else
-        Gem::Package.new(@tempfile.path).spec
-      end
+      @spec ||= Gem::Package.new(@tempfile.path).spec
     end
 
     def name
