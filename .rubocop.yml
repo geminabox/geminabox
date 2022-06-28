@@ -5,6 +5,10 @@ AllCops:
   NewCops: enable
   SuggestExtensions: false
 
+# Dsiabling this cop just before setting TargetRubyVersion to 2.3
+Gemspec/RequiredRubyVersion:
+  Enabled: false
+
 # Disabling this cop at this moment
 # https://github.com/rubocop/rubocop/pull/10696
 Lint/NonAtomicFileOperation:
