@@ -39,7 +39,7 @@ module Geminabox
     end
 
     def http_engine
-      :net_http  # make requests with Net::HTTP
+      :net_http # make requests with Net::HTTP
     end
 
     def options
@@ -52,10 +52,15 @@ module Geminabox
     private
 
     def set_username_and_password(connection, username, password)
+      # Remove this condition when Faraday 0.x dropped (when Ruby 2.2 dropped)
       if Gem::Version.new(Faraday::VERSION) < Gem::Version.new("1.0")
         connection.basic_auth username, password
-      else
+      # Remove this condition when Faraday 1.x dropped (when Ruby 2.5 dropped)
+      elsif Gem::Version.new(Faraday::VERSION) < Gem::Version.new("2.0")
         connection.request :basic_auth, username, password
+      else
+        # Faraday 2.x
+        connection.request :authorization, :basic, username, password
       end
     end
 
