@@ -27,7 +27,7 @@ module Geminabox
         faraday.adapter http_engine
         faraday.proxy(ENV['http_proxy']) if ENV['http_proxy']
       end
-      connection.request(:basic_auth, username, password) if username
+      set_username_and_password connection, username, password
       connection
     end
 
@@ -47,6 +47,16 @@ module Geminabox
         faraday.adapter http_engine
         faraday.proxy(ENV['http_proxy']) if ENV['http_proxy']
       }
+    end
+
+    private
+
+    def set_username_and_password(connection, username, password)
+      if Gem::Version.new(Faraday::VERSION) < Gem::Version.new("1.0")
+        connection.basic_auth username, password
+      else
+        connection.request :basic_auth, username, password
+      end
     end
 
   end
