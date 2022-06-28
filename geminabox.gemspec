@@ -3,12 +3,15 @@ require File.expand_path('../lib/geminabox/version', __FILE__)
 Gem::Specification.new do |s|
   s.name              = 'geminabox'
   s.version           = Geminabox::VERSION
-  s.summary           = 'Really simple rubygem hosting'
-  s.description       = 'A sinatra based gem hosting app, with client side gem push style functionality.'
-  s.authors           = ['Tom Lea', 'Jack Foy', 'Rob Nichols', 'Naotoshi Seo']
-  s.email             = ['contrib@tomlea.co.uk', 'jack@foys.net', 'rob@undervale.co.uk', 'sonots@gmail.com']
-  s.homepage          = 'http://tomlea.co.uk/p/gem-in-a-box'
-  s.metadata          = { "source_code_uri" => "https://github.com/geminabox/geminabox" }
+  s.summary           = 'Really simple private RubyGems hosting'
+  s.description       = 'A private gem hosting and/or caching app, with client side gem push style functionality. Web UI is provided.'
+  s.authors           = ['Tom Lea', 'Jack Foy', 'Rob Nichols', 'Naotoshi Seo', "Takuya Noguchi"]
+  s.email             = ['contrib@tomlea.co.uk', 'jack@foys.net', 'rob@undervale.co.uk', 'sonots@gmail.com', "takninnovationresearch@gmail.com"]
+  s.homepage          = "https://github.com/geminabox/geminabox"
+
+  s.metadata["homepage_uri"]    = s.homepage
+  s.metadata["source_code_uri"] = "https://github.com/geminabox/geminabox"
+  s.metadata["changelog_uri"]   = "https://github.com/geminabox/geminabox/releases"
 
   s.required_ruby_version     = ">= 2.3.0"
   s.required_rubygems_version = ">= 2.4.0"
