@@ -12,10 +12,10 @@ For basic auth, try [Rack::Auth](http://www.rubydoc.info/github/rack/rack/Rack/A
 
 ## System Requirements
 
-- Ruby 2.2 though 3.1 (Ruby 2.7, 3.0, or 3.1 is highly recommended)
-- RubyGems 1.8.25+, 2.x, and 3.0 through 3.3 (2.5.2 or higher is highly recommended)
+- Ruby 2.2 through 3.1 (Ruby 2.7, 3.0, or 3.1 is highly recommended)
+- RubyGems 2.4 through 3.3 (2.5.2 or higher is highly recommended)
 
-Use RubyGems the latest version (at least 2.5.2) for as an end-user full features like ([gem yank --host](https://github.com/rubygems/rubygems/pull/1361)).
+Use RubyGems the latest version (at least 2.5.2) for as an end-user full features like [`gem yank --host`](https://github.com/rubygems/rubygems/pull/1361).
 
 ## Server Setup
 
