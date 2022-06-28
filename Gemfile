@@ -18,4 +18,6 @@ group :test do
 
   # Used only in test/requests/atom_feed_test.rb
   gem "rss", require: false
+
+  gem "simplecov"
 end
