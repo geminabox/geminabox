@@ -23,4 +23,7 @@ group :test do
   end
 
   gem 'webmock'
+
+  # Used only in test/requests/atom_feed_test.rb
+  gem "rss", require: false
 end
