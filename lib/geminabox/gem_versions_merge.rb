@@ -1,7 +1,13 @@
 module Geminabox
   module GemVersionsMerge
     def self.merge(local_gem_list, remote_gem_list, strategy:)
-      strategy_for(strategy).merge(local_gem_list, remote_gem_list)
+      return local_gem_list unless remote_gem_list
+
+      local_split = local_gem_list.split("\n")
+      remote_split = remote_gem_list.split("\n")
+      combined = strategy_for(strategy).merge(local_split, remote_split)
+
+      "#{(local_split[0..1] + combined.values).join("\n")}\n"
     end
 
     def self.strategy_for(strategy)
@@ -22,24 +28,14 @@ module Geminabox
     end
 
     module LocalGemsTakePrecedenceOverRemoteGems
-      def self.merge(local_gem_list, remote_gem_list)
-        return local_gem_list unless remote_gem_list
-
-        local_split = local_gem_list.split("\n")
-        remote_split = remote_gem_list.split("\n")
-        combined = Helpers.gems_hash(remote_split).merge(Helpers.gems_hash(local_split))
-        "#{(local_split[0..1] + combined.values).join("\n")}\n"
+      def self.merge(local_split, remote_split)
+        Helpers.gems_hash(remote_split).merge(Helpers.gems_hash(local_split))
       end
     end
 
     module RemoteGemsTakePrecedenceOverLocalGems
-      def self.merge(local_gem_list, remote_gem_list)
-        return local_gem_list unless remote_gem_list
-
-        local_split = local_gem_list.split("\n")
-        remote_split = remote_gem_list.split("\n")
-        combined = Helpers.gems_hash(local_split).merge(Helpers.gems_hash(remote_split))
-        "#{(local_split[0..1] + combined.values).join("\n")}\n"
+      def self.merge(local_split, remote_split)
+        Helpers.gems_hash(local_split).merge(Helpers.gems_hash(remote_split))
       end
     end
   end
