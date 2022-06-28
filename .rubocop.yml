@@ -5,6 +5,12 @@ AllCops:
   NewCops: enable
   SuggestExtensions: false
 
+# Disabling this cop at this moment
+# https://github.com/rubocop/rubocop/pull/10696
+Lint/NonAtomicFileOperation:
+  Enabled: false
+
+# The following is a workaround for disorder in rubocop auto-gen-config
 Layout/SpaceBeforeBlockBraces:
   Exclude:
     - 'lib/geminabox_client.rb'
@@ -22,3 +28,4 @@ Layout/SpaceBeforeBlockBraces:
 Naming/MethodName:
   Exclude:
     - 'test/units/geminabox/server_test.rb'
+# DO NOT ADD BELOW THIS SECTION
