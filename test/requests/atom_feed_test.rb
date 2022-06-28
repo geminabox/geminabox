@@ -1,6 +1,7 @@
 require_relative '../test_helper'
 require 'minitest/unit'
 require 'rack/test'
+require 'rss/atom'
 
 class AtomFeedTest < Minitest::Test
   include Rack::Test::Methods
