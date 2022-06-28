@@ -38,27 +38,36 @@ module Geminabox
       self.class.fixup_bundler_rubygems!
       force_rebuild = true unless Geminabox.incremental_updates
       if force_rebuild
-        indexer.generate_index
-        Server.dependency_cache.flush
-        CompactIndexer.new.reindex
+        full_reindex
       else
-        begin
-          updated_gemspecs = self.class.updated_gemspecs(indexer)
-          return if updated_gemspecs.empty?
-
-          indexer.update_index
-          updated_gemspecs.each do |spec|
-            Server.dependency_cache.flush_key(spec.name)
-          end
-          CompactIndexer.new.reindex(updated_gemspecs)
-        rescue Errno::ENOENT
-          Server.with_rlock { reindex(:force_rebuild) }
-        rescue StandardError => e
-          puts "#{e.class}:#{e.message}"
-          puts e.backtrace.join("\n")
-          Server.with_rlock { reindex(:force_rebuild) }
-        end
+        incremental_reindex
       end
     end
+
+    private
+
+    def full_reindex
+      indexer.generate_index
+      Server.dependency_cache.flush
+      CompactIndexer.new.reindex
+    end
+
+    def incremental_reindex
+      updated_gemspecs = self.class.updated_gemspecs(indexer)
+      return if updated_gemspecs.empty?
+
+      indexer.update_index
+      updated_gemspecs.each do |spec|
+        Server.dependency_cache.flush_key(spec.name)
+      end
+      CompactIndexer.new.reindex(updated_gemspecs)
+    rescue Errno::ENOENT
+      Server.with_rlock { reindex(:force_rebuild) }
+    rescue StandardError => e
+      puts "#{e.class}:#{e.message}"
+      puts e.backtrace.join("\n")
+      Server.with_rlock { reindex(:force_rebuild) }
+    end
+
   end
 end

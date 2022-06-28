@@ -21,17 +21,22 @@ module Geminabox
       end
     end
 
+    module Helpers
+      def self.merge(gems, other_gems)
+        names = Set.new(gems.map { |gem| gem[:name] })
+        gems + other_gems.reject { |gem| names.include? gem[:name] }
+      end
+    end
+
     module LocalGemsTakePrecedenceOverRemoteGems
       def self.merge(local_gem_list, remote_gem_list)
-        names = Set.new(local_gem_list.map { |gem| gem[:name] })
-        local_gem_list + remote_gem_list.reject { |gem| names.include? gem[:name] }
+        Helpers.merge(local_gem_list, remote_gem_list)
       end
     end
 
     module RemoteGemsTakePrecedenceOverLocalGems
       def self.merge(local_gem_list, remote_gem_list)
-        names = Set.new(remote_gem_list.map { |gem| gem[:name] })
-        remote_gem_list + local_gem_list.reject { |gem| names.include? gem[:name] }
+        Helpers.merge(remote_gem_list, local_gem_list)
       end
     end
 

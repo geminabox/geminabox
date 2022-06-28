@@ -37,6 +37,23 @@ module Geminabox
       end
     end
 
+    def reindex(specs = nil)
+      return unless Geminabox.compact_index
+
+      if specs && File.exist?(CompactIndexer.versions_path)
+        log_time("compact index incremental reindex") do
+          incremental_reindex(specs)
+        end
+        return
+      end
+
+      log_time("compact index full rebuild") do
+        full_reindex
+      end
+    end
+
+    private
+
     def log_time(text)
       start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
       yield
@@ -51,11 +68,24 @@ module Geminabox
       info_path = CompactIndexer.info_path(compact_index_path)
       FileUtils.mkdir_p(info_path)
 
-      updated_files = []
-
       version_info = VersionInfo.new
       version_info.load_versions
 
+      updated_files = update_info_files(gem_specs, info_path, version_info)
+
+      file_path = CompactIndexer.versions_path(compact_index_path)
+      updated_files << [file_path, CompactIndexer.versions_path]
+      version_info.write(file_path)
+
+      updated_files.each do |src, dest|
+        FileUtils.mv(src, dest)
+      end
+    ensure
+      FileUtils.rm_rf(directory)
+    end
+
+    def update_info_files(gem_specs, info_path, version_info)
+      updated_files = []
       gem_specs.group_by(&:name).each do |name, specs|
         info = DependencyInfo.new(name)
         data = CompactIndexer.fetch_info(name)
@@ -65,21 +95,12 @@ module Geminabox
           checksum = Specs.checksum_for_version(gem_version)
           info.add_gem_spec_and_gem_checksum(spec, checksum)
         end
-        file = CompactIndexer.info_name_path(name, info_path)
-        updated_files << [file, CompactIndexer.info_name_path(name)]
-        File.binwrite(file, info.content)
+        file_path = CompactIndexer.info_name_path(name, info_path)
+        updated_files << [file_path, CompactIndexer.info_name_path(name)]
+        File.binwrite(file_path, info.content)
         version_info.update_gem_versions(info)
       end
-
-      file = CompactIndexer.versions_path(compact_index_path)
-      updated_files << [file, CompactIndexer.versions_path]
-      version_info.write(file)
-
-      updated_files.each do |src, dest|
-        FileUtils.mv(src, dest)
-      end
-    ensure
-      FileUtils.rm_rf(directory)
+      updated_files
     end
 
     def all_specs
@@ -100,37 +121,15 @@ module Geminabox
       version_info.write
     end
 
-    def reindex(specs = nil)
-      return unless Geminabox.compact_index
-
-      if specs && File.exist?(CompactIndexer.versions_path)
-        log_time("compact index incremental reindex") do
-          incremental_reindex(specs)
-        end
-      else
-        log_time("compact index full rebuild") do
-          full_reindex
-        end
-      end
-    rescue SystemCallError => e
-      CompactIndexer.clear_index
-      puts "Compact index error #{e.message}\n"
-    end
-
     def dependency_info(gem)
-      DependencyInfo.new(gem.first.name) do |info|
-        gem.by_name do |_name, versions|
-          versions.each do |version|
-            spec = Specs.spec_for_version(version)
-            next unless spec
-
-            checksum = Specs.checksum_for_version(version)
-            next unless checksum
-
-            info.add_gem_spec_and_gem_checksum(spec, checksum)
-          end
-        end
+      name, versions = gem.by_name.first
+      info = DependencyInfo.new(name)
+      versions.each do |version|
+        spec = Specs.spec_for_version(version)
+        checksum = Specs.checksum_for_version(version) if spec
+        info.add_gem_spec_and_gem_checksum(spec, checksum) if checksum
       end
+      info
     end
 
   end
