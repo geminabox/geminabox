@@ -94,7 +94,7 @@ module Geminabox
       return ["---", load_gems.list].join("\n") unless Geminabox.rubygems_proxy
 
       gem_names = Set.new(load_gems.list)
-      remote_names = RubygemsNames.fetch.to_s.split("\n")
+      remote_names = RubygemsCompactIndexApi.fetch_names.to_s.split("\n")
       remote_names.shift if remote_names.first == "---"
       gem_names.merge(remote_names)
 
@@ -248,7 +248,7 @@ module Geminabox
     end
 
     def remote_versions
-      RubygemsVersions.fetch
+      RubygemsCompactIndexApi.fetch_versions
     end
 
     def local_versions
@@ -259,7 +259,7 @@ module Geminabox
     end
 
     def remote_gem_info(name)
-      RubygemsInfo.fetch(name)
+      RubygemsCompactIndexApi.fetch_info(name)
     end
 
     def local_gem_info(name)
