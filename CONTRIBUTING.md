@@ -21,6 +21,17 @@
 - Changelog in CHANGELOG.md is now replaced by PR title.
 - Make sure if Checks in your PR are green.
 
+### Setup development environment
+
+1. Fork the repository: e.g.:
+   - `git clone https://github.com/geminabox/geminabox.git` or
+   - `gh repo clone geminabox/geminabox`
+   - open a Codespace workspace at https://github.dev/geminabox/geminabox
+2. Prepare Ruby 3.1, RubyGems 3.3, and Bundler 2.3.
+3. Retrieve all dependencies with `bundle install`.
+4. Change code whatever you want.
+5. Test with `bundle exec rake test`.
+
 ## First contribution?
 
 If you want to help us something, see the issue list for first-time contributors:
