@@ -21,21 +21,21 @@ jobs:
             gem-version: 2.7.11
           - ruby-version: 2.5.9
             gem-version: 2.7.11
-          # Test with RubyGems 2.4.8 as it is specified in gemspec
+          # Test with RubyGems 2.5.0 as it is specified in gemspec
           - ruby-version: 2.3.8
-            gem-version: 2.4.8
+            gem-version: 2.5.0
             continue-on-error: true
           - ruby-version: 2.4.10
-            gem-version: 2.4.8
+            gem-version: 2.5.0
             continue-on-error: true
           - ruby-version: 2.5.9
-            gem-version: 2.4.8
+            gem-version: 2.5.0
             continue-on-error: true
           - ruby-version: 2.6.10
-            gem-version: 2.4.8
+            gem-version: 2.5.0
             continue-on-error: true
           - ruby-version: 2.7.6
-            gem-version: 2.4.8
+            gem-version: 2.5.0
             continue-on-error: true
 
     steps:
@@ -51,14 +51,6 @@ jobs:
       run: |
         gem update --system $gemver
         gem --version
-    # TODO: remove this step when RubyGems 2.4 support is dropped
-    # Use Bundler 1.17 when using RubyGems 1.x and 2.0-2.4
-    - name: Install Bundler 1.x for RubyGems 2.4
-      if: startsWith(matrix.gem-version, '2.4')
-      run: |
-        gem uninstall bundler
-        gem install bundler --version "< 2"
-        sed -i -e "/^BUNDLED WITH/ {n; s/.*/  1.17.3/} " Gemfile.lock
     - name: Run tests
       run: bundle exec rake
       continue-on-error: ${{ matrix.continue-on-error }}
