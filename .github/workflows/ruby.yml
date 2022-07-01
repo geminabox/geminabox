@@ -62,6 +62,19 @@ jobs:
     - name: Run tests
       run: bundle exec rake
       continue-on-error: ${{ matrix.continue-on-error }}
+    - name: Workaround for coverage report to CodeClimate with jq
+      if: startsWith(matrix.ruby-version, '3.1')
+      run: |
+        jq 'map_values(. | map_values(if type=="object" then map_values(.lines) else . end))' coverage/.resultset.json > coverage/.resultset_workaround.json
+        diff -uw coverage/.resultset.json coverage/.resultset_workaround.json || true
+    - name: Send coverage report to CodeClimate
+      if: startsWith(matrix.ruby-version, '3.1')
+      continue-on-error: true
+      uses: paambaati/codeclimate-action@v3.0.0
+      with:
+        coverageLocations: ${{ github.workspace }}/coverage/.resultset_workaround.json:simplecov
+      env:
+        CC_TEST_REPORTER_ID: 9b585696c2187df640c9fe468b29a1e8cd5ea766a867b2c6f22b7e25d648155b
 
   rubocop:
     runs-on: ubuntu-20.04
