@@ -1,5 +1,8 @@
 require "simplecov"
-SimpleCov.start
+
+SimpleCov.start do
+  add_filter %r{^/test/}
+end
 
 case caller.first
 when %r{test/units}
