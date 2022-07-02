@@ -1,6 +1,15 @@
 require "simplecov"
 SimpleCov.start
 
+case caller.first
+when %r{test/units}
+  SimpleCov.command_name "test/units"
+when %r{test/requests}
+  SimpleCov.command_name "test/requests"
+when %r{test/integration}
+  SimpleCov.command_name "test/integration"
+end
+
 require "rubygems"
 gem "bundler"
 require "bundler/setup"
