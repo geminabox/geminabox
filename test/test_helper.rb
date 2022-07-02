@@ -63,8 +63,8 @@ class Minitest::Test
   end
 
   def silence
-    silence_stream(STDERR) do
-      silence_stream(STDOUT) do
+    silence_stream($stderr) do
+      silence_stream($stdout) do
         yield
       end
     end
