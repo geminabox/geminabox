@@ -116,7 +116,7 @@ module Geminabox
           error_response(400, "force_rebuild parameter must be either of true or false")
         end
         force_rebuild = params[:force_rebuild] == 'true'
-        reindex(force_rebuild)
+        indexer.reindex(force_rebuild)
         redirect url("/")
       end
     end
@@ -151,8 +151,10 @@ module Geminabox
       end
 
       serialize_update do
-        File.delete file_path if File.exist? file_path
-        reindex(:force_rebuild)
+        file_path = File.expand_path(File.join(Geminabox.data, *request.path_info))
+        halt 404, 'Gem not found' and return unless File.exist?(file_path)
+
+        indexer.yank(file_path)
         redirect url("/")
       end
 
@@ -166,16 +168,11 @@ module Geminabox
       halt 400 unless request.form_data?
 
       serialize_update do
-        gems = load_gems.select { |gem| request['gem_name'] == gem.name and
-                                  request['version'] == gem.number.version }
-        halt 404, 'Gem not found' if gems.size == 0
-        gems.each do |gem|
-          gem_path = File.expand_path(File.join(Geminabox.data, 'gems',
-                                                "#{gem.gemfile_name}.gem"))
-          load_gems.delete(gem)
-          File.delete gem_path if File.exists? gem_path
-        end
-        reindex(:force_rebuild)
+        name, version = request.values_at('gem_name', 'version')
+        file_path = File.expand_path(File.join(Geminabox.data, 'gems', "#{name}-#{version}.gem"))
+        halt 404, 'Gem not found' and return unless File.exist? file_path
+
+        indexer.yank(file_path)
         return 200, 'Yanked gem and reindexed'
       end
     end
@@ -211,10 +208,14 @@ module Geminabox
       end
     end
 
-  private
+    private
 
-    def reindex(force_rebuild = false)
-      Indexer.new.reindex(force_rebuild)
+    def indexer
+      @indexer ||= Indexer.new(Geminabox.data)
+    end
+
+    def compact_indexer
+      @compact_indexer ||= CompactIndexer.new(Geminabox.data)
     end
 
     def serialize_update(&block)
@@ -252,9 +253,9 @@ module Geminabox
     end
 
     def local_versions
-      CompactIndexer.fetch_versions || serialize_update do
-        CompactIndexer.new.reindex(:force_rebuild)
-        CompactIndexer.fetch_versions
+      compact_indexer.fetch_versions || serialize_update do
+        compact_indexer.reindex(:force_rebuild)
+        compact_indexer.fetch_versions
       end
     end
 
@@ -263,7 +264,7 @@ module Geminabox
     end
 
     def local_gem_info(name)
-      CompactIndexer.fetch_info(name)
+      compact_indexer.fetch_info(name)
     end
 
     def find_gem(name)
@@ -286,10 +287,6 @@ module Geminabox
 </html>
 HTML
       halt [code, html]
-    end
-
-    def file_path
-      File.expand_path(File.join(Geminabox.data, *request.path_info))
     end
 
     def dependency_cache

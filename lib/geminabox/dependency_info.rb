@@ -42,10 +42,21 @@ module Geminabox
 
       platform = spec.platform.to_s if spec.platform && spec.platform != 'ruby'
       dependencies = spec.runtime_dependencies.sort.map { |dep| [dep.name, dep.requirement.requirements.sort.map { |a| a.join(" ") }] }
-      requirements = [['checksum', checksum]]
+      requirements = [['checksum', [checksum]]]
       requirements += constraints_for('ruby', spec.required_ruby_version)
       requirements += constraints_for('rubygems', spec.required_rubygems_version)
       add_gem_version(spec.version.to_s, platform, dependencies, requirements)
+      @content = nil
+    end
+
+    def remove_gem_spec(spec)
+      raise ArgumentError, "can't remove spec for gem #{spec.name} from gem info for gem #{gem_name}" if spec.name != gem_name
+
+      version_to_delete = GemVersion.from_spec(spec)
+
+      versions.reject! do |version, platform, _, _|
+        version_to_delete == gem_version(version, platform)
+      end
       @content = nil
     end
 
@@ -59,22 +70,22 @@ module Geminabox
 
     def encode(versions = @versions)
       str = PREAMBLE.dup
-      if versions
-        versions.each do |version, platform, dependencies, requirements|
-          str << version_name(version, platform)
-          str << " "
-          str << print_dependencies(dependencies)
-          str << "|"
-          str << print_dependencies(requirements)
-          str << "\n"
-        end
+      return str unless versions
+
+      versions.each do |version, platform, dependencies, requirements|
+        str << version_name(version, platform)
+        str << " "
+        str << print_dependencies(dependencies)
+        str << "|"
+        str << print_dependencies(requirements)
+        str << "\n"
       end
       str
     end
 
     def version_name(version, platform = nil)
       str = version.dup
-      str << "-" << platform.to_s if platform && platform != RUBY_PLATFORM
+      str << "-" << platform.to_s if platform && platform != 'ruby'
       str
     end
 
@@ -99,12 +110,10 @@ module Geminabox
 
     def print_dependency(dependency)
       name, constraints = dependency
-      [name, Array(constraints).join("&")].join(":")
+      [name, constraints.join("&")].join(":")
     end
 
     UNCONSTRAINED = Gem::Requirement.new([">= 0"])
-
-    RUBY_PLATFORM = 'ruby'
 
     def unconstrained?(requirement)
       requirement <=> UNCONSTRAINED
@@ -119,7 +128,12 @@ module Geminabox
     def add_gem_version(version, platform, dependencies, requirements)
       versions.reject! { |v, p, _, _| v == version && p == platform }
       versions << [version, platform, dependencies, requirements]
-      versions.sort_by! { |v, p, _, _| GemVersion.new(gem_name, v, p || RUBY_PLATFORM) }
+      versions.sort_by! { |v, p, _, _| gem_version(v, p) }
     end
+
+    def gem_version(version, platform)
+      GemVersion.new(gem_name, version, platform)
+    end
+
   end
 end

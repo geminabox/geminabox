@@ -2,26 +2,21 @@ module Geminabox
   class VersionInfo
     attr_reader :versions, :digests
 
-    class << self
-      def default_path
-        CompactIndexer.versions_path
-      end
-    end
-
-    def initialize(path = nil)
-      @path = path || self.class.default_path
+    def initialize
       @digests = {}
       @versions = {}
     end
 
-    def exists?
-      File.exist?(@path)
-    end
-
     def update_gem_versions(dependency_info)
       gem_name = dependency_info.gem_name
-      @versions[gem_name] = dependency_info.version_names.join(",")
-      @digests[gem_name] = dependency_info.digest
+      version_names = dependency_info.version_names
+      if version_names.empty?
+        @versions.delete(gem_name)
+        @digests.delete(gem_name)
+      else
+        @versions[gem_name] = version_names.join(",")
+        @digests[gem_name] = dependency_info.digest
+      end
     end
 
     def content(io = StringIO.new)
@@ -29,10 +24,10 @@ module Geminabox
       versions.keys.sort.each do |name|
         io.puts [name, @versions[name], @digests[name]].join(" ")
       end
+      return io.string if io.is_a?(StringIO)
     end
 
-    def write(dest_path = nil)
-      dest_path ||= self.class.default_path
+    def write(dest_path)
       File.open(dest_path, "wb") do |file|
         content(file)
       end
@@ -42,10 +37,10 @@ module Geminabox
       "created_at: #{Time.now.utc.strftime('%Y-%m-%dT%H:%M:%S.%L%z')}\n---\n"
     end
 
-    def load_versions
-      return unless exists?
+    def load_versions(path)
+      return unless File.exist?(path)
 
-      File.read(@path).each_line do |line|
+      File.read(path).each_line do |line|
         next if line =~ /^(---|created_at:)/
 
         gem_name, gem_versions, info_digest = line.chomp.split

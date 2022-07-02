@@ -27,6 +27,19 @@ module Geminabox
       ]
     end
 
+    def gem_spec(version: "1.0.0", platform: nil, dependencies: [], required_ruby_version: nil, required_rubygems_version: nil)
+      Gem::Specification.new do |s|
+        s.name = "test"
+        s.version = version
+        dependencies.each do |name, constraints|
+          s.add_dependency(name, constraints)
+        end
+        s.platform = platform if platform
+        s.required_ruby_version = required_ruby_version if required_ruby_version
+        s.required_rubygems_version = required_ruby_gems_version if required_rubygems_version
+      end
+    end
+
     def test_decoding_content
       info = DependencyInfo.new("test")
       info.content = content
@@ -40,22 +53,26 @@ module Geminabox
       info = DependencyInfo.new("test")
       info.versions = versions
       assert_equal content, info.content
+      assert_equal info.digest, Digest::MD5.hexdigest(content)
     end
 
     def test_adding_a_valid_gem_spec
       info = DependencyInfo.new("test")
-      spec = Gem::Specification.new do |s|
-        s.name = "test"
-        s.version = "3.0.0"
-        s.add_dependency("cucumber", ["< 3.0", ">= 2.2.8"])
-        s.add_dependency("gherkin", [">= 7.3", "< 8.9"])
-        s.add_dependency("yard", [">= 3.2", "< 5"])
-        s.platform = 'java'
-      end
+      deps = [["cucumber", ["< 3.0", ">= 2.2.8"]], ["gherkin", ["< 8.9", ">= 7.3"]], ["yard", ["< 5", ">= 3.2"]]]
+      spec = gem_spec(version: "3.0.0", platform: "java", dependencies: deps, required_ruby_version: ["> 2.7.6"])
       info.add_gem_spec_and_gem_checksum(spec, "foofoofoo")
-      expected = ["3.0.0", "java", [["cucumber", ["< 3.0", ">= 2.2.8"]], ["gherkin", ["< 8.9", ">= 7.3"]], ["yard", ["< 5", ">= 3.2"]]], [["checksum", "foofoofoo"]]]
+      expected = ["3.0.0", "java", deps, [["checksum", ["foofoofoo"]], ["ruby", ["> 2.7.6"]]]]
       assert_equal(expected, info.versions[0])
       assert info.content
+    end
+
+    def test_removing_a_gem_spec
+      info = DependencyInfo.new("test")
+      info.add_gem_spec_and_gem_checksum(gem_spec(version: "1.0.0"), "foofoofoo")
+      info.add_gem_spec_and_gem_checksum(gem_spec(version: "2.0.0"), "feefifofum")
+      assert_equal ["1.0.0", "2.0.0"], info.versions.map(&:first)
+      info.remove_gem_spec(gem_spec(version: "1.0.0"))
+      assert_equal ["2.0.0"], info.versions.map(&:first)
     end
 
     def test_returns_empty_version_list
@@ -70,18 +87,10 @@ module Geminabox
 
     def test_version_names
       info = DependencyInfo.new("test")
-      spec = Gem::Specification.new do |s|
-        s.name = "test"
-        s.version = "1.1.0"
-      end
-      info.add_gem_spec_and_gem_checksum(spec, "checksum1")
-      spec = Gem::Specification.new do |s|
-        s.name = "test"
-        s.version = "1.1.0"
-        s.platform = "java"
-      end
-      info.add_gem_spec_and_gem_checksum(spec, "checksum2")
-      expected = ["1.1.0", "1.1.0-java"]
+      info.add_gem_spec_and_gem_checksum(gem_spec(version: "2.1.0"), "checksum2")
+      info.add_gem_spec_and_gem_checksum(gem_spec(version: "1.1.0"), "checksum1")
+      info.add_gem_spec_and_gem_checksum(gem_spec(version: "1.1.0", platform: "java"), "checksum3")
+      expected = ["1.1.0", "1.1.0-java", "2.1.0"]
       assert_equal expected, info.version_names
     end
 

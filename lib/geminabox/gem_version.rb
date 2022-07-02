@@ -7,14 +7,14 @@ module Geminabox
 
     class << self
       def from_spec(spec)
-        new(spec.name, spec.version, spec.platform)
+        new(spec.name, spec.version.to_s, spec.platform)
       end
     end
 
     def initialize(name, number, platform)
       @name = name
       @number = number
-      @platform = platform
+      @platform = platform || 'ruby'
     end
 
     def ruby?

@@ -36,9 +36,12 @@ module Geminabox
       Digest::SHA256.file(gem_file).hexdigest if File.exist?(gem_file)
     end
 
+    def spec_file_name_for_version(version)
+      File.join(Geminabox.data, "quick", "Marshal.#{Gem.marshal_version}", "#{version.gemfile_name}.gemspec.rz")
+    end
+
     def spec_for_version(version)
-      filename = version.gemfile_name
-      spec_file = File.join(Geminabox.data, "quick", "Marshal.#{Gem.marshal_version}", "#{filename}.gemspec.rz")
+      spec_file = spec_file_name_for_version(version)
       return unless File.exist? spec_file
 
       File.open(spec_file, 'r') do |unzipped_spec_file|
