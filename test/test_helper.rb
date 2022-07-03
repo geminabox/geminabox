@@ -1,5 +1,10 @@
 require "simplecov"
 
+pid = Process.pid
+SimpleCov.at_exit do
+  SimpleCov.result.format! if Process.pid == pid
+end
+
 SimpleCov.start do
   add_filter %r{^/test/}
 end

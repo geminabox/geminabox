@@ -240,16 +240,19 @@ class Geminabox::TestCase < Minitest::Test
     end
 
     @app_server = fork do
-      begin
-        Geminabox.data = config.data
-        unless log_to_stdout?
-          STDERR.reopen(File::NULL)
-          STDOUT.reopen(File::NULL)
-        end
-        Rack::Server.start(server_options)
-      ensure
-        exit
+      SimpleCov.command_name SecureRandom.uuid
+      Geminabox.data = config.data
+      unless log_to_stdout?
+        STDERR.reopen(File::NULL)
+        STDOUT.reopen(File::NULL)
       end
+      # Force kill our process to prevent ugly Webrick messages.
+      Signal.trap(1) do
+        # Data is only collected if we access the result.
+        SimpleCov.result
+        Process.kill(9, Process.pid)
+      end
+      Rack::Server.start(server_options)
     end
 
     Timeout.timeout(10) do
@@ -265,7 +268,7 @@ class Geminabox::TestCase < Minitest::Test
   end
 
   def stop_app!
-    Process.kill(9, @app_server) if @app_server
+    Process.kill(1, @app_server) if @app_server
   end
 
   def gem_file(*args)
