@@ -226,7 +226,7 @@ class Geminabox::TestCase < Minitest::Test
       :app => config.to_app,
       :Port => @test_server_port,
       :AccessLog => [],
-      :Logger => WEBrick::Log::new( log_output, Logger::INFO)
+      :Logger => WEBrick::Log::new(log_output, Logger::INFO)
     }
 
     if config.ssl
