@@ -44,12 +44,12 @@ class GemFactory
         end
       }
 
-      spec_file = Tempfile.open("spec") do |tmpfile|
+      Tempfile.open("spec") do |tmpfile|
         tmpfile << spec
         tmpfile.close
 
         Dir.chdir File.dirname(path) do
-          system "gem build #{tmpfile.path}"
+          system "gem build --silent #{tmpfile.path}"
         end
       end
 

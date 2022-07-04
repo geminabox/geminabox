@@ -15,9 +15,7 @@ class AtomFeedTest < Minitest::Test
   end
 
   test "atom feed returns when no gems are defined" do
-    silence_stream($stdout) do
-      get "/atom.xml"
-    end
+    get "/atom.xml"
     assert last_response.ok?
     refute_match %r{<entry>}, last_response.body
   end

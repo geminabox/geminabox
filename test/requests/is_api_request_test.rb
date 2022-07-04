@@ -8,9 +8,7 @@ class IsApiRequestTest < Minitest::Test
   def setup
     clean_data_dir
 
-    silence_stream($stdout) do
-      Gem::Indexer.new(Geminabox.data).generate_index
-    end
+    Gem::Indexer.new(Geminabox.data).generate_index
   end
 
   def app
@@ -20,9 +18,7 @@ class IsApiRequestTest < Minitest::Test
   test "test upload via web interface" do
     filename = GemFactory.gem_file(:example)
     header "Accept", "text/html"
-    silence_stream($stdout) do
-      post '/upload', { file: Rack::Test::UploadedFile.new(filename, 'application/octet-stream', true) }
-    end
+    post '/upload', { file: Rack::Test::UploadedFile.new(filename, 'application/octet-stream', true) }
 
     follow_redirect!
 
@@ -33,9 +29,7 @@ class IsApiRequestTest < Minitest::Test
   test "test upload via api" do
     filename = GemFactory.gem_file(:example)
     header "Accept", "text/plain"
-    silence_stream($stdout) do
-      post '/upload', { file: Rack::Test::UploadedFile.new(filename, 'application/octet-stream', true) }
-    end
+    post '/upload', { file: Rack::Test::UploadedFile.new(filename, 'application/octet-stream', true) }
 
     assert last_response.ok?
     assert_match(/Gem .* received and indexed\./, last_response.body)

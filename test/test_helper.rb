@@ -51,6 +51,10 @@ module TestMethodMagic
   end
 end
 
+# silence rubygmes UI during tests
+require "rubygems/user_interaction"
+Gem::DefaultUserInteraction.ui = Gem::SilentUI.new
+
 class Minitest::Test
   extend TestMethodMagic
 
@@ -88,10 +92,8 @@ class Minitest::Test
   end
 
   def inject_gems(&block)
-    silence do
-      yield GemFactory.new(File.join(Geminabox.data, "gems"))
-      Gem::Indexer.new(Geminabox.data).generate_index
-    end
+    yield GemFactory.new(File.join(Geminabox.data, "gems"))
+    Gem::Indexer.new(Geminabox.data).generate_index
   end
 
 end
