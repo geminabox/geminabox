@@ -15,7 +15,7 @@ module Geminabox
       add_gem("foo")
 
       @compact_indexer.expect(:reindex, true)
-      reindex
+      @indexer.reindex
       @compact_indexer.verify
     end
 
@@ -23,9 +23,11 @@ module Geminabox
       add_gem("foo")
 
       Indexer.stub(:updated_gemspecs, proc { raise "boohoo" }) do
-        @compact_indexer.expect(:reindex, true)
-        silence { @indexer.reindex }
-        @compact_indexer.verify
+        $stderr.stub(:puts, nil) do
+          @compact_indexer.expect(:reindex, true)
+          @indexer.reindex
+          @compact_indexer.verify
+        end
       end
     end
 
@@ -35,7 +37,7 @@ module Geminabox
       pre_spec = add_gem("pre", version: "1.0.0.pre1")
 
       @compact_indexer.expect(:reindex, true)
-      reindex(:force_rebuild)
+      @indexer.reindex(:force_rebuild)
       @compact_indexer.verify
 
       assert File.exist?(quick_spec_file(foo_spec))
@@ -52,7 +54,7 @@ module Geminabox
 
     def test_incremental_reindexing_creates_indexes_and_compressed_gemspecs
       @compact_indexer.expect(:reindex, true)
-      reindex(:force_rebuild)
+      @indexer.reindex(:force_rebuild)
       @compact_indexer.verify
 
       foo_spec = add_gem("foo")
@@ -62,7 +64,7 @@ module Geminabox
       @compact_indexer.expect(:reindex, true) do |specs|
         specs.map(&:name).sort == %w[foo bar pre].sort
       end
-      reindex
+      @indexer.reindex
       @compact_indexer.verify
 
       assert File.exist?(quick_spec_file(foo_spec))
@@ -83,7 +85,7 @@ module Geminabox
       pre_spec = add_gem("pre", version: "1.0.0.pre1")
 
       @compact_indexer.expect(:reindex, true)
-      reindex(:force_rebuild)
+      @indexer.reindex(:force_rebuild)
       @compact_indexer.verify
 
       assert_indexes_exist
@@ -107,12 +109,6 @@ module Geminabox
       assert_equal [["bar", Gem::Version.new("1.0.0"), "ruby"]], all_specs
       assert_equal [["bar", Gem::Version.new("1.0.0"), "ruby"]], latest_specs
       assert_equal [], prerelease_specs
-    end
-
-    def reindex(*args)
-      silence_stream($stdout) do
-        @indexer.reindex(*args)
-      end
     end
 
     def add_gem(name, options = {})

@@ -3,6 +3,8 @@ require 'fileutils'
 module Geminabox
   class CompactIndexer
 
+    include Gem::UserInteraction
+
     module PathMethods
       def index_path
         File.expand_path(File.join(datadir, 'compact_index'))
@@ -91,7 +93,7 @@ module Geminabox
       yield
     ensure
       end_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      printf("%s: %.2f seconds\n", text, end_time - start_time)
+      say format("%s: %.2f seconds\n", text, end_time - start_time)
     end
 
     def incremental_reindex(gem_specs)

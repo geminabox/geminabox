@@ -25,9 +25,7 @@ module Geminabox
     end
 
     def test_full_reindex_with_no_gems_creates_empty_versions_file
-      silence_stream($stdout) do
-        @indexer.reindex
-      end
+      @indexer.reindex
       version_info = load_versions
 
       assert version_info.versions.empty?
@@ -38,10 +36,8 @@ module Geminabox
       add_gem("foobar")
       add_gem("goofy")
 
-      silence_stream($stdout) do
-        Gem::Indexer.new(TEST_DATA_DIR).generate_index
-        @indexer.reindex
-      end
+      Gem::Indexer.new(TEST_DATA_DIR).generate_index
+      @indexer.reindex
       version_info = load_versions
 
       refute version_info.versions.empty?
@@ -54,9 +50,7 @@ module Geminabox
       VersionInfo.new.write(@indexer.versions_path)
 
       spec, digest = add_gem("foobar")
-      silence_stream($stdout) do
-        @indexer.reindex([spec])
-      end
+      @indexer.reindex([spec])
 
       version_info = load_versions
 
@@ -75,10 +69,8 @@ module Geminabox
       VersionInfo.new.write(@indexer.versions_path)
 
       spec = add_gem("foobar").first
-      silence_stream($stdout) do
-        @indexer.reindex([spec])
-        @indexer.yank(spec)
-      end
+      @indexer.reindex([spec])
+      @indexer.yank(spec)
 
       version_info = load_versions
       info_name_path = @indexer.info_name_path("foobar")
@@ -90,7 +82,7 @@ module Geminabox
 
     def add_gem(name, options = {})
       factory = GemFactory.new(File.join(Geminabox.data, "gems"))
-      path = silence { factory.gem(name, options) }
+      path = factory.gem(name, options)
       digest = Digest::SHA256.file(path).hexdigest
       spec = Gem::Package.new(path.to_s).spec
       [spec, digest]
