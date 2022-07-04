@@ -76,29 +76,27 @@ module Geminabox
       query_gems.any? ? gem_list.to_json : {}
     end
 
-    get '/versions' do
-      content_type 'text/plain'
-      return halt(404) unless Geminabox.supported_compact_index_configuration?
-
-      if Geminabox.rubygems_proxy
-        GemVersionsMerge.merge(local_versions, remote_versions, strategy: Geminabox.rubygems_proxy_merge_strategy)
-      else
-        local_versions
-      end
-    end
-
     get '/names' do
       content_type 'text/plain'
       return halt(404) unless Geminabox.supported_compact_index_configuration?
 
-      return ["---", load_gems.list].join("\n") unless Geminabox.rubygems_proxy
+      with_etag_for(CompactIndexApi.new.names)
+    end
 
-      gem_names = Set.new(load_gems.list)
-      remote_names = RubygemsCompactIndexApi.fetch_names.to_s.split("\n")
-      remote_names.shift if remote_names.first == "---"
-      gem_names.merge(remote_names)
+    get '/versions' do
+      content_type 'text/plain'
+      return halt(404) unless Geminabox.supported_compact_index_configuration?
 
-      ["---", gem_names.to_a.sort].join("\n")
+      with_retry do
+        with_etag_for(CompactIndexApi.new.versions)
+      end
+    end
+
+    get '/info/:gemname' do
+      content_type 'text/plain'
+      return halt(404) unless Geminabox.supported_compact_index_configuration?
+
+      with_etag_for(CompactIndexApi.new.info(params[:gemname])) || halt(404)
     end
 
     get '/upload' do
@@ -119,23 +117,6 @@ module Geminabox
         indexer.reindex(force_rebuild)
         redirect url("/")
       end
-    end
-
-    get '/info/:gemname' do
-      content_type 'text/plain'
-      return halt(404) unless Geminabox.supported_compact_index_configuration?
-
-      name = params[:gemname]
-      info = if Geminabox.rubygems_proxy
-               if Geminabox.rubygems_proxy_merge_strategy == :local_gems_take_precedence_over_remote_gems
-                 local_gem_info(name) || remote_gem_info(name)
-               else
-                 remote_gem_info(name) || local_gem_info(name)
-               end
-             else
-               local_gem_info(name)
-             end
-      info || halt(404)
     end
 
     get '/gems/:gemname' do
@@ -214,18 +195,27 @@ module Geminabox
       @indexer ||= Indexer.new(Geminabox.data)
     end
 
-    def compact_indexer
-      @compact_indexer ||= CompactIndexer.new(Geminabox.data)
+    def with_etag_for(content)
+      etag = %("#{Digest::MD5.hexdigest(content)}")
+      halt 304 and return if request.env['HTTP_IF_NONE_MATCH'] == etag
+      headers['Etag'] = etag
+      content
     end
 
     def serialize_update(&block)
-      with_rlock(&block)
-    rescue ReentrantFlock::AlreadyLocked
-      halt 503, { 'Retry-After' => Geminabox.retry_interval.to_s }, 'Repository lock is held by another process'
+      with_retry do
+        with_rlock(&block)
+      end
     end
 
     def with_rlock(&block)
       self.class.with_rlock(&block)
+    end
+
+    def with_retry(&block)
+      block.call
+    rescue ReentrantFlock::AlreadyLocked
+      halt 503, { 'Retry-After' => Geminabox.retry_interval.to_s }, 'Repository lock is held by another process'
     end
 
     def handle_incoming_gem(gem)
@@ -246,25 +236,6 @@ module Geminabox
       else
         redirect url("/")
       end
-    end
-
-    def remote_versions
-      RubygemsCompactIndexApi.fetch_versions
-    end
-
-    def local_versions
-      compact_indexer.fetch_versions || serialize_update do
-        compact_indexer.reindex(:force_rebuild)
-        compact_indexer.fetch_versions
-      end
-    end
-
-    def remote_gem_info(name)
-      RubygemsCompactIndexApi.fetch_info(name)
-    end
-
-    def local_gem_info(name)
-      compact_indexer.fetch_info(name)
     end
 
     def find_gem(name)

@@ -1,3 +1,5 @@
+require 'time'
+
 module Geminabox
   module GemVersionsMerge
     def self.merge(local_gem_list, remote_gem_list, strategy:)
@@ -7,7 +9,9 @@ module Geminabox
       remote_split = remote_gem_list.split("\n")
       combined = strategy_for(strategy).merge(local_split, remote_split)
 
-      "#{(local_split[0..1] + combined.values).join("\n")}\n"
+      preamble = younger_created_at_header(local_split, remote_split)
+
+      "#{(preamble + combined.values).join("\n")}\n"
     end
 
     def self.strategy_for(strategy)
@@ -19,6 +23,12 @@ module Geminabox
       else
         raise ArgumentError, "Merge strategy must be :local_gems_take_precedence_over_remote_gems (default) or :remote_gems_take_precedence_over_local_gems"
       end
+    end
+
+    def self.younger_created_at_header(local_split, remote_split)
+      t1 = Time.parse(local_split[0].split[1])
+      t2 = Time.parse(remote_split[0].split[1])
+      (t1 > t2 ? local_split : remote_split)[0..1]
     end
 
     module Helpers

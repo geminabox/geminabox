@@ -35,6 +35,7 @@ module Geminabox
   autoload :Server,                  geminabox_path('server')
   autoload :DiskCache,               geminabox_path('disk_cache')
   autoload :IncomingGem,             geminabox_path('incoming_gem')
+  autoload :CompactIndexApi,         geminabox_path('compact_index_api')
   autoload :CompactIndexer,          geminabox_path('compact_indexer')
   autoload :RubygemsCompactIndexApi, geminabox_path('rubygems_compact_index_api')
   autoload :DependencyInfo,          geminabox_path('dependency_info')

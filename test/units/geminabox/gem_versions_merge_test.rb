@@ -26,9 +26,9 @@ module Geminabox
     end
 
     def test_timestamp_remote_over_local
-      local = "created_at: 2021-06-27T16:14:36.466+0000\n---\ntest-gem 0.0.1 91643f56b430feed3f6725c91fcfac70\n"
-      remote = "created_at: 2020-06-27T16:14:36.466+0000\n---\ntest-gem 0.0.5 e7218e76477e2137355d2e7ded094925\n"
-      expected = local[/created_at:\s(\S+)\s/]
+      local = "created_at: 2020-06-27T16:14:36.466+0000\n---\ntest-gem 0.0.1 91643f56b430feed3f6725c91fcfac70\n"
+      remote = "created_at: 2021-06-27T16:14:36.466+0000\n---\ntest-gem 0.0.5 e7218e76477e2137355d2e7ded094925\n"
+      expected = remote[/created_at:\s(\S+)\s/]
       timestamp = GemVersionsMerge.merge(local, remote, strategy: :remote_gems_take_precedence_over_local_gems)[/created_at:\s(\S+)\s/]
       assert_equal expected, timestamp
     end
