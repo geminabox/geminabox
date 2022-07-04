@@ -41,6 +41,8 @@ module Geminabox
     end
 
     def reindex(force_rebuild = nil)
+      ensure_indexer_directory
+
       self.class.fixup_bundler_rubygems!
       force_rebuild = true unless Geminabox.incremental_updates
       if force_rebuild
@@ -48,11 +50,14 @@ module Geminabox
       else
         incremental_reindex
       end
+    ensure
+      remove_indexer_directory
     end
 
     def yank(file_path)
       return reindex(:force_rebuild) unless Geminabox.incremental_updates
 
+      ensure_indexer_directory
       spec = indexer.map_gems_to_specs([file_path]).first
       version = GemVersion.from_spec(spec)
       spec_file = Specs.spec_file_name_for_version(version)
@@ -76,6 +81,8 @@ module Geminabox
       update_indexes(all_versions, latest_versions, prerelease_versions)
 
       compact_indexer.yank(spec)
+    ensure
+      remove_indexer_directory
     end
 
     private
@@ -109,7 +116,6 @@ module Geminabox
     end
 
     def update_indexes(all_versions, latest_versions, prerelease_versions = nil)
-      FileUtils.mkdir_p(indexer.directory)
       updated_files = []
       updated_files += update_index(indexer.dest_specs_index, all_versions)
       updated_files += update_index(indexer.dest_latest_specs_index, latest_versions)
@@ -118,8 +124,6 @@ module Geminabox
       updated_files.each do |path|
         FileUtils.mv(path, indexer.dest_directory)
       end
-    ensure
-      FileUtils.rm_r(indexer.directory)
     end
 
     def update_index(dest_path, versions)
@@ -130,5 +134,12 @@ module Geminabox
       [new_index_path, "#{new_index_path}.gz"]
     end
 
+    def ensure_indexer_directory
+      FileUtils.mkdir_p(indexer.directory)
+    end
+
+    def remove_indexer_directory
+      FileUtils.rm_rf(indexer.directory)
+    end
   end
 end
