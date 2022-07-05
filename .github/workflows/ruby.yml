@@ -52,6 +52,8 @@ jobs:
         gem update --system $gemver
         gem --version
     - name: Run tests
+      env:
+        MINITEST_REPORTER: SpecReporter
       run: bundle exec rake
       continue-on-error: ${{ matrix.continue-on-error }}
     - name: Workaround for coverage report to CodeClimate with jq

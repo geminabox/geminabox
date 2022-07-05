@@ -193,6 +193,17 @@ docker run -d -p 9292:9292 geminabox:latest
 
 Your server should now be running!
 
+
+## Running the tests
+
+Running `rake` will run the complete test suite.
+
+The test suite uses
+[minitest-reporters](https://github.com/minitest-reporters/minitest-reporters)
+with the default reporter. To get more detailed test output, use `rake
+MINITEST_REPORTER=SpecReporter`. With this setting, output of the Geminabox
+server that is started for integration tests is sent to `stdout` as well.
+
 ## Licence
 
 [MIT_LICENSE](./MIT-LICENSE)

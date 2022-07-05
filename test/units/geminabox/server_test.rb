@@ -35,16 +35,18 @@ module Geminabox
         Geminabox::Server.file_class = fake_file_class
         @mock_file = fake_file_class.mock_file
       end
-    end
 
-    def teardown
-      Geminabox.http_adapter = HttpClientAdapter.new
-      Geminabox.allow_remote_failure = false
-      Geminabox::Server.file_class = File
+      def restore_server
+        Geminabox.http_adapter = HttpClientAdapter.new
+        Geminabox.allow_remote_failure = false
+        Geminabox::Server.file_class = File
+      end
     end
 
     describe "#with_rlock" do
       include PrepServer
+
+      after { restore_server }
 
       def do_call
         server.send(:with_rlock) { @called = true }
@@ -78,6 +80,8 @@ module Geminabox
           @args
         end
       end
+
+      after { restore_server }
 
       def test_block_passed_to_with_rlock
         def @server.with_rlock(&block)

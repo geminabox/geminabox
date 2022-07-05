@@ -1,5 +1,22 @@
 require "simplecov"
-SimpleCov.start
+
+pid = Process.pid
+SimpleCov.at_exit do
+  SimpleCov.result.format! if Process.pid == pid
+end
+
+SimpleCov.start do
+  add_filter %r{^/test/}
+end
+
+case caller.first
+when %r{test/units}
+  SimpleCov.command_name "test/units"
+when %r{test/requests}
+  SimpleCov.command_name "test/requests"
+when %r{test/integration}
+  SimpleCov.command_name "test/integration"
+end
 
 require "rubygems"
 gem "bundler"
@@ -16,6 +33,13 @@ require_relative 'test_support/http_socket_error_dummy'
 require 'capybara/mechanize'
 require 'capybara/dsl'
 
+require 'minitest/reporters'
+if ENV['MINITEST_REPORTER']
+  Minitest::Reporters.use!
+else
+  Minitest::Reporters.use!([Minitest::Reporters::DefaultReporter.new])
+end
+
 require 'webmock/minitest'
 WebMock.disable_net_connect!(:allow_localhost => true)
 
@@ -26,6 +50,10 @@ module TestMethodMagic
     define_method "test_method: #{test_name} ", &block
   end
 end
+
+# silence rubygmes UI during tests
+require "rubygems/user_interaction"
+Gem::DefaultUserInteraction.ui = Gem::SilentUI.new
 
 class Minitest::Test
   extend TestMethodMagic
@@ -56,19 +84,16 @@ class Minitest::Test
   end
 
   def silence
-    silence_stream(STDERR) do
-      silence_stream(STDOUT) do
+    silence_stream($stderr) do
+      silence_stream($stdout) do
         yield
       end
     end
   end
 
   def inject_gems(&block)
-    silence do
-      yield GemFactory.new(File.join(Geminabox.data, "gems"))
-      Gem::Indexer.new(Geminabox.data).generate_index
-    end
+    yield GemFactory.new(File.join(Geminabox.data, "gems"))
+    Gem::Indexer.new(Geminabox.data).generate_index
   end
 
 end
-
