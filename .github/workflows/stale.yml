@@ -16,7 +16,7 @@ jobs:
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         days-before-pr-stale: 60
-        days-before-issue-stale: 365
+        days-before-issue-stale: 30
         days-before-close: 14
         stale-issue-message: 'Could you update this issue?'
         stale-pr-message: 'You should update this pull request by commenting on it. Otherwise the PR will be closed in 14 days.'
