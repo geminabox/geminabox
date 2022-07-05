@@ -34,6 +34,7 @@ module Geminabox
   autoload :GemVersionCollection,    geminabox_path('gem_version_collection')
   autoload :Server,                  geminabox_path('server')
   autoload :DiskCache,               geminabox_path('disk_cache')
+  autoload :RemoteCache,             geminabox_path('remote_cache')
   autoload :IncomingGem,             geminabox_path('incoming_gem')
   autoload :CompactIndexApi,         geminabox_path('compact_index_api')
   autoload :CompactIndexer,          geminabox_path('compact_indexer')

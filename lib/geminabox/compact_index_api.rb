@@ -1,15 +1,24 @@
 module Geminabox
   class CompactIndexApi
 
+    attr_reader :cache
+
+    def initialize
+      @cache = RemoteCache.new
+      @api = RubygemsCompactIndexApi.new
+    end
+
     def names
-      gem_names = Set.new(all_gems.list)
-      return ["---", gem_names.to_a.sort].join("\n") unless Geminabox.rubygems_proxy
+      local_gem_list = Set.new(all_gems.list)
+      return format_gem_names(local_gem_list) unless Geminabox.rubygems_proxy
 
-      remote_names = RubygemsCompactIndexApi.fetch_names.to_s.split("\n")
-      remote_names.shift if remote_names.first == "---"
-      gem_names.merge(remote_names)
+      remote_names = fetch("names") do |etag|
+        @api.fetch_names(etag)
+      end
+      return format_gem_names(local_gem_list) unless remote_names
 
-      ["---", gem_names.to_a.sort].join("\n")
+      remote_gem_list = remote_names.split("\n")[1..-1]
+      format_gem_names(local_gem_list.merge(remote_gem_list))
     end
 
     def versions
@@ -29,7 +38,9 @@ module Geminabox
     end
 
     def remote_versions
-      RubygemsCompactIndexApi.fetch_versions
+      fetch("versions") do |etag|
+        @api.fetch_versions(etag)
+      end
     end
 
     def local_versions
@@ -40,7 +51,9 @@ module Geminabox
     end
 
     def remote_gem_info(name)
-      RubygemsCompactIndexApi.fetch_info(name)
+      fetch("info/#{name}") do |etag|
+        @api.fetch_info(name, etag)
+      end
     end
 
     def local_gem_info(name)
@@ -53,6 +66,22 @@ module Geminabox
 
     def compact_indexer
       @compact_indexer ||= CompactIndexer.new(Geminabox.data)
+    end
+
+    private
+
+    def format_gem_names(gem_list)
+      ["---", gem_list.to_a.sort, ""].join("\n")
+    end
+
+    def fetch(path, &block)
+      etag = cache.md5(path)
+      code, data = block.call(etag)
+      if code == 200
+        cache.store(path, data)
+      else # 304, 503, etc...
+        cache.read(path)
+      end
     end
 
   end

@@ -52,21 +52,24 @@ module Geminabox
 
       get "/gems/*.gem" do
         get_from_rubygems_if_not_local
-        serve
       end
 
       private
+
       def get_from_rubygems_if_not_local
+        gem_path = request.path_info[1..-1]
+        file = File.expand_path(File.join(Geminabox.data, gem_path))
 
-        file = File.expand_path(File.join(Geminabox.data, *request.path_info))
+        return serve if File.exist?(file)
 
-        unless File.exist?(file)
+        cache_path = RemoteCache.new.cache(gem_path) do
           ruby_gems_url = Geminabox.ruby_gems_url
-          path = File.join(ruby_gems_url, *request.path_info)
-          content = Geminabox.http_adapter.get_content(path)
-          GemStore.create(IncomingGem.new(StringIO.new(content)))
+          path = URI.join(ruby_gems_url, gem_path)
+          Geminabox.http_adapter.get_content(path)
         end
 
+        headers["Cache-Control"] = 'no-transform'
+        send_file(cache_path, :type => response['Content-Type'])
       end
 
       def splice_file(file_name)

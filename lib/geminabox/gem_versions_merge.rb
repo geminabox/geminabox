@@ -11,7 +11,7 @@ module Geminabox
 
       preamble = younger_created_at_header(local_split, remote_split)
 
-      "#{(preamble + combined.values).join("\n")}\n"
+      "#{(preamble + combined.values.sort).join("\n")}\n"
     end
 
     def self.strategy_for(strategy)
