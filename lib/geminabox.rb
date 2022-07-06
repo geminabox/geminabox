@@ -54,8 +54,6 @@ module Geminabox
       :gem_permissions,
       :allow_delete,
       :rubygems_proxy,
-      :rubygems_proxy_merge_strategy,
-      :compact_index,
       :http_adapter,
       :lockfile,
       :retry_interval,
@@ -71,10 +69,6 @@ module Geminabox
         variable = "@#{method}"
         instance_variable_set(variable, default) unless instance_variable_get(variable)
       end
-    end
-
-    def supported_compact_index_configuration?
-      compact_index && rubygems_proxy_merge_strategy != :combine_local_and_remote_gem_versions
     end
 
     def settings
@@ -93,8 +87,6 @@ module Geminabox
     allow_replace:                  false,
     gem_permissions:                0644,
     rubygems_proxy:                 (ENV['RUBYGEMS_PROXY'] == 'true'),
-    rubygems_proxy_merge_strategy:  ENV.fetch('RUBYGEMS_PROXY_MERGE_STRATEGY') { :local_gems_take_precedence_over_remote_gems }.to_sym,
-    compact_index:                  true,
     allow_delete:                   true,
     http_adapter:                   HttpClientAdapter.new,
     lockfile:                       File.join(ENV.fetch('TMPDIR', Dir.tmpdir), 'geminabox.lockfile'),

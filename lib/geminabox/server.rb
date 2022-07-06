@@ -78,15 +78,11 @@ module Geminabox
 
     get '/names' do
       content_type 'text/plain'
-      return halt(404) unless Geminabox.supported_compact_index_configuration?
-
       with_etag_for(CompactIndexApi.new.names)
     end
 
     get '/versions' do
       content_type 'text/plain'
-      return halt(404) unless Geminabox.supported_compact_index_configuration?
-
       with_retry do
         with_etag_for(CompactIndexApi.new.versions)
       end
@@ -94,8 +90,6 @@ module Geminabox
 
     get '/info/:gemname' do
       content_type 'text/plain'
-      return halt(404) unless Geminabox.supported_compact_index_configuration?
-
       with_etag_for(CompactIndexApi.new.info(params[:gemname])) || halt(404)
     end
 
@@ -289,7 +283,7 @@ HTML
     end
 
     def combined_gem_list
-      GemListMerge.merge(local_gem_list, remote_gem_list, strategy: Geminabox.rubygems_proxy_merge_strategy)
+      GemListMerge.merge(local_gem_list, remote_gem_list)
     end
 
     helpers do

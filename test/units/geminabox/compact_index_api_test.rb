@@ -17,7 +17,6 @@ module Geminabox
 
     def teardown
       Geminabox.rubygems_proxy = false
-      Geminabox.rubygems_proxy_merge_strategy = :local_gems_take_precedence_over_remote_gems
     end
 
     def local_names
@@ -120,19 +119,8 @@ module Geminabox
       @remote_api.verify
     end
 
-    def test_remote_info_takes_precedence_when_configured
-      Geminabox.rubygems_proxy = true
-      Geminabox.rubygems_proxy_merge_strategy = :remote_gems_take_precedence_over_local_gems
-
-      remote_info = "--\nb 2.0.0 somesha\n"
-      @remote_api.expect(:fetch_info, [200, remote_info], ["b", nil])
-      assert_equal remote_info, @api.info("b")
-      @remote_api.verify
-    end
-
     def test_local_info_takes_precedence_when_configured
       Geminabox.rubygems_proxy = true
-      Geminabox.rubygems_proxy_merge_strategy = :local_gems_take_precedence_over_remote_gems
 
       trigger_index_build
 
@@ -142,25 +130,12 @@ module Geminabox
 
     def test_local_versions_take_precedence_when_configured
       Geminabox.rubygems_proxy = true
-      Geminabox.rubygems_proxy_merge_strategy = :local_gems_take_precedence_over_remote_gems
 
       trigger_index_build
 
       @remote_api.expect(:fetch_versions, [200, conflicting_remote_versions], [nil])
       versions = @api.versions
       assert_match(/\Acreated_at:.+\n---\na 2.0.0 \S{32}\nb 1.0.0 \S{32}\nz 1.0.0 \S{32}\n\z/, versions)
-      @remote_api.verify
-    end
-
-    def test_remote_versions_take_precedence_when_configured
-      Geminabox.rubygems_proxy = true
-      Geminabox.rubygems_proxy_merge_strategy = :remote_gems_take_precedence_over_local_gems
-
-      trigger_index_build
-
-      @remote_api.expect(:fetch_versions, [200, conflicting_remote_versions], [nil])
-      versions = @api.versions
-      assert_match(/\Acreated_at:.+\n---\na 2.0.0 \S{32}\nb 1.0.0 \S{32}\nz 2.0.0 \S{32}\n\z/, versions)
       @remote_api.verify
     end
 

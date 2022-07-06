@@ -24,16 +24,14 @@ module Geminabox
     def versions
       return local_versions unless Geminabox.rubygems_proxy
 
-      GemVersionsMerge.merge(local_versions, remote_versions, strategy: Geminabox.rubygems_proxy_merge_strategy)
+      GemVersionsMerge.merge(local_versions, remote_versions)
     end
 
     def info(name)
-      if !Geminabox.rubygems_proxy
-        local_gem_info(name)
-      elsif Geminabox.rubygems_proxy_merge_strategy == :local_gems_take_precedence_over_remote_gems
+      if Geminabox.rubygems_proxy
         local_gem_info(name) || remote_gem_info(name)
       else
-        remote_gem_info(name) || local_gem_info(name)
+        local_gem_info(name)
       end
     end
 
