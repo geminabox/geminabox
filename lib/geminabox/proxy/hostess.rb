@@ -27,27 +27,10 @@ module Geminabox
         end
       end
 
-      %w[quick/Marshal.4.8/*.gemspec.rz
-         yaml.Z
-         Marshal.4.8.Z
-      ].each do |deflated_index|
-        get "/#{deflated_index}" do
-          copy_file request.path_info[1..-1]
-          content_type('application/x-deflate')
-          serve
-        end
-      end
-
-      %w[yaml
-         Marshal.4.8
-         specs.4.8
-         latest_specs.4.8
-         prerelease_specs.4.8
-      ].each do |old_index|
-        get "/#{old_index}" do
-          splice_file old_index
-          serve
-        end
+      get 'quick/Marshal.4.8/*.gemspec.rz' do
+        copy_file request.path_info[1..-1]
+        content_type('application/x-deflate')
+        serve
       end
 
       get "/gems/*.gem" do
