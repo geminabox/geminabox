@@ -39,6 +39,17 @@ class LargeGemListSpec < Geminabox::TestCase
       my_gem-2.0
       my_gem-1.0
     ]
+
+    page.find('.delete-form', match: :first).find_button('delete').click
+
+    assert_equal gems_on_page, %w[
+      my_gem-5.0
+      my_gem-4.0
+      my_gem-3.0
+      my_gem-2.0
+      my_gem-1.0
+      unrelated_gem-1.0
+    ]
   end
 
   def gems_on_page
