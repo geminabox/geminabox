@@ -30,7 +30,7 @@ module Geminabox
     end
 
     def initialize(datadir)
-      @indexer = Gem::Indexer.new(datadir, :build_legacy => Geminabox.build_legacy)
+      @indexer = Gem::Indexer.new(datadir)
       @compact_indexer = CompactIndexer.new(datadir)
     end
 

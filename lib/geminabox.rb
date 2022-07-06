@@ -67,14 +67,6 @@ module Geminabox
       :on_gem_received
     )
 
-    attr_reader :build_legacy
-
-    def build_legacy=(value)
-      warn "Setting `Geminabox.build_legacy` is deprecated and will be removed in the future. Geminbox will always build modern indices"
-
-      @build_legacy = value
-    end
-
     def set_defaults(defaults)
       defaults.each do |method, default|
         variable = "@#{method}"
@@ -98,7 +90,6 @@ module Geminabox
   set_defaults(
     data:                           File.join(File.dirname(__FILE__), *%w[.. data]),
     public_folder:                  File.join(File.dirname(__FILE__), *%w[.. public]),
-    build_legacy:                   false,
     incremental_updates:            true,
     views:                          File.join(File.dirname(__FILE__), *%w[.. views]),
     allow_replace:                  false,
