@@ -49,7 +49,6 @@ module Geminabox
     attr_accessor(
       :data,
       :public_folder,
-      :incremental_updates,
       :views,
       :allow_replace,
       :gem_permissions,
@@ -90,7 +89,6 @@ module Geminabox
   set_defaults(
     data:                           File.join(File.dirname(__FILE__), *%w[.. data]),
     public_folder:                  File.join(File.dirname(__FILE__), *%w[.. public]),
-    incremental_updates:            true,
     views:                          File.join(File.dirname(__FILE__), *%w[.. views]),
     allow_replace:                  false,
     gem_permissions:                0644,

@@ -8,7 +8,6 @@ module Geminabox
       @indexer = Indexer.new(Geminabox.data)
       @compact_indexer = Minitest::Mock.new
       @indexer.instance_variable_set :@compact_indexer, @compact_indexer
-      assert Geminabox.incremental_updates
     end
 
     def test_incremental_reindexing_without_existing_indexes_performs_a_full_reindex

@@ -44,7 +44,6 @@ module Geminabox
       ensure_indexer_directory
 
       self.class.fixup_bundler_rubygems!
-      force_rebuild = true unless Geminabox.incremental_updates
       if force_rebuild
         full_reindex
       else
@@ -55,8 +54,6 @@ module Geminabox
     end
 
     def yank(file_path)
-      return reindex(:force_rebuild) unless Geminabox.incremental_updates
-
       ensure_indexer_directory
       spec = indexer.map_gems_to_specs([file_path]).first
       version = GemVersion.from_spec(spec)
