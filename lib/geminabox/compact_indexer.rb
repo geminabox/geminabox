@@ -59,13 +59,13 @@ module Geminabox
 
     def reindex(specs = nil)
       if specs && File.exist?(versions_path)
-        log_time("compact index incremental reindex") do
+        log_time("Compact index incremental reindex") do
           incremental_reindex(specs)
         end
         return
       end
 
-      log_time("compact index full rebuild") do
+      log_time("Compact index full rebuild") do
         full_reindex
       end
     end
