@@ -4,11 +4,13 @@ require "fileutils"
 
 module Geminabox
   class RemoteCache
-    attr_reader :cache_path, :temp_dir
+    attr_reader :cache_path, :temp_dir, :gems_dir, :info_dir
 
     def initialize
       root = Pathname.new(File.expand_path(Geminabox.data))
       @cache_path = root / 'remote_cache'
+      @gems_dir = @cache_path / 'gems'
+      @info_dir = @cache_path / 'info'
       @temp_dir = root / '_temp'
       ensure_dirs_exist!
     end
@@ -49,8 +51,8 @@ module Geminabox
     private
 
     def ensure_dirs_exist!
-      FileUtils.mkdir_p(cache_path / "gems")
-      FileUtils.mkdir_p(cache_path / "info")
+      FileUtils.mkdir_p(info_dir)
+      FileUtils.mkdir_p(gems_dir)
       FileUtils.mkdir_p(temp_dir)
     end
 

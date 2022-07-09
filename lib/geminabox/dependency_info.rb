@@ -37,6 +37,10 @@ module Geminabox
       Digest::MD5.hexdigest(content)
     end
 
+    def checksums
+      versions.map { |v| checksum(v) }
+    end
+
     def add_gem_spec_and_gem_checksum(spec, checksum)
       raise ArgumentError, "can't add spec for gem #{spec.name} to gem info for gem #{gem_name}" if spec.name != gem_name
 
@@ -58,6 +62,24 @@ module Geminabox
         version_to_delete == gem_version(version, platform)
       end
       @content = nil
+    end
+
+    def empty?
+      versions.empty?
+    end
+
+    def subsumed_by?(other)
+      Set.new(checksums) <= Set.new(other.checksums)
+    end
+
+    def disjoint?(other)
+      !Set.new(checksums).intersect?(Set.new(other.checksums))
+    end
+
+    def conflicts(other)
+      other_checksums = Set.new(other.checksums)
+      local_versions = versions.reject { |v| other_checksums.include?(checksum(v)) }
+      local_versions.map { |v, p, _, _| version_name(v, p) }
     end
 
     private
@@ -133,6 +155,10 @@ module Geminabox
 
     def gem_version(version, platform)
       GemVersion.new(gem_name, version, platform)
+    end
+
+    def checksum(version)
+      version[3].find { |n, _| n == "checksum" }[1].first
     end
 
   end

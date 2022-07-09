@@ -11,6 +11,7 @@ require 'tempfile'
 require 'json'
 require 'tilt/erb'
 require 'rack/protection'
+require 'pathname'
 
 module Geminabox
 

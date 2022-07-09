@@ -94,5 +94,45 @@ module Geminabox
       assert_equal expected, info.version_names
     end
 
+    def test_checksums
+      info = DependencyInfo.new("test")
+      info.add_gem_spec_and_gem_checksum(gem_spec(version: "2.1.0"), "checksum2")
+      info.add_gem_spec_and_gem_checksum(gem_spec(version: "1.1.0"), "checksum1")
+      expected = %w[checksum1 checksum2]
+      assert_equal expected, info.checksums.sort
+    end
+
+    def test_subsumption
+      local = DependencyInfo.new("test")
+      remote = DependencyInfo.new("test")
+
+      assert local.subsumed_by?(remote)
+
+      remote.add_gem_spec_and_gem_checksum(gem_spec(version: "2.1.0"), "checksum2")
+
+      assert local.subsumed_by?(remote)
+
+      local.add_gem_spec_and_gem_checksum(gem_spec(version: "2.1.0"), "checksum2")
+      local.add_gem_spec_and_gem_checksum(gem_spec(version: "1.1.0"), "checksum1")
+
+      refute local.subsumed_by?(remote)
+    end
+
+    def test_conflicts
+      local = DependencyInfo.new("test")
+      remote = DependencyInfo.new("test")
+
+      assert_equal [], local.conflicts(remote)
+
+      remote.add_gem_spec_and_gem_checksum(gem_spec(version: "2.1.0"), "checksum2")
+
+      assert_equal [], local.conflicts(remote)
+
+      local.add_gem_spec_and_gem_checksum(gem_spec(version: "2.1.0"), "checksum2")
+      local.add_gem_spec_and_gem_checksum(gem_spec(version: "1.1.0"), "checksum1")
+
+      assert_equal ["1.1.0"], local.conflicts(remote)
+    end
+
   end
 end

@@ -71,7 +71,7 @@ module Geminabox
     end
 
     def existing_file_digest
-      Digest::SHA1.file(gem.dest_filename).hexdigest
+      Digest::SHA256.file(gem.dest_filename).hexdigest
     end
 
     def write_and_index

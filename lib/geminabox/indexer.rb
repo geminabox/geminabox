@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'geminabox'
 require 'rubygems/indexer'
 require 'fileutils'
 
