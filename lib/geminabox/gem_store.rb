@@ -17,6 +17,7 @@ module Geminabox
 
     def save
       ensure_gem_valid
+      ensure_not_proxied
       prepare_data_folders
       check_replacement_status
       write_and_index
@@ -48,7 +49,31 @@ module Geminabox
       raise GemStoreError.new(400, "Cannot process gem") unless gem.valid?
     end
 
+    def ensure_not_proxied
+      return unless Geminabox.rubygems_proxy
+
+      name = @gem.spec.name
+      digest = @gem.hexdigest
+      api = CompactIndexApi.new
+
+      # If we already have a version of that gem, we allow the upload.
+      return if api.local_gem_info(name)
+
+      # If this gem is not known on rubygems, we will add it.
+      remote_versions = api.remote_gem_info(name)
+      return unless remote_versions
+
+      # If this gem is a new version not known to rubygems, we must store it locally.
+      info = DependencyInfo.new(name)
+      info.content = remote_versions
+      return unless info.checksums.include?(digest)
+
+      # If this gem version is available on rubygems, we ignore the upload.
+      raise GemStoreError.new(412, "Ignoring upload, it is already proxied.")
+    end
+
     private
+
     def ensure_existing_data_folder_compatible
       if File.exist? Geminabox.data
         ensure_data_folder_is_directory
