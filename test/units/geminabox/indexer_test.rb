@@ -110,6 +110,20 @@ module Geminabox
       assert_equal [], prerelease_specs
     end
 
+    def test_with_signal_handler
+      gotit = false
+      assert_raises(Interrupt) do
+        @indexer.__send__(:with_interrupt_handler) do
+          begin
+            Process.kill(2, Process.pid)
+          rescue Interrupt
+            gotit = true
+          end
+        end
+      end
+      assert gotit
+    end
+
     def add_gem(name, options = {})
       factory = GemFactory.new(File.join(Geminabox.data, "gems"))
       path = silence { factory.gem(name, options) }

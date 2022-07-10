@@ -64,10 +64,6 @@ module Geminabox
       @content = nil
     end
 
-    def empty?
-      versions.empty?
-    end
-
     def subsumed_by?(other)
       Set.new(checksums) <= Set.new(other.checksums)
     end

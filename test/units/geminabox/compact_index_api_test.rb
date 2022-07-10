@@ -111,7 +111,7 @@ module Geminabox
     def test_remote_info_when_already_cached
       Geminabox.rubygems_proxy = true
 
-      remote_info = "--\nr 1.0.0 whatever\n"
+      remote_info = "--\n1.0.0 |checksum:whatever\n"
       @api.cache.store("info/r", remote_info)
       etag = @api.cache.md5("info/r")
       @remote_api.expect(:fetch_info, [304, remote_info], ["r", etag])
@@ -121,7 +121,6 @@ module Geminabox
 
     def test_local_info_takes_precedence_when_configured
       Geminabox.rubygems_proxy = true
-
       trigger_index_build
 
       local_info = @api.info("b")
@@ -130,7 +129,6 @@ module Geminabox
 
     def test_local_versions_take_precedence_when_configured
       Geminabox.rubygems_proxy = true
-
       trigger_index_build
 
       @remote_api.expect(:fetch_versions, [200, conflicting_remote_versions], [nil])
@@ -139,5 +137,98 @@ module Geminabox
       @remote_api.verify
     end
 
+    def proxied_remote_versions(versions:, checksum:)
+      b = "b #{versions} #{checksum}"
+      "created_at: 2022-07-06T04:58:59.448+0000\n---\n#{b}\n"
+    end
+
+    def test_moving_a_locally_stored_proxied_gem_to_the_proxy_cache_and_back_again
+      Geminabox.rubygems_proxy = true
+      trigger_index_build
+
+      local_gem_info = @api.local_gem_info("b")
+      checksum = Digest::MD5.hexdigest(local_gem_info)
+      remote_versions = proxied_remote_versions(versions: "1.0.0", checksum: checksum)
+
+      @remote_api.expect(:fetch_versions, [200, remote_versions], [nil])
+      @remote_api.expect(:fetch_info, [200, local_gem_info], ["b", nil])
+      refute @api.cache.read("gems/b-1.0.0.gem")
+      refute @api.cache.read("gems/z-1.0.0.gem")
+
+      @api.remove_proxied_gems_from_local_index
+
+      assert @api.cache.read("gems/b-1.0.0.gem")
+      refute @api.cache.read("gems/z-1.0.0.gem")
+      @remote_api.verify
+
+      @api.move_gems_from_proxy_cache_to_local_index
+      refute @api.cache.read("gems/b-1.0.0.gem")
+    end
+
+    def test_locally_stored_gems_with_non_overlapping_versions_on_the_remote_server_are_not_moved
+      Geminabox.rubygems_proxy = true
+
+      trigger_index_build
+
+      remote_gem_info = "---\n2.0.0 |checksum:someother\n"
+      checksum = Digest::MD5.hexdigest(remote_gem_info)
+      remote_versions = proxied_remote_versions(versions: "1.0.0", checksum: checksum)
+
+      @remote_api.expect(:fetch_versions, [200, remote_versions], [nil])
+      @remote_api.expect(:fetch_info, [200, remote_gem_info], ["b", nil])
+
+      @api.remove_proxied_gems_from_local_index
+      refute @api.cache.read("gems/b-1.0.0.gem")
+      refute @api.cache.read("gems/z-1.0.0.gem")
+      @remote_api.verify
+    end
+
+    def test_locally_stored_gems_with_additional_local_versions_are_not_moved
+      Geminabox.rubygems_proxy = true
+
+      inject_gems do |builder|
+        builder.gem "b", version: "2.0.0"
+      end
+
+      trigger_index_build
+
+      info = DependencyInfo.new("b")
+      info.content = @api.local_gem_info("b")
+      assert_equal ["1.0.0", "2.0.0"], info.version_names
+      version = GemVersion.new("b", "1.0.0", "ruby")
+      spec = Specs.spec_for_version(version)
+      info.remove_gem_spec(spec)
+      remote_gem_info = info.content
+
+      checksum = Digest::MD5.hexdigest(remote_gem_info)
+      remote_versions = proxied_remote_versions(versions: "1.0.0", checksum: checksum)
+
+      @remote_api.expect(:fetch_versions, [200, remote_versions], [nil])
+      @remote_api.expect(:fetch_info, [200, remote_gem_info], ["b", nil])
+
+      @api.remove_proxied_gems_from_local_index
+      refute @api.cache.read("gems/b-1.0.0.gem")
+      refute @api.cache.read("gems/b-2.0.0.gem")
+      refute @api.cache.read("gems/z-1.0.0.gem")
+      @remote_api.verify
+    end
+
+    def test_reporting_proxy_status
+      status_and_conflicts = [
+        ["a", :local, nil],
+        ["b", :proxied, nil],
+        ["c", :disjoint, ["1.0"]],
+        ["d", :conflicts, ["2.0", "3.0"]]
+      ]
+      @api.instance_eval do
+        def say(msg)
+          @messages << msg
+        end
+      end
+      @api.instance_variable_set(:@messages, [])
+      @api.report_proxy_status(status_and_conflicts)
+      expected = ["a: local", "b: proxied", "c: disjoint: 1.0", "d: conflicts: 2.0, 3.0"]
+      assert_equal expected, @api.instance_variable_get(:@messages)
+    end
   end
 end

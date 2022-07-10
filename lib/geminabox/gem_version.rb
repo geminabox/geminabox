@@ -43,10 +43,6 @@ module Geminabox
       [name, number, included_platform].compact.join('-')
     end
 
-    def version_name_with_platform
-      [number, included_platform].compact.join('-')
-    end
-
     private
 
     def included_platform

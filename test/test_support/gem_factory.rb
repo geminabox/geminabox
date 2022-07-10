@@ -1,6 +1,16 @@
 class GemFactory
-  def self.gem_file(*args)
-    new(File.join(Dir.tmpdir, "geminabox-fixtures")).gem(*args)
+  class << self
+    def fixture_path
+      File.join(Dir.tmpdir, "geminabox-fixtures")
+    end
+
+    def gem_file(*args)
+      new(fixture_path).gem(*args)
+    end
+
+    def delete(gemfile)
+      FileUtils.rm(File.join(fixture_path, gemfile))
+    end
   end
 
   def initialize(path)

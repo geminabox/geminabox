@@ -5,6 +5,7 @@ module Geminabox
     def initialize
       @digests = {}
       @versions = {}
+      yield self if block_given?
     end
 
     def update_gem_versions(dependency_info)
@@ -38,15 +39,29 @@ module Geminabox
     end
 
     def load_versions(path)
-      return unless File.exist?(path)
+      reset and return unless File.exist?(path)
 
-      File.read(path).each_line do |line|
-        next if line =~ /^(---|created_at:)/
+      self.content = File.read(path)
+    end
 
-        gem_name, gem_versions, info_digest = line.chomp.split
-        @versions[gem_name] = gem_versions
-        @digests[gem_name] = info_digest
+    def content=(data)
+      reset
+      data.split("\n").each do |line|
+        parse_line(line)
       end
+    end
+
+    def parse_line(line)
+      return if line =~ /^(---|created_at:)/
+
+      gem_name, gem_versions, info_digest = line.chomp.split
+      @versions[gem_name] = gem_versions
+      @digests[gem_name] = info_digest
+    end
+
+    def reset
+      @digests.clear
+      @versions.clear
     end
 
   end

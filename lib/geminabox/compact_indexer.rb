@@ -1,5 +1,3 @@
-require 'fileutils'
-
 module Geminabox
   class CompactIndexer
 
@@ -59,13 +57,13 @@ module Geminabox
 
     def reindex(specs = nil)
       if specs && File.exist?(versions_path)
-        log_time("Compact index incremental reindex") do
+        Gem.time("Compact index incremental reindex") do
           incremental_reindex(specs)
         end
         return
       end
 
-      log_time("Compact index full rebuild") do
+      Gem.time("Compact index full rebuild") do
         full_reindex
       end
     end
@@ -85,14 +83,6 @@ module Geminabox
     end
 
     private
-
-    def log_time(text)
-      start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      yield
-    ensure
-      end_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-      say format("%s: %.2f seconds\n", text, end_time - start_time)
-    end
 
     def incremental_reindex(gem_specs)
       with_tmp_dir do |dest_paths|
@@ -138,14 +128,23 @@ module Geminabox
       clear_index
       version_info = VersionInfo.new
 
-      all_specs.by_name.to_h.each do |name, versions|
+      specs = all_specs.by_name.to_h
+      count = specs.size + 1
+      progress_reporter = ui.progress_reporter(count, "Building #{count} compact index files", "Complete")
+      mutex = Mutex.new
+
+      infos = Parallel.map(specs, in_threads: 10) do |name, versions|
         info = dependency_info(versions)
         file = info_name_path(name)
         File.binwrite(file, info.content)
-        version_info.update_gem_versions(info)
+        mutex.synchronize { progress_reporter.updated(".") }
+        info
       end
 
+      infos.each { |info| version_info.update_gem_versions(info) }
       version_info.write(versions_path)
+
+      progress_reporter.done
     end
 
     def dependency_info(gem)

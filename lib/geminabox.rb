@@ -12,6 +12,8 @@ require 'json'
 require 'tilt/erb'
 require 'rack/protection'
 require 'pathname'
+require 'fileutils'
+require 'parallel'
 
 module Geminabox
 
@@ -20,6 +22,7 @@ module Geminabox
   require_relative 'geminabox/version'
   require_relative 'geminabox/proxy'
   require_relative 'geminabox/http_adapter'
+  require_relative 'geminabox/user_interaction'
 
   def self.geminabox_path(file)
     File.join File.dirname(__FILE__), 'geminabox', file
@@ -44,6 +47,7 @@ module Geminabox
   autoload :VersionInfo,             geminabox_path('version_info')
   autoload :Specs,                   geminabox_path('specs')
   autoload :Indexer,                 geminabox_path('indexer')
+  autoload :ParallelSpecReader,      geminabox_path('parallel_spec_reader')
 
   class << self
 

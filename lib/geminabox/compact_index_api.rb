@@ -77,11 +77,23 @@ module Geminabox
     end
 
     def determine_proxy_status(verbose = nil)
-      names_to_set(local_names).select do |name|
-        status, conflicts = proxy_status(name)
+      remote_version_info = VersionInfo.new
+      remote_version_info.content = remote_versions
+
+      local_gem_names = names_to_set(local_names).to_a
+      status_and_conflicts = Parallel.map(local_gem_names, in_threads: 10) do |name|
+        [name, *proxy_status(name, remote_version_info)]
+      end
+
+      report_proxy_status(status_and_conflicts) if verbose
+
+      status_and_conflicts.map { |name, status, _| name if status == :proxied }.compact
+    end
+
+    def report_proxy_status(status_and_conflicts)
+      status_and_conflicts.sort_by(&:first).each do |name, status, conflicts|
         extra = ": #{conflicts.join(', ')}" if conflicts
-        say "#{name}: #{status}#{extra}" if verbose
-        status == :proxied
+        say "#{name}: #{status}#{extra}"
       end
     end
 
@@ -107,8 +119,10 @@ module Geminabox
     def move_gems_from_proxy_cache_to_local_index
       gems_to_move = Dir["#{cache.gems_dir}/*.gem"]
       gem_count = gems_to_move.size
+
       say "Moving #{gem_count} proxied gem versions to local index"
       FileUtils.mv(gems_to_move, File.join(Geminabox.data, "gems"))
+
       say "Rebuilding all indexes"
       Indexer.new(Geminabox.data).reindex(:force_rebuild)
     end
@@ -118,27 +132,27 @@ module Geminabox
     def move_gem_to_proxy_cache(gemfile)
       gemfile_path = File.join(Geminabox.data, "gems", gemfile)
       cache_path = cache.cache_path.join("gems", gemfile)
-      move_gem(gemfile_path, cache_path)
-    end
-
-    def move_gem(gemfile_path, cache_path)
       FileUtils.mv(gemfile_path, cache_path)
-    rescue Errno::ENOENT
-      say "gem file #{gemfile_path} could not be moved to proxy cache as it's gone"
     end
 
     def names_to_set(raw_names)
       Set.new(raw_names.split("\n")[1..-1])
     end
 
-    def proxy_status(name)
+    def proxy_status(name, remote_version_info)
       local_info = DependencyInfo.new(name)
       local_info.content = local_gem_info(name)
+
+      remote_info_digest = remote_version_info.digests[name]
+      return [:local, nil] unless remote_info_digest
+
+      cached_remote_info_up_to_date = cache.md5("info/#{name}") == remote_info_digest
+      remote_data = cached_remote_info_up_to_date ? cache.read("info/#{name}") : remote_gem_info(name)
+
       remote_info = DependencyInfo.new(name)
-      remote_info.content = remote_gem_info(name)
-      if remote_info.empty?
-        [:local, nil]
-      elsif local_info.subsumed_by?(remote_info)
+      remote_info.content = remote_data
+
+      if local_info.subsumed_by?(remote_info)
         [:proxied, nil]
       elsif local_info.disjoint?(remote_info)
         [:disjoint, local_info.version_names]
