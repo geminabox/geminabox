@@ -11,11 +11,7 @@ module Geminabox
     set :public_folder, Geminabox.public_folder
     set :views, Geminabox.views
 
-    if Geminabox.rubygems_proxy
-      use Proxy::Hostess
-    else
-      use Hostess
-    end
+    use Hostess
 
     class << self
       def disallow_replace?
