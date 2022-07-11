@@ -3,36 +3,40 @@
 require 'sinatra/base'
 
 module Geminabox
-  class Hostess < Sinatra::Base
+  module Hostess
 
-    %w[/specs.4.8.gz
-       /latest_specs.4.8.gz
-       /prerelease_specs.4.8.gz
-    ].each do |index|
-      get index do
-        content_type 'application/x-gzip'
-        if Geminabox.rubygems_proxy
-          serve_proxied(Proxy::Splicer.make(index[1..-1]))
-        else
-          serve_local_file
+    def self.included(app)
+      app.class_eval do
+        %w[/specs.4.8.gz
+           /latest_specs.4.8.gz
+           /prerelease_specs.4.8.gz
+        ].each do |index|
+          get index do
+            content_type 'application/x-gzip'
+            if Geminabox.rubygems_proxy
+              serve_proxied(Proxy::Splicer.make(index[1..-1]))
+            else
+              serve_local_file
+            end
+          end
         end
-      end
-    end
 
-    get '/quick/Marshal.4.8/*.gemspec.rz' do
-      content_type('application/x-deflate')
-      if Geminabox.rubygems_proxy
-        serve_proxied(Proxy::Copier.copy(request.path_info[1..-1]))
-      else
-        serve_local_file
-      end
-    end
+        get '/quick/Marshal.4.8/*.gemspec.rz' do
+          content_type('application/x-deflate')
+          if Geminabox.rubygems_proxy
+            serve_proxied(Proxy::Copier.copy(request.path_info[1..-1]))
+          else
+            serve_local_file
+          end
+        end
 
-    get "/gems/*.gem" do
-      if Geminabox.rubygems_proxy
-        retrieve_from_rubygems_if_not_local
-      else
-        serve_local_file
+        get "/gems/*.gem" do
+          if Geminabox.rubygems_proxy
+            retrieve_from_rubygems_if_not_local
+          else
+            serve_local_file
+          end
+        end
       end
     end
 

@@ -11,7 +11,7 @@ module Geminabox
     set :public_folder, Geminabox.public_folder
     set :views, Geminabox.views
 
-    use Hostess
+    include Hostess
 
     class << self
       def disallow_replace?
