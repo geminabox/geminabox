@@ -38,7 +38,7 @@ module Geminabox
     end
 
     def read(file_path)
-      File.read(cache_path + file_path)
+      File.binread(cache_path + file_path)
     rescue Errno::ENOENT
       nil
     end
