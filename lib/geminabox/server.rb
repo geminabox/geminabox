@@ -289,12 +289,8 @@ HTML
         Rack::Utils.escape_html(text)
       end
 
-      def spec_for(gem_name, version, platform = default_platform)
+      def spec_for(gem_name, version, platform)
         Specs.spec_for_version(GemVersion.new(gem_name, version, platform))
-      end
-
-      def default_platform
-        'ruby'
       end
 
       # Return a list of versions of gem 'gem_name' with the dependencies of each version.
