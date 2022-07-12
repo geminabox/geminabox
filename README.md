@@ -113,15 +113,15 @@ really, really don't want that gem to be served by you Geminabox instance. We kn
 that this has happened at least once already.
 
 Geminabox in proxy mode will ignore uploads of gem versions that are exact copies of
-gems available from rubygems in order to pushing you into the manual upload mode for
-proxied gems.
+gems available from rubygems in order to avoid pushing you into the manual upload
+mode for proxied gems.
 
 
 ### Upgrading from older Geminabox versions
 
-Geminabox ships with a Ruby program to help with server upgrades. The script (,
-script (named `gemianbox`). It also supports converting between standalone and proxy
-servers and can be used to trigger index builds.
+Geminabox ships with a Ruby program to help with server upgrades. The script is
+named `geminabox`. It also supports converting between standalone and proxy servers
+and can be used to trigger index builds.
 
 If you are running a standalone server no explicit upgrade steps are necessary, but
 you might want to build the new gem index by running:
