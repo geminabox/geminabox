@@ -53,9 +53,14 @@ class `Geminabox`:
 | allow\_upload          | allow uploads of gems to the server                                                            |
 | allow\_replace         | allow local gems to be replaced with new versions (this is insecure, use at your own risk)     |
 | allow\_delete          | allow deletions of local gems                                                                  |
-| rubygems\_proxy        | whether gems from an upstream rubygems server should be fetched and added to the local index   |
-| allow\_remote\_failure | whether the server should serve locally stored gems in case the upstream server is unavailable |
+| rubygems\_proxy        | whether gems from an upstream rubygems server should be fetched and cached locally             |
+| allow\_remote\_failure | whether the server should serve locally cached gems in case the upstream server is unavailable |
 
+
+There are three possible configurations for a Geminabox: a standalone server, where
+you manage all gem uploads to the server yourself, a pure caching proxy which
+prohibits any uploads and a caching proxy that additionally maintains an index of
+locally stored gems.
 
 
 ## RubyGems Proxy
@@ -74,13 +79,66 @@ If you want Geminabox to carry on providing gems when rubygems.org is unavailabl
 
     Geminabox.allow_remote_failure = true
 
-### RubyGems Proxy Merge Strategy
 
-When serving gem index information, the list of versions for a particular gem consists of
-either the versions in the local index or the versions in the remote index, where the
-local version list for the given gem overwrites the remote version list. That means, that
-if you ever upload a version of a gem that is alos in rubygems.org, all versions of
-rubygems.org will be ignored and it is your responsibility to upload additional versions.
+### Geminabox Proxy Behavior
+
+When serving a gem, a locally stored and indexed version is always preferred over a
+gem with the same name and version available on the remote server.
+
+Gems that are automatically retrieved from rubygems are stored in a cache that is
+separate from the gem store of the gems you have uploaded yourself to the server
+Geminabox instance.
+
+When serving gem index information, the list of versions for a particular gem
+consists of either all the versions in the local index or all the versions in the
+remote index, where the local version list for the given gem takes precedence over
+the remote version list.
+
+Which means that once a gem ends up in the local index of the Geminabox instance, all
+remote versions of a gem with that name available on rubygems become invisible in the
+index information served and are also not download-able from the server
+anymore. Moreover, additional versions of that gem will need to be manually uploaded
+to the Geminabox instance.
+
+This strategy is unavoidable to protect you against the following scenarios:
+
+1) If you happen to have an in-house gem on your server which was developed some time
+ago, but was never published on rubygems.org, and someday someone comes along and
+picks the same gem name for his or her own project, then you really don't want to
+merge the version lists of those gems. They are two completely separate entities.
+
+2) Even worse, some attacker might create a malicious gem which is a slightly
+modified version of one of your in-house gems and put it on the rubygems server. You
+really, really don't want that gem to be served by you Geminabox instance. We know
+that this has happened at least once already.
+
+Geminabox in proxy mode will ignore uploads of gem versions that are exact copies of
+gems available from rubygems in order to pushing you into the manual upload mode for
+proxied gems.
+
+
+### Upgrading from older Geminabox versions
+
+Geminabox ships with a Ruby program to help with server upgrades. The script (,
+script (named `gemianbox`). It also supports converting between standalone and proxy
+servers and can be used to trigger index builds.
+
+If you are running a standalone server no explicit upgrade steps are necessary, but
+you might want to build the new gem index by running:
+
+```
+geminabox reindex
+```
+
+This will force an index rebuild.
+
+`geminabox proxy` will move gems that can be verified to be just proxied ones from
+the local gem index to the proxy cache from gems and rebuild the index.
+
+`geminabox standalone` will move all cached gems to the local gem store and rebuild
+the indexes.
+
+Call `geminabox --help` to get more information.
 
 
 ## HTTP adapter
