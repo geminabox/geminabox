@@ -168,14 +168,8 @@ module Geminabox
         error_response(403, 'Gem uploading is disabled')
       end
 
-      begin
-        serialize_update do
-          handle_incoming_gem(Geminabox::IncomingGem.new(request.body))
-        end
-      rescue Object => o
-        File.open File.join(Dir::tmpdir, "debug.txt"), "a" do |io|
-          io.puts o, o.backtrace
-        end
+      serialize_update do
+        handle_incoming_gem(Geminabox::IncomingGem.new(request.body))
       end
     end
 
