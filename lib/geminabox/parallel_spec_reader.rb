@@ -6,18 +6,16 @@ module Geminabox
     def map_gems_to_specs(gems)
       count = gems.count
       Gem.time "Read #{count} gem specifications" do
-        mutex = Mutex.new
-        progress_reporter = ui.progress_reporter(count, "Reading #{count} gem specifications", "Complete")
-
-        specs = Parallel.map(gems, in_threads: 10) do |gemfile|
-          map_gem_file_to_spec(gemfile).tap do
-            mutex.synchronize { progress_reporter.updated(".") }
-          end
+        n = Geminabox.workers
+        progressbar_options = {
+          title: "Reading #{count} gem specifications using #{n} workers",
+          total: count,
+          format: '%t %b',
+          progress_mark: '.'
+        }
+        Parallel.map(gems, progress: progressbar_options, in_processes: n) do |gemfile|
+          map_gem_file_to_spec(gemfile)
         end.compact
-
-        progress_reporter.done
-
-        specs
       end
     end
 

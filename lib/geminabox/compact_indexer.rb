@@ -130,21 +130,23 @@ module Geminabox
 
       specs = all_specs.by_name.to_h
       count = specs.size + 1
-      progress_reporter = ui.progress_reporter(count, "Building #{count} compact index files", "Complete")
-      mutex = Mutex.new
+      n = Geminabox.workers
+      progressbar_options = {
+        title: "Building #{count} compact index files using #{n} workers",
+        total: count,
+        format: '%t %b',
+        progress_mark: '.'
+      }
 
-      infos = Parallel.map(specs, in_threads: 10) do |name, versions|
+      infos = Parallel.map(specs, progress: progressbar_options, in_processes: n) do |name, versions|
         info = dependency_info(versions)
         file = info_name_path(name)
         File.binwrite(file, info.content)
-        mutex.synchronize { progress_reporter.updated(".") }
         info
       end
 
       infos.each { |info| version_info.update_gem_versions(info) }
       version_info.write(versions_path)
-
-      progress_reporter.done
     end
 
     def dependency_info(gem)

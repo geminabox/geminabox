@@ -3,7 +3,7 @@
 require 'optparse'
 require 'ostruct'
 
-options = Struct.new(:data_dir).new
+options = Struct.new(:data_dir, :workers).new
 options.data_dir = "#{Dir.pwd}/data"
 
 description = <<~DESC
@@ -46,6 +46,10 @@ OptionParser.new do |opts|
     options.data_dir = path
   end
 
+  opts.on("-w", "--workers N", "How many indexing processes to fork. Defaults to 10.") do |n|
+    options.workers = n.to_i
+  end
+
   opts.on_tail("--help", "Show this message") do
     puts opts
     puts "\nCommands:\n"
@@ -58,6 +62,7 @@ require_relative '../lib/geminabox'
 
 Geminabox.data = Pathname.new(options.data_dir)
 Geminabox.rubygems_proxy = true
+Geminabox.workers = options.workers
 
 begin
   case ARGV[0]
