@@ -7,12 +7,14 @@ module Geminabox
       count = gems.count
       Gem.time "Read #{count} gem specifications" do
         n = Geminabox.workers
-        progressbar_options = {
+
+        progressbar_options = n > 1 and {
           title: "Reading #{count} gem specifications using #{n} workers",
           total: count,
           format: '%t %b',
           progress_mark: '.'
         }
+
         Parallel.map(gems, progress: progressbar_options, in_processes: n) do |gemfile|
           map_gem_file_to_spec(gemfile)
         end.compact

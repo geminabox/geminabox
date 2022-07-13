@@ -131,7 +131,8 @@ module Geminabox
       specs = all_specs.by_name.to_h
       count = specs.size + 1
       n = Geminabox.workers
-      progressbar_options = {
+
+      progressbar_options = n > 1 and {
         title: "Building #{count} compact index files using #{n} workers",
         total: count,
         format: '%t %b',
