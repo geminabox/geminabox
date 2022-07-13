@@ -22,7 +22,17 @@ module Geminabox
     end
 
     def self.gems_hash(source)
-      source[2..-1].map { |line| [line[/(^\S+)\s/], line] }.to_h
+      source[2..-1].each_with_object({}) do |line, hash|
+        line.chomp!
+        name, versions, digest = line.split
+        seen = hash[name]
+        if seen
+          seen_versions = seen.split[1]
+          hash[name] = "#{name} #{seen_versions},#{versions} #{digest}"
+        else
+          hash[name] = line
+        end
+      end
     end
   end
 end
