@@ -30,4 +30,5 @@ Gem::Specification.new do |s|
   s.add_dependency('faraday', "> 1.0", "< 3.0")
   s.add_dependency('reentrant_flock')
   s.add_dependency('parallel')
+  s.add_dependency('ruby-progressbar')
 end
