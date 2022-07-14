@@ -5,6 +5,7 @@ require 'ostruct'
 
 options = Struct.new(:data_dir, :workers).new
 options.data_dir = "#{Dir.pwd}/data"
+options.workers = 10
 
 description = <<~DESC
 
