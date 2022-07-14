@@ -36,6 +36,12 @@ class InfoApiTest < Geminabox::TestCase
     assert_equal 304, response2.code
   end
 
+  test "getting info for unknoen gem returns 404" do
+    info_url = url_for("info/foobar")
+    response = HTTPClient.new.get(info_url)
+    assert_equal 404, response.code
+  end
+
   protected
 
   def fetch_info(name)

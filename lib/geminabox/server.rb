@@ -86,7 +86,7 @@ module Geminabox
 
     get '/info/:gemname' do
       content_type 'text/plain'
-      with_etag_for(CompactIndexApi.new.info(params[:gemname])) || halt(404)
+      with_etag_for(CompactIndexApi.new.info(params[:gemname]))
     end
 
     get '/upload' do
@@ -180,6 +180,8 @@ module Geminabox
     end
 
     def with_etag_for(content)
+      halt 404 and return unless content
+
       etag = %("#{Digest::MD5.hexdigest(content)}")
       halt 304 and return if request.env['HTTP_IF_NONE_MATCH'] == etag
       headers['Etag'] = etag
