@@ -8,8 +8,8 @@ module Geminabox
       Gem.time "Read #{count} gem specifications" do
         n = Geminabox.workers
 
-        progressbar_options = n > 1 and {
-          title: "Reading #{count} gem specifications using #{n} workers",
+        progressbar_options = $stdout.tty? && n > 1 && {
+          title: "Reading #{count} gem specifications",
           total: count,
           format: '%t %b',
           progress_mark: '.'
