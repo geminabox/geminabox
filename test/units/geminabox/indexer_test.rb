@@ -5,14 +5,13 @@ module Geminabox
 
     def setup
       clean_data_dir
-      @indexer = Indexer.new(Geminabox.data)
+      @indexer = Indexer.new
       @compact_indexer = Minitest::Mock.new
       @indexer.instance_variable_set :@compact_indexer, @compact_indexer
     end
 
     def test_incremental_reindexing_without_existing_indexes_performs_a_full_reindex
       add_gem("foo")
-
       @compact_indexer.expect(:reindex, true)
       @indexer.reindex
       @compact_indexer.verify
@@ -60,6 +59,7 @@ module Geminabox
       bar_spec = add_gem("bar")
       pre_spec = add_gem("pre", version: "1.0.0.pre1")
 
+      @compact_indexer.expect(:active?, true)
       @compact_indexer.expect(:reindex, true) do |specs|
         specs.map(&:name).sort == %w[foo bar pre].sort
       end
@@ -92,6 +92,8 @@ module Geminabox
       assert File.exist?(quick_spec_file(foo_spec))
       assert File.exist?(quick_spec_file(bar_spec))
 
+      @compact_indexer.expect(:active?, true)
+      @compact_indexer.expect(:active?, true)
       @compact_indexer.expect(:yank, true) { |spec| spec.name == "foo" }
       @compact_indexer.expect(:yank, true) { |spec| spec.name == "pre" }
       @indexer.yank(gemfile_path(foo_spec))

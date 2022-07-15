@@ -106,7 +106,7 @@ module Geminabox
           f << blk
         end
       end
-      Indexer.new(Geminabox.data).reindex
+      Indexer.new.reindex
     end
 
     # based on http://as.rubyonrails.org/classes/File.html

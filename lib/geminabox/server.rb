@@ -79,9 +79,7 @@ module Geminabox
 
     get '/versions' do
       content_type 'text/plain'
-      with_retry do
-        with_etag_for(CompactIndexApi.new.versions)
-      end
+      with_etag_for(CompactIndexApi.new.versions)
     end
 
     get '/info/:gemname' do
@@ -176,7 +174,7 @@ module Geminabox
     private
 
     def indexer
-      @indexer ||= Indexer.new(Geminabox.data)
+      @indexer ||= Indexer.new
     end
 
     def with_etag_for(content)

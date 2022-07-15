@@ -13,10 +13,17 @@ module Geminabox
       @remote_api = Minitest::Mock.new
       @api.instance_variable_set :@api, @remote_api
       @api.cache.flush_all
+      reindex
     end
 
     def teardown
       Geminabox.rubygems_proxy = false
+    end
+
+    def reindex
+      Indexer.new.reindex(:force_rebuild)
+      CompactIndexer.new.reindex
+      assert @api.local_versions
     end
 
     def local_names
@@ -31,10 +38,6 @@ module Geminabox
       %w[--- a b r z].join("\n") << "\n"
     end
 
-    def trigger_index_build
-      assert @api.local_versions
-    end
-
     def remote_versions
       a = "a 1.0.0 4f94d7e65f1e7e55b5bfcf7334449d8f"
       r = "r 1.0.0 c6009f08fc5fc6385f1ea1f5840e179f"
@@ -45,6 +48,14 @@ module Geminabox
       b = "a 2.0.0 4f94d7e65f1e7e55b5bfcf7334449d8f"
       z = "z 2.0.0 c6009f08fc5fc6385f1ea1f5840e179f"
       "created_at: 2022-07-06T04:58:59.448+0000\n---\n#{b}\n#{z}\n"
+    end
+
+    def test_local_versions_returns_nil_before_the_first_reindex
+      clean_data_dir
+      inject_gems do |builder|
+        builder.gem "x"
+      end
+      refute CompactIndexApi.new.local_versions
     end
 
     def test_local_for_standalone_server
@@ -94,7 +105,7 @@ module Geminabox
     end
 
     def test_local_info
-      trigger_index_build
+      reindex
       local_info = @api.info("b")
       assert_match(/---\n1.0.0 |checksum:\S{64}/, local_info)
     end
@@ -121,7 +132,7 @@ module Geminabox
 
     def test_local_info_takes_precedence_when_configured
       Geminabox.rubygems_proxy = true
-      trigger_index_build
+      reindex
 
       local_info = @api.info("b")
       assert_match(/---\n1.0.0 |checksum:\S{64}/, local_info)
@@ -129,7 +140,7 @@ module Geminabox
 
     def test_local_versions_take_precedence_when_configured
       Geminabox.rubygems_proxy = true
-      trigger_index_build
+      reindex
 
       @remote_api.expect(:fetch_versions, [200, conflicting_remote_versions], [nil])
       versions = @api.versions
@@ -144,7 +155,7 @@ module Geminabox
 
     def test_moving_a_locally_stored_proxied_gem_to_the_proxy_cache_and_back_again
       Geminabox.rubygems_proxy = true
-      trigger_index_build
+      reindex
 
       local_gem_info = @api.local_gem_info("b")
       checksum = Digest::MD5.hexdigest(local_gem_info)
@@ -168,7 +179,7 @@ module Geminabox
     def test_locally_stored_gems_with_non_overlapping_versions_on_the_remote_server_are_not_moved
       Geminabox.rubygems_proxy = true
 
-      trigger_index_build
+      reindex
 
       remote_gem_info = "---\n2.0.0 |checksum:someother\n"
       checksum = Digest::MD5.hexdigest(remote_gem_info)
@@ -190,7 +201,7 @@ module Geminabox
         builder.gem "b", version: "2.0.0"
       end
 
-      trigger_index_build
+      reindex
 
       info = DependencyInfo.new("b")
       info.content = @api.local_gem_info("b")

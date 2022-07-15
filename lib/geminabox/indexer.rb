@@ -25,9 +25,9 @@ module Geminabox
 
     end
 
-    def initialize(datadir)
-      @indexer = Gem::Indexer.new(datadir)
-      @compact_indexer = CompactIndexer.new(datadir)
+    def initialize
+      @indexer = Gem::Indexer.new(Geminabox.data)
+      @compact_indexer = CompactIndexer.new
     end
 
     attr_reader :indexer, :compact_indexer
@@ -73,7 +73,7 @@ module Geminabox
 
       update_indexes(all_versions, latest_versions, prerelease_versions)
 
-      compact_indexer.yank(spec)
+      compact_indexer.yank(spec) if compact_indexer.active?
     ensure
       remove_indexer_directory
     end
@@ -110,7 +110,7 @@ module Geminabox
       updated_gemspecs.each do |spec|
         Server.dependency_cache.flush_key(spec.name)
       end
-      compact_indexer.reindex(updated_gemspecs)
+      compact_indexer.reindex(updated_gemspecs) if compact_indexer.active?
     rescue Errno::ENOENT
       full_reindex
     rescue StandardError => e

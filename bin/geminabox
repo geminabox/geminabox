@@ -10,7 +10,7 @@ options.workers = 10
 description = <<~DESC
 
   reindex:
-    Forces a complete rebuild of the local gem index.
+    Forces a complete rebuild of all local gem indexes (legacy and compact).
 
   compact-index:
     Rebuilds the compact index.
@@ -70,9 +70,9 @@ begin
   when "status"
     Geminabox::CompactIndexApi.new.determine_proxy_status(:verbose)
   when "reindex"
-    Geminabox::Indexer.new(Geminabox.data).reindex(:force_rebuild)
+    Geminabox::Indexer.new.reindex(:force_rebuild)
   when "compact-index"
-    Geminabox::CompactIndexer.new(Geminabox.data).reindex
+    Geminabox::CompactIndexer.new.reindex
   when "proxy"
     Geminabox::CompactIndexApi.new.remove_proxied_gems_from_local_index
   when "standalone"

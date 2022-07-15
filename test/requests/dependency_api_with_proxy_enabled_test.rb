@@ -10,7 +10,7 @@ class DependencyApiWithProxyEnabledTest < Minitest::Test
     inject_gems do |builder|
       builder.gem(:foo)
     end
-    Geminabox::Indexer.new(Geminabox.data).reindex(:force_rebuild)
+    Geminabox::Indexer.new.reindex(:force_rebuild)
   end
 
   def teardown

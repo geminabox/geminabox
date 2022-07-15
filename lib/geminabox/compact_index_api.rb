@@ -52,10 +52,7 @@ module Geminabox
     end
 
     def local_versions
-      compact_indexer.fetch_versions || Server.with_rlock do
-        compact_indexer.reindex(:force_rebuild)
-        compact_indexer.fetch_versions
-      end
+      compact_indexer.fetch_versions
     end
 
     def remote_gem_info(name)
@@ -73,7 +70,7 @@ module Geminabox
     end
 
     def compact_indexer
-      @compact_indexer ||= CompactIndexer.new(Geminabox.data)
+      @compact_indexer ||= CompactIndexer.new
     end
 
     def determine_proxy_status(verbose = nil)
@@ -113,7 +110,7 @@ module Geminabox
       end
 
       say "Rebuilding all indexes"
-      Indexer.new(Geminabox.data).reindex(:force_rebuild)
+      Indexer.new.reindex(:force_rebuild)
     end
 
     def move_gems_from_proxy_cache_to_local_index
@@ -124,7 +121,7 @@ module Geminabox
       FileUtils.mv(gems_to_move, File.join(Geminabox.data, "gems"))
 
       say "Rebuilding all indexes"
-      Indexer.new(Geminabox.data).reindex(:force_rebuild)
+      Indexer.new.reindex(:force_rebuild)
     end
 
     private

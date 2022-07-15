@@ -5,11 +5,11 @@ module Geminabox
 
     def setup
       clean_data_dir
-      @indexer = CompactIndexer.new(Geminabox.data)
+      @indexer = CompactIndexer.new
     end
 
-    def test_info_path_exists
-      assert File.exist?(@indexer.info_path)
+    def test_info_path_does_not_exist
+      refute File.exist?(@indexer.info_path)
     end
 
     def test_version_path_does_not_exist
@@ -47,6 +47,7 @@ module Geminabox
     end
 
     def test_adding_a_new_gem_to_an_existing_index
+      FileUtils.mkdir_p(@indexer.info_path)
       VersionInfo.new.write(@indexer.versions_path)
 
       spec, digest = add_gem("foobar")
@@ -66,6 +67,7 @@ module Geminabox
     end
 
     def test_removing_a_gem_from_the_index
+      FileUtils.mkdir_p(@indexer.info_path)
       VersionInfo.new.write(@indexer.versions_path)
 
       spec = add_gem("foobar").first

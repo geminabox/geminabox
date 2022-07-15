@@ -123,8 +123,9 @@ Geminabox ships with a Ruby program to help with server upgrades. The script is
 named `geminabox`. It also supports converting between standalone and proxy servers
 and can be used to trigger index builds.
 
-If you are running a standalone server no explicit upgrade steps are necessary, but
-you might want to build the new gem index by running:
+One complete index rebuild is necessary to activate the new bundler
+API on a existing server. If you start with a new server, this will
+happen automatically.
 
 ```
 geminabox reindex

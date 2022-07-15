@@ -33,16 +33,22 @@ module Geminabox
 
     attr_reader :datadir
 
-    def initialize(datadir)
-      @datadir = datadir
-      FileUtils.mkdir_p(info_path)
+    def initialize
+      @datadir = Geminabox.data
     end
 
     include PathMethods
 
+    def activate!
+      FileUtils.mkdir_p(info_path)
+    end
+
+    def active?
+      File.exist?(info_path)
+    end
+
     def clear_index
       FileUtils.rm_rf(index_path)
-      FileUtils.mkdir_p(info_path)
     end
 
     def fetch_info(name)
@@ -56,6 +62,8 @@ module Geminabox
     end
 
     def reindex(specs = nil)
+      FileUtils.mkdir_p(info_path)
+
       if specs && File.exist?(versions_path)
         Gem.time("Compact index incremental reindex") do
           incremental_reindex(specs)
@@ -126,6 +134,8 @@ module Geminabox
 
     def full_reindex
       clear_index
+      activate!
+
       version_info = VersionInfo.new
 
       specs = all_specs.by_name.to_h
