@@ -1,7 +1,7 @@
 require_relative '../test_helper'
 require 'rack/test'
 
-class ProxyHostessTest < Minitest::Test
+class ProxyDownloadsTest < Minitest::Test
   include Rack::Test::Methods
 
   def setup
