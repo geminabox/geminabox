@@ -3,6 +3,8 @@
 module Geminabox
   class Indexer
 
+    include Gem::UserInteraction
+
     class << self
 
       def updated_gemspecs(indexer)
@@ -114,7 +116,7 @@ module Geminabox
     rescue Errno::ENOENT
       full_reindex
     rescue StandardError => e
-      $stderr.puts "#{e.class}:#{e.message}\n#{e.backtrace.join("\n")}"
+      alert_error "#{e.class}:#{e.message}\n#{e.backtrace.join("\n")}"
       full_reindex
     end
 

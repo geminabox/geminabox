@@ -21,11 +21,9 @@ module Geminabox
       add_gem("foo")
 
       Indexer.stub(:updated_gemspecs, proc { raise "boohoo" }) do
-        $stderr.stub(:puts, nil) do
-          @compact_indexer.expect(:reindex, true)
-          @indexer.reindex
-          @compact_indexer.verify
-        end
+        @compact_indexer.expect(:reindex, true)
+        @indexer.reindex
+        @compact_indexer.verify
       end
     end
 
