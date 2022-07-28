@@ -142,12 +142,14 @@ module Geminabox
       count = specs.size + 1
       n = Geminabox.workers
 
-      progressbar_options = $stdout.tty? && n > 1 && {
-        title: "Building #{count} compact index files",
+      title = "Building #{count} compact index files"
+      progressbar_options = Gem::DefaultUserInteraction.ui.outs.tty? && n > 1 && {
+        title: title,
         total: count,
         format: '%t %b',
         progress_mark: '.'
       }
+      say title unless progressbar_options
 
       infos = Parallel.map(specs, progress: progressbar_options, in_processes: n) do |name, versions|
         info = dependency_info(versions)

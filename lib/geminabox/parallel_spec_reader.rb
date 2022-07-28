@@ -8,12 +8,14 @@ module Geminabox
       Gem.time "Read #{count} gem specifications" do
         n = Geminabox.workers
 
-        progressbar_options = $stdout.tty? && n > 1 && {
-          title: "Reading #{count} gem specifications",
+        title = "Reading #{count} gem specifications"
+        progressbar_options = Gem::DefaultUserInteraction.ui.outs.tty? && n > 1 && {
+          title: title,
           total: count,
           format: '%t %b',
           progress_mark: '.'
         }
+        say title unless progressbar_options
 
         Parallel.map(gems, progress: progressbar_options, in_processes: n) do |gemfile|
           map_gem_file_to_spec(gemfile)
