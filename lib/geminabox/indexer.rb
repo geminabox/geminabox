@@ -96,12 +96,13 @@ module Geminabox
     # the indexer code even more than we already do.
     def with_interrupt_handler(&block)
       aborted = false
-      trap("INT") do
+      old_handler = trap("INT") do
         aborted = true
         raise Interrupt
       end
       block.call
-      raise Interrupt if aborted
+      trap("INT", old_handler)
+      Process.kill(2, Process.pid) if aborted
     end
 
     def incremental_reindex

@@ -110,8 +110,10 @@ module Geminabox
       assert_equal [], prerelease_specs
     end
 
-    def test_with_signal_handler
+    def test_with_signal_handler_for_installed_default_handler
       gotit = false
+      old_handler = trap("INT", "DEFAULT")
+      # the default handler for the interrupt signal raises Interrupt, so we expect it here
       assert_raises(Interrupt) do
         @indexer.__send__(:with_interrupt_handler) do
           begin
@@ -122,6 +124,31 @@ module Geminabox
         end
       end
       assert gotit
+    ensure
+      trap("INT", old_handler)
+    end
+
+    def test_with_signal_handler_for_installed_custom_handler
+      gotit = false
+      outer_handler_called = false
+      old_handler = trap("INT") do
+        outer_handler_called = true
+        raise "foo"
+      end
+      # our custom  handler for the interrupt signal raises RuntimeError, so we expect it here
+      assert_raises(RuntimeError) do
+        @indexer.__send__(:with_interrupt_handler) do
+          begin
+            Process.kill(2, Process.pid)
+          rescue Interrupt
+            gotit = true
+          end
+        end
+      end
+      assert gotit
+      assert outer_handler_called
+    ensure
+      trap("INT", old_handler)
     end
 
     def add_gem(name, options = {})
