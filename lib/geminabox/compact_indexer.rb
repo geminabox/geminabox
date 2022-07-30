@@ -173,11 +173,11 @@ module Geminabox
       info
     end
 
-    def with_tmp_dir(&block)
+    def with_tmp_dir
       directory = Dir.mktmpdir("geminabox-compact-index")
       dest_paths = Paths.new(directory)
       FileUtils.mkdir_p(dest_paths.info_path)
-      updated_files = block.call(dest_paths)
+      updated_files = yield dest_paths
       updated_files.each do |src, dest|
         if src
           FileUtils.mv(src, dest)

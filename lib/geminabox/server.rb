@@ -196,8 +196,8 @@ module Geminabox
       self.class.with_rlock(&block)
     end
 
-    def with_retry(&block)
-      block.call
+    def with_retry
+      yield
     rescue ReentrantFlock::AlreadyLocked
       halt 503, { 'Retry-After' => Geminabox.retry_interval.to_s }, 'Repository lock is held by another process'
     end

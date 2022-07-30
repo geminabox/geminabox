@@ -162,9 +162,9 @@ module Geminabox
       ["---", gem_list.to_a.sort, ""].join("\n")
     end
 
-    def fetch(path, &block)
+    def fetch(path)
       etag = cache.md5(path)
-      code, data = block.call(etag)
+      code, data = yield etag
       if code == 200
         cache.store(path, data)
       else # 304, 503, etc...

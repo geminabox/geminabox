@@ -94,13 +94,13 @@ module Geminabox
     # The rubygems indexer swallows interrupts so we install a signal
     # handler to learn about it. This method avoids monkey patching
     # the indexer code even more than we already do.
-    def with_interrupt_handler(&block)
+    def with_interrupt_handler
       aborted = false
       old_handler = trap("INT") do
         aborted = true
         raise Interrupt
       end
-      block.call
+      yield
       trap("INT", old_handler)
       Process.kill(2, Process.pid) if aborted
     end
