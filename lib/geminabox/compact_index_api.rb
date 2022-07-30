@@ -143,12 +143,21 @@ module Geminabox
       remote_info_digest = remote_version_info.digests[name]
       return [:local, nil] unless remote_info_digest
 
+      remote_info = remote_info_for_gem(name, remote_info_digest)
+
+      proxy_status_from_local_and_remote_info(local_info, remote_info)
+    end
+
+    def remote_info_for_gem(name, remote_info_digest)
       cached_remote_info_up_to_date = cache.md5("info/#{name}") == remote_info_digest
       remote_data = cached_remote_info_up_to_date ? cache.read("info/#{name}") : remote_gem_info(name)
 
-      remote_info = DependencyInfo.new(name)
-      remote_info.content = remote_data
+      DependencyInfo.new(name).tap do |remote_info|
+        remote_info.content = remote_data
+      end
+    end
 
+    def proxy_status_from_local_and_remote_info(local_info, remote_info)
       if local_info.subsumed_by?(remote_info)
         [:proxied, nil]
       elsif local_info.disjoint?(remote_info)
