@@ -56,25 +56,12 @@ module Geminabox
       spec = indexer.map_gems_to_specs([file_path]).first
       version = GemVersion.from_spec(spec)
       spec_file = Specs.spec_file_name_for_version(version)
+
       File.delete(file_path)
       FileUtils.rm_f(spec_file)
       Server.dependency_cache.flush_key(spec.name)
 
-      all_versions = load_index(indexer.dest_specs_index)
-
-      all_versions_by_name = all_versions.group_by(&:first)
-      remove_spec_from_versions(spec, all_versions_by_name[spec.name])
-
-      all_versions = all_versions_by_name.values.flatten(1).sort
-      latest_versions = all_versions_by_name.values.map(&:last).compact.sort
-
-      if spec.version.prerelease?
-        prerelease_versions = load_index(indexer.dest_prerelease_specs_index)
-        remove_spec_from_versions(spec, prerelease_versions)
-      end
-
-      update_indexes(all_versions, latest_versions, prerelease_versions)
-
+      update_legacy_indexes_after_yanking(spec)
       compact_indexer.yank(spec) if compact_indexer.active?
     ensure
       remove_indexer_directory
@@ -152,6 +139,23 @@ module Geminabox
 
     def remove_indexer_directory
       FileUtils.rm_rf(indexer.directory)
+    end
+
+    def update_legacy_indexes_after_yanking(spec)
+      all_versions = load_index(indexer.dest_specs_index)
+
+      all_versions_by_name = all_versions.group_by(&:first)
+      remove_spec_from_versions(spec, all_versions_by_name[spec.name])
+
+      all_versions = all_versions_by_name.values.flatten(1).sort
+      latest_versions = all_versions_by_name.values.map(&:last).compact.sort
+
+      if spec.version.prerelease?
+        prerelease_versions = load_index(indexer.dest_prerelease_specs_index)
+        remove_spec_from_versions(spec, prerelease_versions)
+      end
+
+      update_indexes(all_versions, latest_versions, prerelease_versions)
     end
   end
 end
