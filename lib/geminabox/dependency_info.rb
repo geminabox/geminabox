@@ -45,10 +45,9 @@ module Geminabox
       raise ArgumentError, "can't add spec for gem #{spec.name} to gem info for gem #{gem_name}" if spec.name != gem_name
 
       platform = spec.platform.to_s if spec.platform && spec.platform != 'ruby'
-      dependencies = spec.runtime_dependencies.sort.map { |dep| [dep.name, dep.requirement.requirements.sort.map { |a| a.join(" ") }] }
-      requirements = [['checksum', [checksum]]]
-      requirements += constraints_for('ruby', spec.required_ruby_version)
-      requirements += constraints_for('rubygems', spec.required_rubygems_version)
+      dependencies = dependencies_from_spec(spec)
+      requirements = requirements_from_spec(spec, checksum)
+
       add_gem_version(spec.version.to_s, platform, dependencies, requirements)
       @content = nil
     end
@@ -157,5 +156,19 @@ module Geminabox
       version[3].find { |n, _| n == "checksum" }[1].first
     end
 
+    def dependencies_from_spec(spec)
+      spec.runtime_dependencies.sort.map { |dep| requirements_from_dep(dep) }
+    end
+
+    def requirements_from_dep(dep)
+      [dep.name, dep.requirement.requirements.sort.map { |a| a.join(" ") }]
+    end
+
+    def requirements_from_spec(spec, checksum)
+      requirements = [['checksum', [checksum]]]
+      requirements += constraints_for('ruby', spec.required_ruby_version)
+      requirements += constraints_for('rubygems', spec.required_rubygems_version)
+      requirements
+    end
   end
 end
