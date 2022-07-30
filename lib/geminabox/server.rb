@@ -121,7 +121,7 @@ module Geminabox
 
       serialize_update do
         file_path = File.expand_path(File.join(Geminabox.data, *request.path_info))
-        halt 404, 'Gem not found' and return unless File.exist?(file_path)
+        halt 404, 'Gem not found' unless File.exist?(file_path)
 
         indexer.yank(file_path)
         redirect url("/")
@@ -139,7 +139,7 @@ module Geminabox
       serialize_update do
         name, version = request.values_at('gem_name', 'version')
         file_path = File.expand_path(File.join(Geminabox.data, 'gems', "#{name}-#{version}.gem"))
-        halt 404, 'Gem not found' and return unless File.exist? file_path
+        halt 404, 'Gem not found' unless File.exist? file_path
 
         indexer.yank(file_path)
         return 200, 'Yanked gem and reindexed'
@@ -178,10 +178,11 @@ module Geminabox
     end
 
     def with_etag_for(content)
-      halt 404 and return unless content
+      halt 404 unless content
 
       etag = %("#{Digest::MD5.hexdigest(content)}")
-      halt 304 and return if request.env['HTTP_IF_NONE_MATCH'] == etag
+      halt 304 if request.env['HTTP_IF_NONE_MATCH'] == etag
+
       headers['Etag'] = etag
       content
     end

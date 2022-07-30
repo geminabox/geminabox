@@ -39,9 +39,7 @@ module Geminabox
     end
 
     def load_versions(path)
-      reset and return unless File.exist?(path)
-
-      self.content = File.read(path)
+      self.content = File.read(path) if File.exist?(path)
     end
 
     def content=(data)
