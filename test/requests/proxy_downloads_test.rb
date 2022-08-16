@@ -26,6 +26,12 @@ class ProxyDownloadsTest < Minitest::Test
     assert last_response.ok?, "unexpected response for /gems/foo-1.0.0.gem --> #{last_response.inspect}"
   end
 
+  test "can download local gems" do
+    inject_gems { |builder| builder.gem "example" }
+    get "/gems/example-1.0.0.gem"
+    assert last_response.ok?, "unexpected response for /gems/example-1.0.0.gem --> #{last_response.inspect}"
+  end
+
   test "can download remote gem specs from the quick index" do
     stub_request(:get, "https://rubygems.org/quick/Marshal.4.8/foo-1.0.0.gemspec.rz")
       .with(headers: { 'User-Agent' => /./ })

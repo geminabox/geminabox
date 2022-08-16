@@ -65,7 +65,7 @@ module Geminabox
     def retrieve_from_rubygems_if_not_local
       gem_path = request.path_info[1..-1]
       file = File.expand_path(File.join(Geminabox.data, gem_path))
-      return serve if File.exist?(file)
+      return serve_local_file if File.exist?(file)
 
       cache_path = retrieve_gem_from_cache_or_rubygems(gem_path)
 
