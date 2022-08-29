@@ -47,6 +47,9 @@ task :default => :test
 
 desc 'Open an irb session preloaded with the gem library'
 task :console do
-  sh 'irb -I lib -r geminabox.rb'
+  require "irb"
+  require "geminabox"
+  ARGV.shift
+  IRB.start
 end
 task :c => :console
