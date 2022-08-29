@@ -1,4 +1,7 @@
+[![](https://repository-images.githubusercontent.com/463074/c53c4131-3d92-42db-85b0-52f1e88c219a)](https://github.com/geminabox)
+
 # Gem in a Box – Really simple rubygem hosting
+
 [![Ruby](https://github.com/geminabox/geminabox/actions/workflows/ruby.yml/badge.svg)](https://github.com/geminabox/geminabox/actions/workflows/ruby.yml?query=branch%3Amaster)
 [![Gem Version](https://badge.fury.io/rb/geminabox.svg)](http://badge.fury.io/rb/geminabox)
 [![Code Climate](https://codeclimate.com/github/geminabox/geminabox/badges/gpa.svg)](https://codeclimate.com/github/geminabox/geminabox)
