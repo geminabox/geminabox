@@ -15,7 +15,7 @@ module Geminabox
       when :combine_local_and_remote_gem_versions
         CombineLocalAndRemoteGemVersions
       else
-        raise ArgumentError, "Merge strategy must be :local_gems_take_precedence_over_remote_gems (default) or :merge_local_and_remote_gem_versions"
+        raise ArgumentError, "Merge strategy must be :local_gems_take_precedence_over_remote_gems (default) or :combine_local_and_remote_gem_versions"
       end
     end
 
