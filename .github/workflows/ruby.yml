@@ -64,7 +64,7 @@ jobs:
     - name: Send coverage report to CodeClimate
       if: startsWith(matrix.ruby-version, '3.1')
       continue-on-error: true
-      uses: paambaati/codeclimate-action@v3.0.0
+      uses: paambaati/codeclimate-action@v3.1.0
       with:
         coverageLocations: ${{ github.workspace }}/coverage/.resultset_workaround.json:simplecov
       env:
