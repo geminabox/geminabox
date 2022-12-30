@@ -186,20 +186,31 @@ gem 'geminabox'
 
 From there
 
-```
+```sh
 docker build -t geminabox .
 ```
 
-```
-docker run -d -p 9292:9292 geminabox:latest
+```sh
+docker run --name geminabox --rm -d -p 9292:9292 geminabox:latest
 ```
 
 Your server should now be running!
 
+To stop the server
+
+```sh
+docker stop geminabox
+```
 
 ## Running the tests
 
 Running `rake` will run the complete test suite.
+
+Using the docker image built above, one may also run rake in a docker container
+
+```sh
+docker run --rm --volume $PWD/lib:/usr/src/app/lib --volume $PWD/test:/usr/src/app/test --entrypoint rake geminabox:latest
+```
 
 The test suite uses
 [minitest-reporters](https://github.com/minitest-reporters/minitest-reporters)
