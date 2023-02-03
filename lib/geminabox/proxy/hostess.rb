@@ -10,12 +10,10 @@ module Geminabox
       attr_accessor :file_handler
 
       def stream_file(file)
-        f = File.open(File.expand_path(File.join(Geminabox.data, *request.path_info)), "r")
-  
+        f = File.open(file, "r")
+
         stream do |out|
-          until f.eof?
-            out <<  f.read( 1024 * 1024 )
-          end
+          out <<  f.read(1024*1024) until f.eof?
         end
       end
 
