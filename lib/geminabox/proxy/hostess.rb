@@ -1,18 +1,32 @@
 # frozen_string_literal: true
 
 require 'sinatra/base'
+require 'sinatra/streaming'
 require 'net/http'
 
 module Geminabox
   module Proxy
     class Hostess < Sinatra::Base
       attr_accessor :file_handler
+
+      def stream_file(file)
+        f = File.open(File.expand_path(File.join(Geminabox.data, *request.path_info)), "r")
+  
+        stream do |out|
+          until f.eof?
+            out <<  f.read( 1024 * 1024 )
+          end
+        end
+      end
+
       def serve
-        headers["Cache-Control"] = 'no-transform'
+        cache_control "no-transform"
+        content_type "application/octet-stream"
+
         if file_handler
-          send_file file_handler.proxy_path
+          stream_file file_handler.proxy_path
         else
-          send_file(File.expand_path(File.join(Geminabox.data, *request.path_info)), :type => response['Content-Type'])
+          stream_file(File.expand_path(File.join(Geminabox.data, *request.path_info)))
         end
       end
 

@@ -1,13 +1,28 @@
 # frozen_string_literal: true
 
 require 'sinatra/base'
+require 'sinatra/streaming'
 
 module Geminabox
 
   class Hostess < Sinatra::Base
+    helpers Sinatra::Streaming
+
+    def stream_file(file)
+      f = File.open(File.expand_path(File.join(Geminabox.data, *request.path_info)), "r")
+
+      stream do |out|
+        until f.eof?
+          out <<  f.read( 1024 * 1024 )
+        end
+      end
+    end
+
     def serve
-      headers["Cache-Control"] = 'no-transform'
-      send_file(File.expand_path(File.join(Geminabox.data, *request.path_info)), :type => response['Content-Type'])
+      cache_control "no-transform"
+      content_type "application/octet-stream"
+
+      stream_file file
     end
 
     %w[/specs.4.8.gz
