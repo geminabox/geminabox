@@ -12,7 +12,7 @@ module Geminabox
       f = File.open(file, "r")
 
       stream do |out|
-        out <<  f.read(1024*1024) until f.eof?
+        out <<  f.read(1024 * 1024) until f.eof?
       end
     end
 
