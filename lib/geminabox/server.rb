@@ -164,7 +164,7 @@ module Geminabox
         gems.each do |gem|
           gem_path = File.expand_path(File.join(Geminabox.data, 'gems',
                                                 "#{gem.gemfile_name}.gem"))
-          File.delete gem_path if File.exists? gem_path
+          File.delete gem_path if File.exist? gem_path
         end
         self.class.reindex(:force_rebuild)
         return 200, 'Yanked gem and reindexed'
