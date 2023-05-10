@@ -17,7 +17,9 @@ module Geminabox
         }
         say title unless progressbar_options
 
-        Parallel.map(gems, progress: progressbar_options, in_processes: n) do |gemfile|
+        fork_type = {in_processes: n}
+        fork_type = {in_threads: n} if RUBY_PLATFORM == 'x64-mingw32'
+        Parallel.map(gems, progress: progressbar_options, **fork_type) do |gemfile|
           map_gem_file_to_spec(gemfile)
         end.compact
       end
