@@ -12,6 +12,10 @@ module Geminabox
         File.join(index_path, 'versions')
       end
 
+      def merged_versions_path
+        File.join(index_path, 'merged_versions')
+      end
+
       def info_path
         File.join(index_path, 'info')
       end
