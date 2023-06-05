@@ -20,7 +20,8 @@ Gem::Specification.new do |s|
   s.rdoc_options      = %w[--main README.md]
 
   s.license           = 'MIT-LICENSE'
-  s.files             = %w[MIT-LICENSE README.md] + Dir['{lib,public,views}/**/*']
+  s.files             = %w[MIT-LICENSE README.md] + Dir['{lib,public,views}/**/*'] + %w[bin/geminabox]
+  s.executables       = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
   s.require_paths     = ['lib']
 
   s.add_dependency('sinatra', "~> 2.0")
@@ -29,4 +30,6 @@ Gem::Specification.new do |s|
   s.add_dependency('nesty')
   s.add_dependency('faraday', "> 1.0", "< 3.0")
   s.add_dependency('reentrant_flock')
+  s.add_dependency('parallel')
+  s.add_dependency('ruby-progressbar')
 end

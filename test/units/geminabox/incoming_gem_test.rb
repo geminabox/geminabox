@@ -50,7 +50,7 @@ module Geminabox
       File.open(file_name) do |file|
         subject = Geminabox::IncomingGem.new(file)
 
-        assert_equal Digest::SHA1.hexdigest(File.binread(file_name)), subject.hexdigest
+        assert_equal Digest::SHA256.hexdigest(File.binread(file_name)), subject.hexdigest
       end
     end
 

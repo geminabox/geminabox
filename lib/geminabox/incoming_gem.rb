@@ -8,7 +8,7 @@ module Geminabox
         raise ArgumentError, "Expected an instance of IO"
       end
 
-      digest = Digest::SHA1.new
+      digest = Digest::SHA256.new
       @tempfile = Tempfile.new("gem", encoding: "binary", binmode: true)
 
       while data = gem_data.read(1024**2)
@@ -17,7 +17,7 @@ module Geminabox
       end
 
       @tempfile.close
-      @sha1 = digest.hexdigest
+      @sha256 = digest.hexdigest
 
       @root_path = root_path
     end
@@ -51,7 +51,7 @@ module Geminabox
     end
 
     def hexdigest
-      @sha1
+      @sha256
     end
   end
 
