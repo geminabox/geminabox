@@ -55,6 +55,10 @@ end
 require "rubygems/user_interaction"
 Gem::DefaultUserInteraction.ui = Gem::SilentUI.new
 
+# Don't parallelize index builds. This avoids annoying log output
+# during tests and ensures clean coverage reports.
+Geminabox.workers = 0
+
 class Minitest::Test
   extend TestMethodMagic
 

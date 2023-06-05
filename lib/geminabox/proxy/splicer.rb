@@ -39,10 +39,6 @@ module Geminabox
         proxy_path
       end
 
-      def splice_folder_path
-        proxy_folder_path
-      end
-
       def splice_file_exists?
         file_exists? splice_path
       end

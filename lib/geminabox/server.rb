@@ -2,6 +2,7 @@
 
 require 'reentrant_flock'
 require 'rubygems/util'
+require 'set'
 
 module Geminabox
 
@@ -10,11 +11,7 @@ module Geminabox
     set :public_folder, Geminabox.public_folder
     set :views, Geminabox.views
 
-    if Geminabox.rubygems_proxy
-      use Proxy::Hostess
-    else
-      use Hostess
-    end
+    include Hostess
 
     class << self
       def disallow_replace?
@@ -27,40 +24,6 @@ module Geminabox
 
       def allow_upload?
         Geminabox.allow_upload
-      end
-
-      def fixup_bundler_rubygems!
-        return if @post_reset_hook_applied
-        Gem.post_reset{ Gem::Specification.all = nil } if defined? Bundler and Gem.respond_to? :post_reset
-        @post_reset_hook_applied = true
-      end
-
-      def reindex(force_rebuild = false)
-        fixup_bundler_rubygems!
-        force_rebuild = true unless Geminabox.incremental_updates
-        if force_rebuild
-          indexer.generate_index
-          dependency_cache.flush
-        else
-          begin
-            require 'geminabox/indexer'
-            updated_gemspecs = Geminabox::Indexer.updated_gemspecs(indexer)
-            return if updated_gemspecs.empty?
-            indexer.update_index
-            updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
-          rescue Errno::ENOENT
-            with_rlock { reindex(:force_rebuild) }
-          rescue => e
-            puts "#{e.class}:#{e.message}"
-            puts e.backtrace.join("\n")
-            with_rlock { reindex(:force_rebuild) }
-          end
-        end
-      rescue Gem::SystemExitException
-      end
-
-      def indexer
-        Gem::Indexer.new(Geminabox.data, :build_legacy => Geminabox.build_legacy)
       end
 
       def dependency_cache
@@ -109,6 +72,21 @@ module Geminabox
       query_gems.any? ? gem_list.to_json : {}
     end
 
+    get '/names' do
+      content_type 'text/plain'
+      with_etag_for(CompactIndexApi.new.names)
+    end
+
+    get '/versions' do
+      content_type 'text/plain'
+      with_etag_for(CompactIndexApi.new.versions)
+    end
+
+    get '/info/:gemname' do
+      content_type 'text/plain'
+      with_etag_for(CompactIndexApi.new.info(params[:gemname]))
+    end
+
     get '/upload' do
       unless self.class.allow_upload?
         error_response(403, 'Gem uploading is disabled')
@@ -124,14 +102,13 @@ module Geminabox
           error_response(400, "force_rebuild parameter must be either of true or false")
         end
         force_rebuild = params[:force_rebuild] == 'true'
-        self.class.reindex(force_rebuild)
+        indexer.reindex(force_rebuild)
         redirect url("/")
       end
     end
 
     get '/gems/:gemname' do
-      gems = Hash[load_gems.by_name]
-      @gem = gems[params[:gemname]]
+      @gem = find_gem(params[:gemname])
       @allow_delete = self.class.allow_delete?
       halt 404 unless @gem
       erb :gem
@@ -143,8 +120,10 @@ module Geminabox
       end
 
       serialize_update do
-        File.delete file_path if File.exist? file_path
-        self.class.reindex(:force_rebuild)
+        file_path = File.expand_path(File.join(Geminabox.data, *request.path_info))
+        halt 404, 'Gem not found' unless File.exist?(file_path)
+
+        indexer.yank(file_path)
         redirect url("/")
       end
 
@@ -158,15 +137,11 @@ module Geminabox
       halt 400 unless request.form_data?
 
       serialize_update do
-        gems = load_gems.select { |gem| request['gem_name'] == gem.name and
-                                  request['version'] == gem.number.version }
-        halt 404, 'Gem not found' if gems.size == 0
-        gems.each do |gem|
-          gem_path = File.expand_path(File.join(Geminabox.data, 'gems',
-                                                "#{gem.gemfile_name}.gem"))
-          File.delete gem_path if File.exist? gem_path
-        end
-        self.class.reindex(:force_rebuild)
+        name, version = request.values_at('gem_name', 'version')
+        file_path = File.expand_path(File.join(Geminabox.data, 'gems', "#{name}-#{version}.gem"))
+        halt 404, 'Gem not found' unless File.exist? file_path
+
+        indexer.yank(file_path)
         return 200, 'Yanked gem and reindexed'
       end
     end
@@ -191,27 +166,41 @@ module Geminabox
         error_response(403, 'Gem uploading is disabled')
       end
 
-      begin
-        serialize_update do
-          handle_incoming_gem(Geminabox::IncomingGem.new(request.body))
-        end
-      rescue Object => o
-        File.open File.join(Dir::tmpdir, "debug.txt"), "a" do |io|
-          io.puts o, o.backtrace
-        end
+      serialize_update do
+        handle_incoming_gem(Geminabox::IncomingGem.new(request.body))
       end
     end
 
-  private
+    private
+
+    def indexer
+      @indexer ||= Indexer.new
+    end
+
+    def with_etag_for(content)
+      halt 404 unless content
+
+      etag = %("#{Digest::MD5.hexdigest(content)}")
+      halt 304 if request.env['HTTP_IF_NONE_MATCH'] == etag
+
+      headers['Etag'] = etag
+      content
+    end
 
     def serialize_update(&block)
-      with_rlock(&block)
-    rescue ReentrantFlock::AlreadyLocked
-      halt 503, { 'Retry-After' => Geminabox.retry_interval.to_s }, 'Repository lock is held by another process'
+      with_retry do
+        with_rlock(&block)
+      end
     end
 
     def with_rlock(&block)
       self.class.with_rlock(&block)
+    end
+
+    def with_retry
+      yield
+    rescue ReentrantFlock::AlreadyLocked
+      halt 503, { 'Retry-After' => Geminabox.retry_interval.to_s }, 'Repository lock is held by another process'
     end
 
     def handle_incoming_gem(gem)
@@ -234,6 +223,10 @@ module Geminabox
       end
     end
 
+    def find_gem(name)
+      Hash[load_gems.by_name][name]
+    end
+
     def api_request?
       request.accept.first.to_s != "text/html"
     end
@@ -252,44 +245,12 @@ HTML
       halt [code, html]
     end
 
-    def file_path
-      File.expand_path(File.join(Geminabox.data, *request.path_info))
-    end
-
     def dependency_cache
       self.class.dependency_cache
     end
 
-    def all_gems
-      all_gems_with_duplicates.inject(:|)
-    end
-
-    def all_gems_with_duplicates
-      specs_files_paths.map do |specs_file_path|
-        if File.exist?(specs_file_path)
-          Marshal.load(Gem::Util.gunzip(Gem.read_binary(specs_file_path)))
-        else
-          []
-        end
-      end
-    end
-
-    def specs_file_types
-      [:specs, :prerelease_specs]
-    end
-
-    def specs_files_paths
-      specs_file_types.map do |specs_file_type|
-        File.join(Geminabox.data, spec_file_name(specs_file_type))
-      end
-    end
-
-    def spec_file_name(specs_file_type)
-      [specs_file_type, Gem.marshal_version, 'gz'].join('.')
-    end
-
     def load_gems
-      @loaded_gems ||= Geminabox::GemVersionCollection.new(all_gems)
+      @loaded_gems ||= Geminabox::GemVersionCollection.new(Specs.all_gems)
     end
 
     def index_gems(gems)
@@ -313,7 +274,7 @@ HTML
     end
 
     def combined_gem_list
-      GemListMerge.merge(local_gem_list, remote_gem_list, strategy: Geminabox.rubygems_proxy_merge_strategy)
+      GemListMerge.merge(local_gem_list, remote_gem_list)
     end
 
     helpers do
@@ -329,18 +290,8 @@ HTML
         Rack::Utils.escape_html(text)
       end
 
-      def spec_for(gem_name, version, platform = default_platform)
-        filename = [gem_name, version]
-        filename.push(platform) if platform != default_platform
-        spec_file = File.join(Geminabox.data, "quick", "Marshal.#{Gem.marshal_version}", "#{filename.join("-")}.gemspec.rz")
-        File::open(spec_file, 'r') do |unzipped_spec_file|
-          unzipped_spec_file.binmode
-          Marshal.load(Gem::Util.inflate(unzipped_spec_file.read))
-        end if File.exist? spec_file
-      end
-
-      def default_platform
-        'ruby'
+      def spec_for(gem_name, version, platform)
+        Specs.spec_for_version(GemVersion.new(gem_name, version, platform))
       end
 
       # Return a list of versions of gem 'gem_name' with the dependencies of each version.
@@ -348,7 +299,7 @@ HTML
         dependency_cache.marshal_cache(gem_name) do
           load_gems.
             select { |gem| gem_name == gem.name }.
-            map    { |gem| [gem, spec_for(gem.name, gem.number, gem.platform)] }.
+            map    { |gem| [gem, Specs.spec_for_version(gem)] }.
             reject { |(_, spec)| spec.nil? }.
             map do |(gem, spec)|
               {
@@ -360,8 +311,6 @@ HTML
             end
         end
       end
-
-
 
       def runtime_dependencies(spec)
         spec.

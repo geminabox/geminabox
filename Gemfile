@@ -3,6 +3,9 @@ source "https://rubygems.org"
 gemspec
 group :development do
   gem 'byebug'
+  gem 'rubocop', '~> 1.31.0'
+  gem 'rubocop-minitest', '~> 0.20.1'
+  gem 'rubocop-rake', '~> 0.6.0'
 end
 group :test do
   gem 'minitest'

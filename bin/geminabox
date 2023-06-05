@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'ostruct'
+
+options = Struct.new(:data_dir, :workers).new
+options.data_dir = "#{Dir.pwd}/data"
+options.workers = 10
+
+description = <<~DESC
+
+  reindex:
+    Forces a complete rebuild of all local gem indexes (legacy and compact).
+
+  compact-index:
+    Rebuilds the compact index.
+
+  status:
+    Prints the status of you local gems w.r.t. the proxied gem server.
+
+    Possible status values for a given gem are:
+      local:     the gem does not exist on the remote server
+      proxied:   all local versions are on the remote server
+      disjoint:  local and remote server have no versions in common
+      conflicts: some local versions are not on the remote server
+
+  proxy:
+    Converts your server to a caching proxy, possibly with some local gems.
+
+    This moves all proxied gems (as defined above) into the proxy
+    cache and rebuilds the local index.
+
+  standalone:
+    Converts your proxy setup into a standalone server.
+
+    This moves all gems from the proxy cache to the the local gem directory and
+    rebuilds the local index.
+
+DESC
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: geminabox [options] reindex|proxy|standalone|status"
+
+  opts.separator("")
+
+  opts.on("-d", "--data DIR", "Geminabox data directory. Defaults to './data'.") do |path|
+    options.data_dir = path
+  end
+
+  opts.on("-w", "--workers N", "How many indexing processes to fork. Defaults to 10.") do |n|
+    options.workers = n.to_i
+  end
+
+  opts.on_tail("--help", "Show this message") do
+    puts opts
+    puts "\nCommands:\n"
+    puts description
+    exit
+  end
+end.parse!
+
+require_relative '../lib/geminabox'
+
+Geminabox.data = Pathname.new(options.data_dir)
+Geminabox.rubygems_proxy = true
+Geminabox.workers = options.workers
+
+begin
+  case ARGV[0]
+  when "status"
+    Geminabox::CompactIndexApi.new.determine_proxy_status(:verbose)
+  when "reindex"
+    Geminabox::Indexer.new.reindex(:force_rebuild)
+  when "compact-index"
+    Geminabox::CompactIndexer.new.reindex
+  when "proxy"
+    Geminabox::CompactIndexApi.new.remove_proxied_gems_from_local_index
+  when "standalone"
+    Geminabox::CompactIndexApi.new.move_gems_from_proxy_cache_to_local_index
+  else
+    warn "unknown comand: #{ARGV[0]}"
+    exit 1
+  end
+rescue SignalException => e
+  warn e.class.name
+  exit 1
+end

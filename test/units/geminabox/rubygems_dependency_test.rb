@@ -69,22 +69,22 @@ module Geminabox
     def some_gem_dependencies
       [
         {
-          'name' => 'some_gem',
-          'number' => '0.0.1',
-          'platform' => 'ruby',
-          'dependencies' => []
+          name: 'some_gem',
+          number: '0.0.1',
+          platform: 'ruby',
+          dependencies: []
         },
         {
-          'name' => 'some_gem',
-          'number' => '0.0.2',
-          'platform' => 'ruby',
-          'dependencies' => []
+          name: 'some_gem',
+          number: '0.0.2',
+          platform: 'ruby',
+          dependencies: []
         },
         {
-          'name' => 'other_gem',
-          'number' => '0.0.1',
-          'platform' => 'ruby',
-          'dependencies' => [
+          name: 'other_gem',
+          number: '0.0.1',
+          platform: 'ruby',
+          dependencies: [
             ['some_gem', ">= 0"]
           ]
         }

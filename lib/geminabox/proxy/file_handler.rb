@@ -59,9 +59,6 @@ module Geminabox
       end
 
       private
-      def encoding
-        "UTF-8"
-      end
 
       def ensure_destination_exists
         create_local_folder unless local_folder_exists?

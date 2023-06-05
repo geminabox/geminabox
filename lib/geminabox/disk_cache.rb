@@ -85,7 +85,14 @@ module Geminabox
     end
 
     def write_int(key_hash)
-      File.open(path(key_hash), 'wb') { |f| yield(f) }
+      File.open(path(key_hash), 'wb') { |f| yield(f) }.then { @retried = false }
+    rescue Errno::ENOENT => e
+      raise e if @retried
+
+      # There is a possibility that the directory is removed by another process.
+      ensure_dir_exists!
+      @retried = true
+      retry
     end
 
   end

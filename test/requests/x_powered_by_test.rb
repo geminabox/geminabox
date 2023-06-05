@@ -1,5 +1,4 @@
 require_relative '../test_helper'
-require 'minitest/unit'
 require 'rack/test'
 
 class XPoweredByTest < Minitest::Test
