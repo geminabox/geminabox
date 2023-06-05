@@ -21,6 +21,8 @@ module Geminabox
       @gems.first
     end
 
+    alias first oldest
+
     # FIXME: Terminology makes no sense when the version are not all of the same
     # name
     def newest
@@ -33,6 +35,10 @@ module Geminabox
 
     def each(&block)
       @gems.each(&block)
+    end
+
+    def list
+      @gems.map(&:name).sort
     end
 
     # The collection can contain gems of different names, this method groups them
@@ -63,5 +69,5 @@ module Geminabox
       end
     end
   end
-  
+
 end

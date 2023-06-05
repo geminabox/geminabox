@@ -1,0 +1,5 @@
+plugins:
+  flog:
+    enabled: true
+    config:
+      score_threshold: 35.0

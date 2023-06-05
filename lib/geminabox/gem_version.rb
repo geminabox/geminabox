@@ -5,10 +5,16 @@ module Geminabox
   class GemVersion
     attr_accessor :name, :number, :platform
 
+    class << self
+      def from_spec(spec)
+        new(spec.name, spec.version.to_s, spec.platform)
+      end
+    end
+
     def initialize(name, number, platform)
       @name = name
       @number = number
-      @platform = platform
+      @platform = platform || 'ruby'
     end
 
     def ruby?
@@ -34,9 +40,15 @@ module Geminabox
     end
 
     def gemfile_name
-      included_platform = ruby? ? nil : platform
       [name, number, included_platform].compact.join('-')
     end
+
+    private
+
+    def included_platform
+      ruby? ? nil : platform
+    end
+
   end
 
 end

@@ -1,0 +1,6 @@
+created_at: 2022-06-30T13:09:03.812+0000
+---
+example 1.0.0 0843d12079d52bb165316f4b543c110d
+gem_with_dependencies 3.0.0 ada5ba50b78d1df4b9e1709e88b2941b
+requirements 3.0.0 d23cc69decc95924088599b2c13aaed2
+test_multiple 1.0.0 395fba1907dce2578a3ed27449ab13fd

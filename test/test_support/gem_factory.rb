@@ -1,6 +1,16 @@
 class GemFactory
-  def self.gem_file(*args)
-    new(File.join(Dir.tmpdir, "geminabox-fixtures")).gem(*args)
+  class << self
+    def fixture_path
+      File.join(Dir.tmpdir, "geminabox-fixtures")
+    end
+
+    def gem_file(*args)
+      new(fixture_path).gem(*args)
+    end
+
+    def delete(gemfile)
+      FileUtils.rm(File.join(fixture_path, gemfile))
+    end
   end
 
   def initialize(path)
@@ -21,6 +31,9 @@ class GemFactory
       end
     end.join("\n")
 
+    required_ruby_version = options[:required_ruby_version]
+    required_rubygems_version = options[:required_rubygems_version]
+
     name = name.to_s
     filename = %W[#{name} #{version}]
     filename.push(platform) if platform != "ruby"
@@ -30,16 +43,17 @@ class GemFactory
     unless File.exist? path
       spec = %{
         Gem::Specification.new do |s|
-          s.name              = #{name.inspect}
-          s.version           = #{version.inspect}
-          s.platform          = #{platform.inspect}
-          s.summary           = #{name.inspect}
-          s.description       = s.summary + " description"
-          s.author            = 'Test'
-          s.files             = []
-          s.email             = 'fake@fake.fake'
-          s.homepage          = 'http://fake.fake/fake'
-          s.licenses          = ['Nonstandard']
+          s.name                      = #{name.inspect}
+          s.version                   = #{version.inspect}
+          s.platform                  = #{platform.inspect}
+          s.summary                   = #{name.inspect}
+          s.description               = s.summary + " description"
+          s.author                    = 'Test'
+          s.files                     = []
+          s.email                     = 'fake@fake.fake'
+          s.homepage                  = 'http://fake.fake/fake'
+          s.required_ruby_version     = #{required_ruby_version.inspect}
+          s.required_rubygems_version = #{required_rubygems_version.inspect}
           #{dependencies}
         end
       }

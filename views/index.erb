@@ -1,6 +1,9 @@
 <p>
+<small>VERSION <%= Geminabox::VERSION %></small>
+
 <small>If you did not need any credentials to get to this page</small>
   <pre><code>gem sources -a <%= url "/" %></code></pre>
+
 <small>If you needed some credentials to get to this page</small>
   <pre><code>gem sources -a <%= url.to_s.gsub('://','://username:password@') %></code></pre>
 <% if @allow_upload %>
