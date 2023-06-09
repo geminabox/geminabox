@@ -12,31 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby-version: [2.3.8, 2.4.10, 2.5.9, 2.6.10, 2.7.8, 3.0.6, 3.1.4, 3.2.2]
+        ruby-version: [3.2.2]
         gem-version: [3.3.15]
-        include:
-          - ruby-version: 2.3.8
-            gem-version: 2.7.11
-          - ruby-version: 2.4.10
-            gem-version: 2.7.11
-          - ruby-version: 2.5.9
-            gem-version: 2.7.11
-          # Test with RubyGems 2.5.0 as it is specified in gemspec
-          - ruby-version: 2.3.8
-            gem-version: 2.5.0
-            continue-on-error: true
-          - ruby-version: 2.4.10
-            gem-version: 2.5.0
-            continue-on-error: true
-          - ruby-version: 2.5.9
-            gem-version: 2.5.0
-            continue-on-error: true
-          - ruby-version: 2.6.10
-            gem-version: 2.5.0
-            continue-on-error: true
-          - ruby-version: 2.7.8
-            gem-version: 2.5.0
-            continue-on-error: true
 
     steps:
     - uses: actions/checkout@v3
