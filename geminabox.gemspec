@@ -23,10 +23,10 @@ Gem::Specification.new do |s|
   s.files             = %w[MIT-LICENSE README.md] + Dir['{lib,public,views}/**/*']
   s.require_paths     = ['lib']
 
-  s.add_dependency('sinatra', ">= 3.0.0")
-  s.add_dependency('builder')
-  s.add_dependency('httpclient', [">= 2.2.7"])
-  s.add_dependency('nesty')
-  s.add_dependency('faraday', "> 1.0", "< 3.0")
-  s.add_dependency('reentrant_flock')
+  s.add_dependency 'sinatra'
+  s.add_dependency 'builder'
+  s.add_dependency 'httpclient'
+  s.add_dependency 'nesty'
+  s.add_dependency 'faraday'
+  s.add_dependency 'reentrant_flock'
 end
