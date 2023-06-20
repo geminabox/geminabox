@@ -2,6 +2,9 @@
 
 See https://github.com/geminabox/geminabox/releases.
 
+# 2.2.1
+ - Updated Sinatra dependency to v3.x
+
 # 1.4.2 - 1.5.0
 
 - https://github.com/geminabox/geminabox/releases/tag/v1.5.0
