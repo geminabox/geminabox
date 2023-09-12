@@ -43,6 +43,12 @@ module Geminabox
       end
     end
 
+    describe 'Geminabox::VERSION' do
+      def test_version
+        assert_equal 'constant', (defined?(Geminabox::VERSION))
+      end
+    end
+
     describe "#with_rlock" do
       include PrepServer
 
