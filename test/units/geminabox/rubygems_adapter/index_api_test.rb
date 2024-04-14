@@ -71,13 +71,12 @@ module Geminabox
         return @data if @data
 
         @data = {}
-        @data[:some_gem] = <<~SOME_GEM_INFO
-          0.0.1 | checksum:foo
-          0.0.2 | checksum:foo
-        SOME_GEM_INFO
-        @data[:other_gem] = <<~OTHER_GEM_INFO
-          0.0.1 some_gem:>= 0| checksum:foo
-        OTHER_GEM_INFO
+        @data[:some_gem] = "SOME_GEM_INFO\n" \
+                           "0.0.1 | checksum:foo\n" \
+                           "0.0.2 | checksum:foo"
+        @data[:other_gem] = "OTHER_GEM_INFO\n" \
+                            "0.0.1 some_gem:>= 0| checksum:foo"
+
         @data
       end
 
