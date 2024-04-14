@@ -508,7 +508,7 @@ Security/MarshalLoad:
   Exclude:
     - 'lib/geminabox/disk_cache.rb'
     - 'lib/geminabox/proxy/splicer.rb'
-    - 'lib/geminabox/rubygems_dependency.rb'
+    - 'lib/geminabox/rubygems_adapter/dependency_api.rb'
     - 'lib/geminabox/server.rb'
     - 'test/integration/dependency_api/dependencies_api_java_test.rb'
     - 'test/integration/dependency_api/dependencies_api_test.rb'

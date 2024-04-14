@@ -34,6 +34,7 @@ module Geminabox
   autoload :Server,                 geminabox_path('server')
   autoload :DiskCache,              geminabox_path('disk_cache')
   autoload :IncomingGem,            geminabox_path('incoming_gem')
+  autoload :RubygemsAdapter,        geminabox_path('rubygems_adapter')
 
   class << self
 
@@ -46,6 +47,7 @@ module Geminabox
       :gem_permissions,
       :allow_delete,
       :rubygems_proxy,
+      :rubygems_adapter,
       :rubygems_proxy_merge_strategy,
       :http_adapter,
       :lockfile,
@@ -53,6 +55,7 @@ module Geminabox
       :allow_remote_failure,
       :ruby_gems_url,
       :bundler_ruby_gems_url,
+      :index_ruby_gems_url,
       :allow_upload,
       :on_gem_received
     )
@@ -90,6 +93,7 @@ module Geminabox
     allow_replace:                  false,
     gem_permissions:                0644,
     rubygems_proxy:                 (ENV['RUBYGEMS_PROXY'] == 'true'),
+    rubygems_adapter:               ENV.fetch('RUBYGEMS_ADAPTER') { :index }.to_sym,
     rubygems_proxy_merge_strategy:  ENV.fetch('RUBYGEMS_PROXY_MERGE_STRATEGY') { :local_gems_take_precedence_over_remote_gems }.to_sym,
     allow_delete:                   true,
     http_adapter:                   HttpClientAdapter.new,
@@ -98,6 +102,7 @@ module Geminabox
     allow_remote_failure:           false,
     ruby_gems_url:                  'https://rubygems.org/',
     bundler_ruby_gems_url:          'https://bundler.rubygems.org/',
+    index_ruby_gems_url:            'https://index.rubygems.org/',
     allow_upload:                   true,
     on_gem_received:                nil
   )
