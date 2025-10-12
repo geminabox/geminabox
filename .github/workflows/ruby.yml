@@ -71,7 +71,7 @@ jobs:
         CC_TEST_REPORTER_ID: 9b585696c2187df640c9fe468b29a1e8cd5ea766a867b2c6f22b7e25d648155b
 
   rubocop:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v4
     - name: Set up Ruby
