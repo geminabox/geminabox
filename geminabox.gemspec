@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.metadata["source_code_uri"] = "https://github.com/geminabox/geminabox"
   s.metadata["changelog_uri"]   = "https://github.com/geminabox/geminabox/releases"
 
-  s.required_ruby_version     = ">= 2.3.0"
+  s.required_ruby_version     = ">= 3.0.0"
   s.required_rubygems_version = ">= 2.5.0"
 
   s.extra_rdoc_files  = %w[README.md]
@@ -29,4 +29,6 @@ Gem::Specification.new do |s|
   s.add_dependency('nesty')
   s.add_dependency('faraday', "> 1.0", "< 3.0")
   s.add_dependency('reentrant_flock')
+  # Required for Ruby 3.3+ compatibility - replaces removed Gem::Indexer
+  s.add_dependency('rubygems-generate_index', '~> 1.1')
 end
