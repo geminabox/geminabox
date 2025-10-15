@@ -2,7 +2,7 @@ name: Ruby
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, ruby-3-4-support ]
   pull_request:
     branches: [ master ]
 
