@@ -24,9 +24,9 @@ jobs:
             continue-on-error: true
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
     - name: Set up Ruby
-      uses: ruby/setup-ruby@v1.202.0
+      uses: ruby/setup-ruby@a2bbe5b1b236842c1cb7dd11e8e3b51e0a616acc # v1.202.0
       with:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true
@@ -49,7 +49,7 @@ jobs:
     - name: Send coverage report to CodeClimate
       if: startsWith(matrix.ruby-version, '3.2.')
       continue-on-error: true
-      uses: paambaati/codeclimate-action@v9.0.0
+      uses: paambaati/codeclimate-action@f429536ee076d758a24705203199548125a28ca7 # v9.0.0
       with:
         coverageLocations: ${{ github.workspace }}/coverage/.resultset_workaround.json:simplecov
       env:
@@ -58,9 +58,9 @@ jobs:
   rubocop:
     runs-on: ubuntu-20.04
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
     - name: Set up Ruby
-      uses: ruby/setup-ruby@v1.202.0
+      uses: ruby/setup-ruby@a2bbe5b1b236842c1cb7dd11e8e3b51e0a616acc # v1.202.0
       with:
         ruby-version: 3.2.2
     - name: Run RuboCop
