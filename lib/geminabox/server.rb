@@ -159,8 +159,8 @@ module Geminabox
       halt 400 unless request.form_data?
 
       serialize_update do
-        gems = load_gems.select { |gem| request['gem_name'] == gem.name and
-                                  request['version'] == gem.number.version }
+        gems = load_gems.select { |gem| params['gem_name'] == gem.name and
+                                  params['version'] == gem.number.version }
         halt 404, 'Gem not found' if gems.size == 0
         gems.each do |gem|
           gem_path = File.expand_path(File.join(Geminabox.data, 'gems',
