@@ -10,6 +10,7 @@ group :test do
   gem 'minitest-reporters'
   gem 'rack-test'
   gem 'rake'
+  gem 'rackup'
 
   gem 'capybara-mechanize'
   gem 'capybara'
