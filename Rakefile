@@ -2,7 +2,8 @@ require "rubygems"
 require "rubygems/package_task"
 require "bundler/gem_tasks"
 
-Gem::PackageTask.new(eval(File.read("geminabox.gemspec"))) do |pkg|
+spec = Gem::Specification.load("geminabox.gemspec")
+Gem::PackageTask.new(spec) do |pkg|
 end
 
 desc 'Clear out generated packages'
