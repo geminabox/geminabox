@@ -41,7 +41,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Ruby
-      uses: ruby/setup-ruby@v1.202.0
+      uses: ruby/setup-ruby@v1.280.0
       with:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true
@@ -75,7 +75,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up Ruby
-      uses: ruby/setup-ruby@v1.202.0
+      uses: ruby/setup-ruby@v1.280.0
       with:
         ruby-version: 3.2.2
     - name: Run RuboCop
