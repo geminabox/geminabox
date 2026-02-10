@@ -1,4 +1,4 @@
-require 'minitest/unit'
+require 'minitest'
 require 'timeout'
 require 'socket'
 require 'rack'
