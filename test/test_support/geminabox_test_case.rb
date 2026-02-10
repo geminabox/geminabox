@@ -135,7 +135,7 @@ class Geminabox::TestCase < Minitest::Test
   end
 
   def execute(command)
-    output = ""
+    output = +""
     IO.popen(command, "r") do |io|
       data = io.read
       output << data
