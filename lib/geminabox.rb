@@ -5,7 +5,19 @@ require 'digest/md5'
 require 'builder'
 require 'sinatra/base'
 require 'rubygems/user_interaction'
-require 'rubygems/indexer'
+# Gem::Indexer was extracted from RubyGems in 3.3+.
+# On Ruby 3.3+, require the rubygems-generate_index gem instead.
+begin
+  require 'rubygems/indexer'
+rescue LoadError
+  begin
+    require 'rubygems-generate_index'
+  rescue LoadError
+    raise LoadError,
+          "Ruby 3.3+ requires the 'rubygems-generate_index' gem. " \
+          "Add it to your Gemfile or run: gem install rubygems-generate_index"
+  end
+end
 require 'rubygems/package'
 require 'tempfile'
 require 'json'
