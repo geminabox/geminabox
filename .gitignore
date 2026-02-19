@@ -16,3 +16,4 @@ test/fixtures/fake_home_path/.local/share/gem/specs
 test/fixtures/*.fixture
 
 /coverage
+test/fixtures/fake_home_path/.cache/
