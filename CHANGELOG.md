@@ -1,4 +1,29 @@
-# Changelog for the latest release
+# Changelog
+
+## [2.2.0] - 2026-02-20
+
+### Added
+- Ruby 3.3 and 3.4 support
+- Docker: run container as non-root user
+
+### Changed
+- **Server operators running Ruby 3.3+** must add `rubygems-generate_index`
+  to their Gemfile or run `gem install rubygems-generate_index`.
+  `Gem::Indexer` was extracted from RubyGems starting with Ruby 3.3 and is
+  no longer bundled. The server will refuse to start with a clear error
+  if the gem is missing.
+- Docker base image upgraded from Ruby 3.2 to 3.4
+- Pin GitHub Actions to commit SHAs for supply chain security
+- CI matrix updated: Ruby 2.3-3.4, ubuntu-22.04
+
+### Fixed
+- Rakefile gemspec loading now uses `Gem::Specification.load` instead of `eval`
+
+### Deprecated
+- Ruby 2.x support. geminabox 3.0 will require Ruby >= 3.0.
+  Users on Ruby 2.x should pin to `gem 'geminabox', '~> 2.2'`.
+
+## Previous releases
 
 See https://github.com/geminabox/geminabox/releases.
 
@@ -13,6 +38,7 @@ See https://github.com/geminabox/geminabox/releases.
 ###### 1.4.1 (2021-05-30)
 
 - https://github.com/geminabox/geminabox/releases/tag/v1.4.1
+
 ###### 1.4.0 (2021-05-30)
 
 - https://github.com/geminabox/geminabox/releases/tag/v1.4.0
