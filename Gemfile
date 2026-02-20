@@ -10,7 +10,7 @@ group :development do
   gem 'byebug'
 end
 group :test do
-  gem 'minitest', '< 6'
+  gem 'minitest', '< 7'
   gem 'minitest-reporters'
   gem 'rack-test'
   gem 'rake'
