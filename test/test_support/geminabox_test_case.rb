@@ -79,7 +79,9 @@ class Geminabox::TestCase < Minitest::Test
 
     def url_with_port(port)
       uri = URI.parse url
+      userinfo = uri.userinfo
       uri.port = port
+      uri.userinfo = userinfo
       uri.to_s
     end
 
