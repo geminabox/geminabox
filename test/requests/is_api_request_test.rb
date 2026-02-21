@@ -1,5 +1,5 @@
 require_relative '../test_helper'
-require 'minitest/unit'
+require 'minitest'
 require 'rack/test'
 
 class IsApiRequestTest < Minitest::Test

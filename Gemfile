@@ -6,7 +6,15 @@ group :development do
   gem 'byebug'
 end
 group :test do
-  gem 'minitest', '< 6'
+  if RUBY_VERSION >= '4.0'
+    gem 'minitest'
+    # minitest-mock was extracted from minitest in 5.26;
+    # minitest-mock 5.27+ requires Ruby >= 3.1
+    gem 'minitest-mock'
+  else
+    # minitest < 5.26 still bundles minitest/mock
+    gem 'minitest', '< 5.26'
+  end
   gem 'minitest-reporters'
   gem 'rack-test'
   gem 'rackup'
@@ -21,6 +29,7 @@ group :test do
   # rack and sinatra depend on ostruct for option handling
   gem 'ostruct'
 
+  gem 'logger'
   gem 'webmock'
 
   # Used only in test/requests/atom_feed_test.rb
