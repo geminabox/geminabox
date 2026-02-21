@@ -18,6 +18,9 @@ group :test do
   # Required for Ruby 3.4+ - nkf was extracted from stdlib
   # mechanize (used by capybara-mechanize) depends on nkf for character encoding
   gem 'nkf'
+  # Required for Ruby 4.0+ - ostruct will be extracted from stdlib
+  # rack and sinatra depend on ostruct for option handling
+  gem 'ostruct'
 
   gem 'webmock'
 
