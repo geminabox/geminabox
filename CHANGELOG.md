@@ -14,6 +14,13 @@
 - **`rubygems-generate_index` is now a hard dependency** and no longer needs
   to be installed separately. Remove it from your Gemfile if you added it
   for geminabox 2.2.
+- **`Geminabox.build_legacy` removed.** This setting was deprecated and had
+  no effect. `Gem::Indexer` itself dropped the `build_legacy` option in
+  [RubyGems 2.0.0](http://ruby-doc.org/stdlib-2.0.0/libdoc/rubygems/rdoc/Gem/Indexer.html)
+  (2013); modern indices are always built.
+- **Removed legacy index routes** (`yaml`, `yaml.Z`, `Marshal.4.8`,
+  `Marshal.4.8.Z`). These formats have not been generated since RubyGems
+  2.0.0 (2013) and no client meeting the `>= 3.2.3` requirement uses them.
 
 ### Added
 - Ruby 4.0 support

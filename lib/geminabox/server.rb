@@ -61,7 +61,7 @@ module Geminabox
       end
 
       def indexer
-        Gem::Indexer.new(Geminabox.data, :build_legacy => Geminabox.build_legacy)
+        Gem::Indexer.new(Geminabox.data)
       end
 
       def dependency_cache
