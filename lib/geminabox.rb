@@ -25,11 +25,6 @@ require 'tilt/erb'
 require 'rack/protection'
 
 module Geminabox
-  if RUBY_VERSION < '3.0'
-    warn "DEPRECATION: geminabox 3.0 will require Ruby >= 3.0. " \
-         "You are running Ruby #{RUBY_VERSION}. Please plan your upgrade. " \
-         "Pin to gem 'geminabox', '~> 2.2' if you cannot upgrade yet."
-  end
 
   class Error < StandardError ; end
 

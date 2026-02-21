@@ -15,16 +15,8 @@ For basic auth, try [Rack::Auth](http://www.rubydoc.info/github/rack/rack/Rack/A
 
 ## System Requirements
 
-- Ruby 2.3 through 3.4 (Ruby 3.2+ is highly recommended)
+- Ruby 3.0 or later (Ruby 3.2+ recommended)
 - RubyGems 2.5 or later (latest version recommended)
-- **Ruby 3.3+ users:** You must also install the `rubygems-generate_index` gem.
-  `Gem::Indexer` was extracted from RubyGems in 3.3 and geminabox requires it
-  to function. Add it to your Gemfile or install it directly:
-
-      gem install rubygems-generate_index
-
-**Note:** Ruby 2.x support is deprecated. geminabox 3.0 will require Ruby >= 3.0.
-Pin to `gem 'geminabox', '~> 2.2'` if you cannot upgrade yet.
 
 ## Server Setup
 

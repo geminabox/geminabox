@@ -13,7 +13,7 @@ Gem::Specification.new do |s|
   s.metadata["source_code_uri"] = "https://github.com/geminabox/geminabox"
   s.metadata["changelog_uri"]   = "https://github.com/geminabox/geminabox/releases"
 
-  s.required_ruby_version     = ">= 2.3.0"
+  s.required_ruby_version     = ">= 3.0.0"
   s.required_rubygems_version = ">= 2.5.0"
 
   s.extra_rdoc_files  = %w[README.md]
