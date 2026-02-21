@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'geminabox'
+require 'rubygems/indexer'
 
 module Geminabox::Indexer
   def self.updated_gemspecs(indexer)

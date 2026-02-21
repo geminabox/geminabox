@@ -180,7 +180,6 @@ Your Gemfile only needs:
 source 'https://rubygems.org'
 
 gem 'geminabox'
-gem 'rubygems-generate_index' # Required for Ruby 3.3+
 ```
 
 From there
