@@ -258,14 +258,12 @@ class Geminabox::TestCase < Minitest::Test
     end
 
     Timeout.timeout(10) do
-      begin
-        Timeout.timeout(1) do
-          TCPSocket.open("localhost", @test_server_port).close
-        end
-      rescue Errno::ECONNREFUSED
-        sleep 0.10
-        retry
+      Timeout.timeout(1) do
+        TCPSocket.open("localhost", @test_server_port).close
       end
+    rescue Errno::ECONNREFUSED
+      sleep 0.10
+      retry
     end
   end
 

@@ -32,7 +32,7 @@ module Geminabox
          Marshal.4.8.Z
       ].each do |deflated_index|
         get "/#{deflated_index}" do
-          copy_file request.path_info[1..-1]
+          copy_file request.path_info[1..]
           content_type('application/x-deflate')
           serve
         end
