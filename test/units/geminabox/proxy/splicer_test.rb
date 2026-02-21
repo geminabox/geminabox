@@ -79,7 +79,7 @@ module Geminabox
       end
 
       def splice_with_gz
-        gz_file_name
+        @file_name = gz_file_name
         splice
       end
 
@@ -88,7 +88,7 @@ module Geminabox
       end
 
       def gz_file_name
-        file_name << '.gz'
+        "#{file_name}.gz"
       end
 
       def remote_content

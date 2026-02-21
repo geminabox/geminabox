@@ -30,6 +30,9 @@ require_relative 'test_support/geminabox_test_case'
 require_relative 'test_support/http_dummy'
 require_relative 'test_support/http_socket_error_dummy'
 
+require 'rackup'
+require 'ostruct'
+
 require 'capybara/mechanize'
 require 'capybara/dsl'
 

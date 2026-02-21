@@ -1,4 +1,4 @@
-require 'minitest/unit'
+require 'minitest'
 require 'timeout'
 require 'socket'
 require 'rack'
@@ -135,7 +135,7 @@ class Geminabox::TestCase < Minitest::Test
   end
 
   def execute(command)
-    output = ""
+    output = +""
     IO.popen(command, "r") do |io|
       data = io.read
       output << data
@@ -254,7 +254,7 @@ class Geminabox::TestCase < Minitest::Test
         SimpleCov.result
         Process.kill(9, Process.pid)
       end
-      Rack::Server.start(server_options)
+      Rackup::Server.start(server_options)
     end
 
     Timeout.timeout(10) do
