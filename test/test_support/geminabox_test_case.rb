@@ -254,7 +254,7 @@ class Geminabox::TestCase < Minitest::Test
         SimpleCov.result
         Process.kill(9, Process.pid)
       end
-      Rack::Server.start(server_options)
+      Rackup::Server.start(server_options)
     end
 
     Timeout.timeout(10) do

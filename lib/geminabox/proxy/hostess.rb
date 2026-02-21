@@ -6,6 +6,8 @@ require 'net/http'
 module Geminabox
   module Proxy
     class Hostess < Sinatra::Base
+      set :host_authorization, { permitted_hosts: [] }
+
       attr_accessor :file_handler
       def serve
         headers["Cache-Control"] = 'no-transform'
