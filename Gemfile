@@ -2,10 +2,6 @@ source "https://rubygems.org"
 
 gemspec
 
-# Required for Ruby 3.3+ (Gem::Indexer extracted from RubyGems into a bundled gem).
-# Bundler blocks bundled gems unless explicitly listed. Can't go in gemspec —
-# the gem requires Ruby >= 3.0 and breaks Bundler resolution on 2.x.
-gem 'rubygems-generate_index' if RUBY_VERSION >= '3.3'
 group :development do
   gem 'byebug'
 end
@@ -22,6 +18,9 @@ group :test do
   # Required for Ruby 3.4+ - nkf was extracted from stdlib
   # mechanize (used by capybara-mechanize) depends on nkf for character encoding
   gem 'nkf'
+  # Required for Ruby 4.0+ - ostruct will be extracted from stdlib
+  # rack and sinatra depend on ostruct for option handling
+  gem 'ostruct'
 
   gem 'webmock'
 
