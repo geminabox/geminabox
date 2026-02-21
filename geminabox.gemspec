@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.metadata["changelog_uri"]   = "https://github.com/geminabox/geminabox/releases"
 
   s.required_ruby_version     = ">= 3.0.0"
-  s.required_rubygems_version = ">= 2.5.0"
+  s.required_rubygems_version = ">= 3.2.3"
 
   s.extra_rdoc_files  = %w[README.md]
   s.rdoc_options      = %w[--main README.md]

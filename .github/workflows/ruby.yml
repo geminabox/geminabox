@@ -12,51 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby-version: [2.3.8, 2.4.10, 2.5.9, 2.6.10, 2.7.8, 3.0.7, 3.1.7, 3.2.10, 3.3.10, 3.4.8]
-        gem-version: ['']
-        exclude:
-          # Default RubyGems on these Rubies is too old to build test gem fixtures
-          - ruby-version: 2.3.8
-            gem-version: ''
-          - ruby-version: 2.6.10
-            gem-version: ''
-        include:
-          # Default RubyGems version for older Rubies
-          - ruby-version: 2.3.8
-            gem-version: 3.3.15
-          - ruby-version: 2.4.10
-            gem-version: 3.3.15
-          - ruby-version: 2.5.9
-            gem-version: 3.3.15
-          - ruby-version: 2.6.10
-            gem-version: 3.3.15
-          - ruby-version: 2.7.8
-            gem-version: 3.3.15
-          - ruby-version: 3.0.7
-            gem-version: 3.3.15
-          # Test with older RubyGems on older Rubies
-          - ruby-version: 2.3.8
-            gem-version: 2.7.11
-          - ruby-version: 2.4.10
-            gem-version: 2.7.11
-          - ruby-version: 2.5.9
-            gem-version: 2.7.11
-          # Test with RubyGems 2.5.0 as it is specified in gemspec
-          - ruby-version: 2.3.8
-            gem-version: 2.5.0
-            continue-on-error: true
-          - ruby-version: 2.4.10
-            gem-version: 2.5.0
-            continue-on-error: true
-          - ruby-version: 2.5.9
-            gem-version: 2.5.0
-            continue-on-error: true
-          - ruby-version: 2.6.10
-            gem-version: 2.5.0
-            continue-on-error: true
-          - ruby-version: 2.7.8
-            gem-version: 2.5.0
-            continue-on-error: true
+        ruby-version: [3.0.7, 3.1.7, 3.2.10, 3.3.10, 3.4.8]
 
     steps:
     - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
@@ -65,21 +21,10 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true
-    - name: Use RubyGems with the specific version
-      if: matrix.gem-version != ''
-      env:
-        gemver: ${{ matrix.gem-version }}
-      run: |
-        gem update --system $gemver
-        gem --version
-    - name: Install rubygems-generate_index for Ruby 3.3+
-      if: startsWith(matrix.ruby-version, '3.3.') || startsWith(matrix.ruby-version, '3.4.')
-      run: gem install rubygems-generate_index
     - name: Run tests
       env:
         MINITEST_REPORTER: SpecReporter
       run: bundle exec rake
-      continue-on-error: ${{ matrix.continue-on-error || false }}
     - name: Workaround for coverage report to CodeClimate with jq
       if: startsWith(matrix.ruby-version, '3.2.')
       run: |
