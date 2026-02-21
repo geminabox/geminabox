@@ -9,11 +9,11 @@ group :test do
   gem 'minitest', '< 6'
   gem 'minitest-reporters'
   gem 'rack-test'
-  gem 'rake'
   gem 'rackup'
+  gem 'rake'
 
-  gem 'capybara-mechanize'
   gem 'capybara'
+  gem 'capybara-mechanize'
   # Required for Ruby 3.4+ - nkf was extracted from stdlib
   # mechanize (used by capybara-mechanize) depends on nkf for character encoding
   gem 'nkf'
