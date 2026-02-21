@@ -16,7 +16,7 @@ For basic auth, try [Rack::Auth](http://www.rubydoc.info/github/rack/rack/Rack/A
 ## System Requirements
 
 - Ruby 3.0 or later (Ruby 3.2+ recommended)
-- RubyGems 2.5 or later (latest version recommended)
+- RubyGems 3.2.3 or later (latest version recommended)
 
 ## Server Setup
 
