@@ -17,7 +17,7 @@ jobs:
     steps:
     - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
     - name: Set up Ruby
-      uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # v1.288.0
+      uses: ruby/setup-ruby@19a9babd0096de1a2aa716cac395f01253934999 # v1.288.0
       with:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true
@@ -44,7 +44,7 @@ jobs:
     steps:
     - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955 # v4
     - name: Set up Ruby
-      uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # v1.288.0
+      uses: ruby/setup-ruby@19a9babd0096de1a2aa716cac395f01253934999 # v1.288.0
       with:
         ruby-version: 3.2.10
     - name: Run RuboCop
