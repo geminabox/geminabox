@@ -1,5 +1,46 @@
 # Changelog
 
+## [3.0.0] - 2026-02-21
+
+### Breaking Changes
+- **Ruby >= 3.0 required.** Ruby 2.x is no longer supported.
+  Users on Ruby 2.x should pin to `gem 'geminabox', '~> 2.2'`.
+- **Sinatra upgraded from 2.x to 4.x.** If you mount geminabox inside a
+  larger Rack/Sinatra application, review the
+  [Sinatra 3.0](https://github.com/sinatra/sinatra/blob/main/CHANGELOG.md#300--2024-01-19)
+  and [4.0](https://github.com/sinatra/sinatra/blob/main/CHANGELOG.md#400--2024-01-19)
+  changelogs for breaking changes.
+- **RubyGems >= 3.2.3 required** (up from 2.5.0).
+- **`rubygems-generate_index` is now a hard dependency** and no longer needs
+  to be installed separately. Remove it from your Gemfile if you added it
+  for geminabox 2.2.
+- **`Geminabox.build_legacy` removed.** This setting was deprecated and had
+  no effect. `Gem::Indexer` itself dropped the `build_legacy` option in
+  [RubyGems 2.0.0](http://ruby-doc.org/stdlib-2.0.0/libdoc/rubygems/rdoc/Gem/Indexer.html)
+  (2013); modern indices are always built.
+- **Removed legacy index routes** (`yaml`, `yaml.Z`, `Marshal.4.8`,
+  `Marshal.4.8.Z`). These formats have not been generated since RubyGems
+  2.0.0 (2013) and no client meeting the `>= 3.2.3` requirement uses them.
+
+### Added
+- Ruby 4.0 support
+
+### Changed
+- Docker base image upgraded from Ruby 3.4 to 4.0
+- CI matrix simplified: Ruby 3.0-4.0 only (removed 2.x matrix and
+  RubyGems version testing)
+- Gem delete action uses `params` instead of `request` hash for Sinatra 4
+  compatibility
+- Sinatra `host_authorization` configured to permit all hosts (Sinatra 4
+  requires explicit opt-in)
+- Modernized Ruby syntax: removed unnecessary `begin`/`end` blocks inside
+  method rescue clauses, replaced `[1..-1]` with `[1..]`
+
+### Removed
+- Ruby 2.x deprecation warnings (no longer needed since 2.x is dropped)
+- `rubygems-generate_index` conditional require logic (now a gemspec
+  dependency)
+
 ## [2.2.0] - 2026-02-20
 
 ### Added

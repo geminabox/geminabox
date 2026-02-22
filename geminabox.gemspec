@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files  = %w[README.md]
   s.rdoc_options      = %w[--main README.md]
 
-  s.license           = 'MIT-LICENSE'
+  s.license           = 'MIT'
   s.files             = %w[MIT-LICENSE README.md] + Dir['{lib,public,views}/**/*']
   s.require_paths     = ['lib']
 
