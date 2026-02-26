@@ -28,7 +28,7 @@ module Geminabox
       end
 
       def gem_info
-        @data ||= {
+        @gem_info ||= {
           some_gem: "SOME_GEM_INFO\n" \
                     "0.0.1 | checksum:foo\n" \
                     "0.0.2 | checksum:foo",

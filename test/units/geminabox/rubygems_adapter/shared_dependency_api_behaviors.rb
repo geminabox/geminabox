@@ -21,9 +21,9 @@ module Geminabox
       end
 
       def test_get_list_with_socket_error
-        Geminabox.http_adapter = HttpSocketErrorDummy.new.tap { |a|
+        Geminabox.http_adapter = HttpSocketErrorDummy.new.tap do |a|
           a.default_response = 'getaddrinfo: Name or service not known'
-        }
+        end
         assert_raises(SocketError) { RubygemsDependency.for(:some_gem, :other_gem) }
       end
 
@@ -40,9 +40,9 @@ module Geminabox
       end
 
       def test_get_list_with_socket_error_and_allow_remote_failure
-        Geminabox.http_adapter = HttpSocketErrorDummy.new.tap { |a|
+        Geminabox.http_adapter = HttpSocketErrorDummy.new.tap do |a|
           a.default_response = 'getaddrinfo: Name or service not known'
-        }
+        end
         Geminabox.allow_remote_failure = true
         assert_equal [], RubygemsDependency.for(:some_gem, :other_gem)
       end

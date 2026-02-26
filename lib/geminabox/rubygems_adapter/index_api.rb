@@ -10,7 +10,7 @@ module Geminabox
           gems.each_with_object([]) do |gem_name, accum|
             accum.push(*for_gem(gem_name))
           end
-        rescue StandardError => e
+        rescue StandardError
           return [] if Geminabox.allow_remote_failure
 
           raise

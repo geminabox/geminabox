@@ -13,7 +13,7 @@ module Geminabox
 
           body = Geminabox.http_adapter.get_content(url)
           Marshal.load(body)
-        rescue StandardError => e
+        rescue StandardError
           return [] if Geminabox.allow_remote_failure
 
           raise
