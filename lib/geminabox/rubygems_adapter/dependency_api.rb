@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'uri'
+
 module Geminabox
   module RubygemsAdapter
     module DependencyApi
@@ -14,7 +16,7 @@ module Geminabox
         rescue StandardError => e
           return [] if Geminabox.allow_remote_failure
 
-          raise e
+          raise
         end
 
         private
