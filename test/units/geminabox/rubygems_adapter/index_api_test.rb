@@ -11,6 +11,15 @@ module Geminabox
         Geminabox.allow_remote_failure = false
       end
 
+      def some_gem_dependencies
+        [
+          { name: 'some_gem', number: '0.0.1', platform: 'ruby', dependencies: [] },
+          { name: 'some_gem', number: '0.0.2', platform: 'ruby', dependencies: [] },
+          { name: 'other_gem', number: '0.0.1', platform: 'ruby',
+            dependencies: [['some_gem', ">= 0"]] }
+        ]
+      end
+
       def stub_single_gem_request(status:)
         stub_request(:get, "https://index.rubygems.org/info/some_gem")
           .to_return(status: status, body: 'Whoops')

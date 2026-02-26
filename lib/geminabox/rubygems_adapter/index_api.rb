@@ -42,10 +42,10 @@ module Geminabox
             end
 
             data = {
-              "name" => gem_name.to_s,
-              "number" => version,
-              "platform" => platform,
-              "dependencies" => dependencies
+              name: gem_name.to_s,
+              number: version,
+              platform: platform,
+              dependencies: dependencies
             }
 
             result.push(data)
