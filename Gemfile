@@ -13,7 +13,7 @@ group :test do
     gem 'minitest-mock'
   else
     # minitest < 5.26 still bundles minitest/mock
-    gem 'minitest', '< 5.26'
+    gem 'minitest', '< 5.27'
   end
   gem 'minitest-reporters'
   gem 'rack-test'
