@@ -11,4 +11,4 @@ USER appuser
 
 EXPOSE 9292
 
-ENTRYPOINT ["rackup", "--host", "0.0.0.0"]
+ENTRYPOINT ["bundle", "exec", "rackup", "--host", "0.0.0.0"]
