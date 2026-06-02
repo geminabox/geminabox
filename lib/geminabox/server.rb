@@ -12,6 +12,7 @@ module Geminabox
     set :host_authorization, { permitted_hosts: [] }
 
     if Geminabox.rubygems_proxy
+      Geminabox.warn_rubygems_proxy_deprecation
       use Proxy::Hostess
     else
       use Hostess

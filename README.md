@@ -43,6 +43,12 @@ Start your gem server with 'rackup' to run WEBrick or hook up the config.ru as y
 
 ## RubyGems Proxy
 
+> **Deprecated.** The RubyGems proxy is unmaintained and **will be removed in
+> Geminabox 4.0.** It depends on the RubyGems.org Dependency API
+> (`/api/v1/dependencies`), which was [sunset on 2023-05-24](https://blog.rubygems.org/2023/02/22/dependency-api-deprecation.html)
+> in favour of the Compact Index API, so proxy mode no longer functions.
+> Enabling it now emits a deprecation warning. Do not rely on this feature.
+
 Geminabox can be configured to pull gems, it does not currently have, from rubygems.org. To enable this mode you can either:
 
 Set RUBYGEM_PROXY to true in the environment:
