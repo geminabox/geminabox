@@ -10,9 +10,18 @@
   in favour of the Compact Index API, so proxy mode no longer functions.
   Enabling it now emits a deprecation warning.
 
+### Fixed
+- Docker container instructions now work on modern Ruby/Rack. The example
+  `Gemfile` must include `rackup` (extracted from Rack in Rack 3) and a
+  server such as `webrick` (removed from Ruby's stdlib in 3.0), and the
+  container now starts with `bundle exec rackup`. Without these the
+  documented container failed to boot. (thanks to Ivan Kuchin, @toy)
+
 ### Internal
-- CI: `gem-push` workflow GitHub Actions pinned to commit SHAs. No
-  consumer-facing impact (not shipped in the gem).
+- CI: pinned `gem-push` workflow actions to commit SHAs and bumped
+  `ruby/setup-ruby` to v1.310.0.
+- CI: bumped `actions/checkout` to v6.0.3 for Node 24 compatibility.
+- Relaxed the `minitest` development dependency to `< 5.27`.
 
 ## [3.0.0] - 2026-02-21
 
