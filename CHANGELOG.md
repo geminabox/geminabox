@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+### Breaking Changes
+- **RubyGems proxy removed.** Proxy mode (`RUBYGEMS_PROXY` env /
+  `Geminabox.rubygems_proxy`), deprecated in 3.1.0, has been removed along
+  with its now-unused configuration (`Geminabox.rubygems_proxy_merge_strategy`,
+  `Geminabox.allow_remote_failure`, `Geminabox.ruby_gems_url`,
+  `Geminabox.bundler_ruby_gems_url`) and the internal `RubygemsDependency`
+  and `GemListMerge` helpers. The proxy relied on the RubyGems.org Dependency
+  API (`/api/v1/dependencies`), which was
+  [sunset on 2023-05-24](https://blog.rubygems.org/2023/02/22/dependency-api-deprecation.html)
+  in favour of the Compact Index API, so proxy mode no longer functioned.
+  Remove these settings from your `config.ru`.
+
 ## [3.1.0] - 2026-06-02
 
 ### Deprecated

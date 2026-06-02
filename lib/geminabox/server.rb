@@ -12,12 +12,7 @@ module Geminabox
     set :views, Geminabox.views
     set :host_authorization, { permitted_hosts: [] }
 
-    if Geminabox.rubygems_proxy
-      Geminabox.warn_rubygems_proxy_deprecation
-      use Proxy::Hostess
-    else
-      use Hostess
-    end
+    use Hostess
 
     class << self
       def disallow_replace?
@@ -306,23 +301,11 @@ HTML
     end
 
     def gem_list
-      Geminabox.rubygems_proxy ? combined_gem_list : local_gem_list
+      query_gems.map{|query_gem| gem_dependencies(query_gem) }.flatten(1)
     end
 
     def query_gems
       params[:gems].to_s.split(',')
-    end
-
-    def local_gem_list
-      query_gems.map{|query_gem| gem_dependencies(query_gem) }.flatten(1)
-    end
-
-    def remote_gem_list
-      RubygemsDependency.for(*query_gems)
-    end
-
-    def combined_gem_list
-      GemListMerge.merge(local_gem_list, remote_gem_list, strategy: Geminabox.rubygems_proxy_merge_strategy)
     end
 
     helpers do
