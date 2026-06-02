@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [3.1.0] - 2026-06-02
 
 ### Deprecated
 - **RubyGems proxy** (`RUBYGEMS_PROXY` env / `Geminabox.rubygems_proxy`) is
