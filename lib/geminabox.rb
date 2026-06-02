@@ -68,6 +68,17 @@ module Geminabox
       Server.settings
     end
 
+    # Deprecated: the RubyGems proxy is unmaintained and will be removed in
+    # Geminabox 4.0. It depends on the RubyGems.org Dependency API
+    # (/api/v1/dependencies), which was sunset on 2023-05-24, so proxy mode no
+    # longer functions.
+    def warn_rubygems_proxy_deprecation
+      warn '[DEPRECATION] Geminabox RubyGems proxy is deprecated and will be ' \
+           'removed in Geminabox 4.0. It depends on the RubyGems.org ' \
+           'Dependency API (/api/v1/dependencies), which was sunset on ' \
+           '2023-05-24, so proxy mode no longer functions.'
+    end
+
     def call(env)
       Server.call env
     end
