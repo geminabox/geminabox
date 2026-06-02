@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+### Deprecated
+- **RubyGems proxy** (`RUBYGEMS_PROXY` env / `Geminabox.rubygems_proxy`) is
+  deprecated and **will be removed in 4.0.** It depends on the RubyGems.org
+  Dependency API (`/api/v1/dependencies`), which was
+  [sunset on 2023-05-24](https://blog.rubygems.org/2023/02/22/dependency-api-deprecation.html)
+  in favour of the Compact Index API, so proxy mode no longer functions.
+  Enabling it now emits a deprecation warning.
+
+### Internal
+- CI: `gem-push` workflow GitHub Actions pinned to commit SHAs. No
+  consumer-facing impact (not shipped in the gem).
+
 ## [3.0.0] - 2026-02-21
 
 ### Breaking Changes
