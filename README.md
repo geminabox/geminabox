@@ -186,6 +186,8 @@ Your Gemfile only needs:
 source 'https://rubygems.org'
 
 gem 'geminabox'
+gem 'rackup'
+gem 'webrick' # or other server you prefer
 ```
 
 From there
