@@ -2,6 +2,7 @@
 
 require 'reentrant_flock'
 require 'rubygems/util'
+require 'rss'
 
 module Geminabox
 
