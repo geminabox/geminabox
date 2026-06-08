@@ -16,7 +16,7 @@ class Gem::Commands::InaboxCommand < Gem::Command
   end
 
   def initialize
-    super 'inabox', description
+    super('inabox', description)
 
     add_option('-c', '--configure', "Configure GemInABox") do |value, options|
       options[:configure] = true
