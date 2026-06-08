@@ -49,7 +49,4 @@ jobs:
         ruby-version: 3.2.10
     - name: Run RuboCop
       run: |
-        bundle add rubocop --version 1.55.0
-        bundle add rubocop-minitest --version 0.20.1
-        bundle add rubocop-rake --version 0.6.0
         bundle exec rubocop
