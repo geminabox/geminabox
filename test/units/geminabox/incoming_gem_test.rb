@@ -12,37 +12,42 @@ module Geminabox
       subject = Geminabox::IncomingGem.new(StringIO.new('NOT A GEM'))
       refute subject.valid?
 
-      file = File.open(GemFactory.gem_file(:example))
-      subject = Geminabox::IncomingGem.new(file)
-      assert subject.valid?
+      File.open(GemFactory.gem_file(:example)) do |file|
+        subject = Geminabox::IncomingGem.new(file)
+        assert subject.valid?
+      end
     end
 
     test "#spec" do
-      file = File.open(GemFactory.gem_file(:example))
-      subject = Geminabox::IncomingGem.new(file)
+      File.open(GemFactory.gem_file(:example)) do |file|
+        subject = Geminabox::IncomingGem.new(file)
 
-      assert_instance_of Gem::Specification, subject.spec
+        assert_instance_of Gem::Specification, subject.spec
+      end
     end
 
     test "#name" do
-      file = File.open(GemFactory.gem_file(:example))
-      subject = Geminabox::IncomingGem.new(file)
+      File.open(GemFactory.gem_file(:example)) do |file|
+        subject = Geminabox::IncomingGem.new(file)
 
-      assert_equal "example-1.0.0.gem", subject.name
+        assert_equal "example-1.0.0.gem", subject.name
+      end
     end
 
     test "#name for platform dependent gem" do
-      file = File.open(GemFactory.gem_file(:example, :platform => "x86_64-linux"))
-      subject = Geminabox::IncomingGem.new(file)
+      File.open(GemFactory.gem_file(:example, :platform => "x86_64-linux")) do |file|
+        subject = Geminabox::IncomingGem.new(file)
 
-      assert_equal "example-1.0.0-x86_64-linux.gem", subject.name
+        assert_equal "example-1.0.0-x86_64-linux.gem", subject.name
+      end
     end
 
     test "#dest_filename" do
-      file = File.open(GemFactory.gem_file(:example))
-      subject = Geminabox::IncomingGem.new(file, "/root/path")
+      File.open(GemFactory.gem_file(:example)) do |file|
+        subject = Geminabox::IncomingGem.new(file, "/root/path")
 
-      assert_equal '/root/path/gems/example-1.0.0.gem', subject.dest_filename
+        assert_equal '/root/path/gems/example-1.0.0.gem', subject.dest_filename
+      end
     end
 
     test "#hexdigest" do

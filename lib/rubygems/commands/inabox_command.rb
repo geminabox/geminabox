@@ -89,9 +89,7 @@ class Gem::Commands::InaboxCommand < Gem::Command
     dirname = File.dirname(config_path)
     Dir.mkdir(dirname) unless File.exist?(dirname)
 
-    File.open(config_path, 'w') do |f|
-      f.write config.to_yaml
-    end
+    File.write(config_path, config.to_yaml)
   end
 
 end

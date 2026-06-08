@@ -13,7 +13,7 @@ module Geminabox
         url = [
           rubygems_uri,
           '?gems=',
-          gems.map(&:to_s).join(',')
+          gems.join(',')
         ].join
         body = Geminabox.http_adapter.get_content(url)
         Marshal.load(body)

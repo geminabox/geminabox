@@ -217,7 +217,7 @@ class Geminabox::TestCase < Minitest::Test
   end
 
   def log_to_stdout?
-    Minitest::Reporters.reporters.any?{|reporter| reporter.instance_of?(Minitest::Reporters::SpecReporter)}
+    Minitest::Reporters.reporters.any?(Minitest::Reporters::SpecReporter)
   end
 
   def start_app!
