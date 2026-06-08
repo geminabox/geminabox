@@ -4,6 +4,7 @@ gemspec
 
 group :development do
   gem 'byebug'
+  gem 'rubocop', '= 1.55'
 end
 group :test do
   if RUBY_VERSION >= '4.0'
