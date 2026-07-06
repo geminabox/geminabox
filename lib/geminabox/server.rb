@@ -2,6 +2,7 @@
 
 require 'reentrant_flock'
 require 'rubygems/util'
+require 'rss'
 
 module Geminabox
 
@@ -91,6 +92,7 @@ module Geminabox
     end
 
     get '/' do
+      content_type :html
       @gems = load_gems
       @index_gems = index_gems(@gems)
       @allow_upload = self.class.allow_upload?
@@ -99,15 +101,18 @@ module Geminabox
     end
 
     get '/atom.xml' do
+      content_type 'application/atom+xml'
       @gems = load_gems
       erb :atom, :layout => false
     end
 
     get '/api/v1/dependencies' do
+      content_type 'application/octet-stream'
       query_gems.any? ? Marshal.dump(gem_list) : 200
     end
 
     get '/api/v1/dependencies.json' do
+      content_type :json
       query_gems.any? ? gem_list.to_json : {}
     end
 
@@ -116,6 +121,7 @@ module Geminabox
         error_response(403, 'Gem uploading is disabled')
       end
 
+      content_type :html
       erb :upload
     end
 
@@ -136,6 +142,7 @@ module Geminabox
       @gem = gems[params[:gemname]]
       @allow_delete = self.class.allow_delete?
       halt 404 unless @gem
+      content_type :html
       erb :gem
     end
 

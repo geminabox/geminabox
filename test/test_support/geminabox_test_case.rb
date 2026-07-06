@@ -10,6 +10,7 @@ require 'webrick/https'
 require 'logger'
 require 'rack/auth/abstract/handler'
 require 'rack/auth/abstract/request'
+require 'httpclient'
 
 class Geminabox::TestCase < Minitest::Test
   class << self
@@ -178,8 +179,29 @@ class Geminabox::TestCase < Minitest::Test
   end
 
   def assert_can_fetch(gemname = :example, *args)
-    geminabox_push(gem_file(gemname, *args))
+    gem_file_path = gem_file(gemname, *args)
+    geminabox_push(gem_file_path)
     assert_match( /Downloaded #{gemname}/, gem_fetch(gemname))
+    assert_gem_download_content_type(gem_file_path)
+  end
+
+  def assert_gem_download_content_type(gem_file_path)
+    gem_url = url_for("/gems/#{File.basename(gem_file_path)}")
+    response = http_client_for(gem_url).head(gem_url)
+    assert_equal 200, response.status
+    assert_equal 'application/octet-stream', response.headers['Content-Type']
+  end
+
+  def http_client_for(url)
+    uri = URI.parse(url)
+    HTTPClient.new.tap do |client|
+      if uri.user && uri.password
+        auth_url = uri.dup
+        auth_url.user = nil
+        auth_url.password = nil
+        client.set_auth(auth_url.to_s, uri.user, uri.password)
+      end
+    end
   end
 
   def assert_can_push(gemname = :example, *args)
