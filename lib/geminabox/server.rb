@@ -264,36 +264,8 @@ HTML
       self.class.dependency_cache
     end
 
-    def all_gems
-      all_gems_with_duplicates.inject(:|)
-    end
-
-    def all_gems_with_duplicates
-      specs_files_paths.map do |specs_file_path|
-        if File.exist?(specs_file_path)
-          Marshal.load(Gem::Util.gunzip(Gem.read_binary(specs_file_path)))
-        else
-          []
-        end
-      end
-    end
-
-    def specs_file_types
-      [:specs, :prerelease_specs]
-    end
-
-    def specs_files_paths
-      specs_file_types.map do |specs_file_type|
-        File.join(Geminabox.data, spec_file_name(specs_file_type))
-      end
-    end
-
-    def spec_file_name(specs_file_type)
-      [specs_file_type, Gem.marshal_version, 'gz'].join('.')
-    end
-
     def load_gems
-      @loaded_gems ||= Geminabox::GemVersionCollection.new(all_gems)
+      @loaded_gems ||= Geminabox::GemVersionCollection.from_specs_index(Geminabox.data)
     end
 
     def index_gems(gems)

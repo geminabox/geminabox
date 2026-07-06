@@ -37,6 +37,10 @@ module Geminabox
       included_platform = ruby? ? nil : platform
       [name, number, included_platform].compact.join('-')
     end
+
+    def number_and_platform
+      ruby? ? number.to_s : "#{number}-#{platform}"
+    end
   end
 
 end

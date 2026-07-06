@@ -44,5 +44,24 @@ module Geminabox
       assert_equal 'bbb', subject.oldest.name
       assert_equal 'aaa', subject.newest.name
     end
+
+    def test_from_specs_index_loads_release_and_prerelease_specs
+      clean_data_dir
+      inject_gems do |builder|
+        builder.gem "alpha"
+        builder.gem "alpha", version: "2.0.0.pre"
+        builder.gem "beta", platform: "java"
+      end
+
+      collection = Geminabox::GemVersionCollection.from_specs_index(Geminabox.data)
+      assert_equal [["alpha", "1.0.0"], ["alpha", "2.0.0.pre"], ["beta", "1.0.0"]],
+                   collection.map { |gem| [gem.name, gem.number.to_s] }.sort
+    end
+
+    def test_from_specs_index_returns_an_empty_collection_when_no_index_exists
+      clean_data_dir
+      collection = Geminabox::GemVersionCollection.from_specs_index(Geminabox.data)
+      assert_equal 0, collection.size
+    end
   end
 end
