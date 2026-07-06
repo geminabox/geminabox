@@ -80,4 +80,30 @@ module Geminabox
     on_gem_received:                nil
   )
 
+  # Removed in 4.0 with the RubyGems proxy. Warn-and-ignore (rather than
+  # NoMethodError at boot) so stale config.ru lines don't break upgrades.
+  # Drop these shims in 5.0.
+  [
+    :rubygems_proxy,
+    :rubygems_proxy_merge_strategy,
+    :allow_remote_failure,
+    :ruby_gems_url,
+    :bundler_ruby_gems_url
+  ].each do |setting|
+    define_singleton_method("#{setting}=") do |_value|
+      warn "[REMOVED] Geminabox.#{setting} was removed in Geminabox 4.0 " \
+           'along with the RubyGems proxy and has no effect. Remove this ' \
+           'line from your config.ru. Migration notes: ' \
+           'https://github.com/geminabox/geminabox/pull/735'
+    end
+    define_singleton_method(setting) { nil }
+  end
+
+  if ENV['RUBYGEMS_PROXY'] == 'true' || ENV.key?('RUBYGEMS_PROXY_MERGE_STRATEGY')
+    warn '[REMOVED] The RUBYGEMS_PROXY and RUBYGEMS_PROXY_MERGE_STRATEGY ' \
+         'environment variables were removed in Geminabox 4.0; Geminabox ' \
+         'now always serves only local gems. Migration notes: ' \
+         'https://github.com/geminabox/geminabox/pull/735'
+  end
+
 end
