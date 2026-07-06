@@ -17,6 +17,7 @@ class AtomFeedTest < Minitest::Test
   test "atom feed returns when no gems are defined" do
     get "/atom.xml"
     assert last_response.ok?
+    assert_equal 'application/atom+xml', last_response.media_type
     refute_match %r{<entry>}, last_response.body
   end
 
@@ -27,6 +28,7 @@ class AtomFeedTest < Minitest::Test
 
     get "/atom.xml"
     assert last_response.ok?
+    assert_equal 'application/atom+xml', last_response.media_type
     feed_content = RSS::Parser.parse(last_response.body)
     feed_content.items.size == 1
   end
