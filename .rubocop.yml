@@ -10,6 +10,21 @@ AllCops:
 Lint/NonAtomicFileOperation:
   Enabled: false
 
+# New cops from the rubocop 1.88 bump (#737). Not adopting them; disabling
+# rather than churning the codebase to comply.
+Naming/PredicateMethod:
+  Enabled: false
+Style/FileOpen:
+  Enabled: false
+Style/MapJoin:
+  Enabled: false
+Style/OneClassPerFile:
+  Enabled: false
+Style/PredicateWithKind:
+  Enabled: false
+Style/SuperWithArgsParentheses:
+  Enabled: false
+
 # The following is a workaround for disorder in rubocop auto-gen-config
 Layout/SpaceBeforeBlockBraces:
   Exclude:
