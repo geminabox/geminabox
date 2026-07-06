@@ -12,7 +12,21 @@
   API (`/api/v1/dependencies`), which was
   [sunset on 2023-05-24](https://blog.rubygems.org/2023/02/22/dependency-api-deprecation.html)
   in favour of the Compact Index API, so proxy mode no longer functioned.
-  Remove these settings from your `config.ru`.
+  It also served remote and local gems from a single merged namespace, which
+  exposes users to dependency confusion attacks and defeats Bundler's
+  scoped-source pinning.
+
+  **Migration:** remove these settings from your `config.ru`; leaving them
+  in place does not break startup, each logs a `[REMOVED]` warning and is
+  ignored (these shims will be dropped in 5.0). Setting the
+  `RUBYGEMS_PROXY` or `RUBYGEMS_PROXY_MERGE_STRATEGY` environment variables
+  likewise only produces a startup warning. To use
+  Geminabox alongside rubygems.org, declare it as a scoped source in your
+  Gemfile (`source "https://gems.example.com" do ... end`) so each gem is
+  pinned to one server; see the README. If you need a caching or mirroring
+  proxy for rubygems.org, use
+  [gemstash](https://github.com/rubygems/gemstash). Discussion and full
+  rationale: [#735](https://github.com/geminabox/geminabox/pull/735).
 
 ## [3.1.0] - 2026-06-02
 

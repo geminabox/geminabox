@@ -41,6 +41,50 @@ Create a config.ru as follows:
 
 Start your gem server with 'rackup' to run WEBrick or hook up the config.ru as you normally would ([passenger](https://www.phusionpassenger.com/), [thin](http://code.macournoyer.com/thin/), [unicorn](https://bogomips.org/unicorn/), whatever floats your boat).
 
+## Using Geminabox alongside rubygems.org
+
+Geminabox serves only the gems you push to it. To use it together with
+rubygems.org, declare it as a scoped source in your Gemfile so that every gem
+is pinned to exactly one source:
+
+```ruby
+source "https://rubygems.org"
+
+source "https://gems.example.com" do
+  gem "internal-widgets"
+  gem "internal-tools"
+end
+```
+
+This pinning is Bundler's protection against dependency confusion: a gem name
+that exists on both servers can never silently resolve to the wrong one.
+
+### RubyGems proxy (removed in 4.0)
+
+Earlier versions of Geminabox could proxy rubygems.org and serve remote and
+local gems from one merged namespace. The feature was deprecated in 3.1.0 and
+removed in 4.0:
+
+- It relied on the RubyGems.org Dependency API
+  (`/api/v1/dependencies`), which was
+  [sunset on 2023-05-24](https://blog.rubygems.org/2023/02/22/dependency-api-deprecation.html),
+  so the proxy had not worked for years.
+- Serving remote and local gems from one namespace invites dependency
+  confusion attacks and defeats Bundler's source pinning described above.
+
+When upgrading, remove `Geminabox.rubygems_proxy` and its related settings
+(`rubygems_proxy_merge_strategy`, `allow_remote_failure`, `ruby_gems_url`,
+`bundler_ruby_gems_url`) from your config.ru, and point your Gemfile at
+rubygems.org directly with a scoped source block as shown above. Leftover
+settings won't break your server: 4.0 warns about each one and ignores it,
+and the `RUBYGEMS_PROXY` and `RUBYGEMS_PROXY_MERGE_STRATEGY` environment
+variables get the same startup warning. These shims go away in 5.0.
+
+If you need a caching or mirroring proxy for rubygems.org (air-gapped
+networks, bandwidth, protection against upstream yanks), use
+[gemstash](https://github.com/rubygems/gemstash), maintained by the RubyGems
+organization.
+
 ## HTTP adapter
 
 Geminabox uses the HTTPClient gem to manage its connections to remote resources.
