@@ -47,9 +47,6 @@ jobs:
       uses: ruby/setup-ruby@afeafc3d1ab54a631816aba4c914a0081c12ff2f # v1.310.0
       with:
         ruby-version: 3.2.10
+        bundler-cache: true
     - name: Run RuboCop
-      run: |
-        bundle add rubocop --version 1.55.0
-        bundle add rubocop-minitest --version 0.20.1
-        bundle add rubocop-rake --version 0.6.0
-        bundle exec rubocop
+      run: bundle exec rubocop
