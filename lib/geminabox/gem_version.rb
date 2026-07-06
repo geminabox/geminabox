@@ -39,7 +39,11 @@ module Geminabox
     end
 
     def number_and_platform
-      ruby? ? number.to_s : "#{number}-#{platform}"
+      if platform.nil? || ruby?
+        number.to_s
+      else
+        "#{number}-#{platform}"
+      end
     end
   end
 
