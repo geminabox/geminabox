@@ -169,4 +169,22 @@ class CompactIndexerTest < Minitest::Test
                    "info/#{name} bytes must hash to the last versions.list checksum"
     end
   end
+
+  test "Server.reindex(:force_rebuild) refreshes the compact index" do
+    GemFactory.new(File.join(Geminabox.data, "gems")).gem("a")
+    Geminabox::Server.reindex(:force_rebuild)
+    assert_match(/^a 1\.0\.0 /, File.read(@indexer.versions_path))
+  end
+
+  test "incremental Server.reindex appends new versions" do
+    build_index { |builder| builder.gem "a" }
+    before = File.read(@indexer.versions_path)
+
+    GemFactory.new(File.join(Geminabox.data, "gems")).gem("a", version: "2.0.0")
+    Geminabox::Server.reindex
+
+    after = File.read(@indexer.versions_path)
+    assert after.start_with?(before), "incremental reindex must append"
+    assert_match(/\Aa 2\.0\.0 [0-9a-f]{32}\z/, after.split("\n").last)
+  end
 end

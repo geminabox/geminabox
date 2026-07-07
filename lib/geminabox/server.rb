@@ -39,6 +39,7 @@ module Geminabox
         if force_rebuild
           indexer.generate_index
           dependency_cache.flush
+          compact_indexer.reindex
         else
           begin
             require 'geminabox/indexer'
@@ -46,6 +47,7 @@ module Geminabox
             return if updated_gemspecs.empty?
             indexer.update_index
             updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
+            compact_indexer.reindex
           rescue Errno::ENOENT
             with_rlock { reindex(:force_rebuild) }
           rescue => e
@@ -63,6 +65,10 @@ module Geminabox
 
       def dependency_cache
         @dependency_cache ||= Geminabox::DiskCache.new(File.join(Geminabox.data, "_cache"))
+      end
+
+      def compact_indexer
+        Geminabox::CompactIndexer.new(Geminabox.data)
       end
 
       def with_rlock(&block)
