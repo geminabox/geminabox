@@ -9,7 +9,6 @@ require 'fileutils'
 require 'rubygems/util'
 
 module Geminabox
-
   # Materializes the compact index API bodies (/versions, /info/NAME, /names)
   # under data/compact_index/, from the gems recorded in the legacy Marshal
   # specs indexes. Callers must hold the repository lock while writing.
@@ -48,7 +47,7 @@ module Geminabox
       end
     end
 
-  private
+    private
 
     # Cumulative state recorded in versions.list. Returns nil when the file
     # is missing or unparseable, which triggers a from-scratch build.
@@ -59,14 +58,17 @@ module Geminabox
     #                content-only change can be detected against it.
     def known_versions
       return nil unless File.exist?(versions_path)
+
       lines = File.read(versions_path).split("\n")
       separator = lines.index("---")
       return nil unless separator
+
       state = Hash.new { |hash, key| hash[key] = [] }
       checksums = {}
       lines.drop(separator + 1).each do |line|
-        name, versions, checksum = line.split(" ")
+        name, versions, checksum = line.split
         return nil unless name && versions && checksum
+
         versions.split(",").each do |entry|
           if entry.start_with?("-")
             state[name].delete(entry[1..])
@@ -100,6 +102,7 @@ module Geminabox
       (known_state.keys - current.keys).each do |name|
         removed = known_state[name]
         next if removed.empty?
+
         info_body = CompactIndex.info([])
         atomic_write(info_path(name), info_body)
         additions << version_line(name, removed.map { |id| "-#{id}" }, info_body)
@@ -125,8 +128,10 @@ module Geminabox
     # Returns nil when nothing needs to change, keeping reconcile idempotent.
     def refresh_line(name, versions, current_ids, known_checksum)
       return unless dirty?(name, versions)
+
       info_body = write_info(name, versions)
       return if Digest::MD5.hexdigest(info_body) == known_checksum
+
       entries = current_ids.map { |id| "-#{id}" } + current_ids
       version_line(name, entries, info_body)
     end
@@ -137,6 +142,7 @@ module Geminabox
     def dirty?(name, versions)
       info = info_path(name)
       return true unless File.exist?(info)
+
       info_mtime = File.stat(info).mtime
       versions.any? do |version|
         gem_file = File.join(@data_dir, "gems", "#{version.gemfile_name}.gem")
@@ -145,7 +151,7 @@ module Geminabox
     end
 
     def version_line(name, entries, info_body)
-      "#{name} #{entries.join(",")} #{Digest::MD5.hexdigest(info_body)}\n"
+      "#{name} #{entries.join(',')} #{Digest::MD5.hexdigest(info_body)}\n"
     end
 
     # name => GemVersionCollection, name-sorted; versions version-sorted.
@@ -192,6 +198,7 @@ module Geminabox
       versions.map do |version|
         spec = load_spec(version)
         next unless spec
+
         CompactIndex::GemVersion.new(
           version.number.to_s,
           version.platform,
@@ -205,11 +212,11 @@ module Geminabox
     end
 
     def info_dependencies(spec)
-      spec.dependencies.
-        select { |dep| dep.type == :runtime }.
-        map    { |dep| [dep.name.is_a?(Array) ? dep.name.first : dep.name, dep.requirement.to_s] }.
-        sort_by(&:first).
-        map    { |name, requirement| CompactIndex::Dependency.new(name, requirement, nil, nil) }
+      spec.dependencies
+          .select { |dep| dep.type == :runtime }
+          .map { |dep| [dep.name.is_a?(Array) ? dep.name.first : dep.name, dep.requirement.to_s] }
+          .sort_by(&:first)
+          .map { |name, requirement| CompactIndex::Dependency.new(name, requirement, nil, nil) }
     end
 
     def requirement_string(requirement)
@@ -220,6 +227,7 @@ module Geminabox
       spec_file = File.join(@data_dir, "quick", "Marshal.#{Gem.marshal_version}",
                             "#{version.gemfile_name}.gemspec.rz")
       return unless File.exist?(spec_file)
+
       Marshal.load(Gem::Util.inflate(Gem.read_binary(spec_file)))
     end
 
@@ -240,5 +248,4 @@ module Geminabox
       File.rename(temp_file.path, file_name)
     end
   end
-
 end

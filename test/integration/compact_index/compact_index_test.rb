@@ -9,7 +9,7 @@ class CompactIndexIntegrationTest < Geminabox::TestCase
     Dir.mktmpdir do |dir|
       gemfile = File.join(dir, "Gemfile")
       File.write(gemfile, <<~GEMFILE)
-        source "#{url_for("/")}"
+        source "#{url_for('/')}"
         gem "a"
       GEMFILE
 
@@ -30,7 +30,7 @@ class CompactIndexIntegrationTest < Geminabox::TestCase
     end
   end
 
-protected
+  protected
 
   def bundle(dir, command)
     output = without_bundler do

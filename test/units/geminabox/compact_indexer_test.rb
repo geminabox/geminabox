@@ -44,9 +44,9 @@ class CompactIndexerTest < Minitest::Test
       builder.gem "a", deps: { b: ">= 1.0" }
     end
 
-    assert_equal "---\n1.0.0 |checksum:#{gem_sha256("b-1.0.0.gem")}\n",
+    assert_equal "---\n1.0.0 |checksum:#{gem_sha256('b-1.0.0.gem')}\n",
                  File.read(@indexer.info_path("b"))
-    assert_equal "---\n1.0.0 b:>= 1.0|checksum:#{gem_sha256("a-1.0.0.gem")}\n",
+    assert_equal "---\n1.0.0 b:>= 1.0|checksum:#{gem_sha256('a-1.0.0.gem')}\n",
                  File.read(@indexer.info_path("a"))
   end
 
@@ -175,7 +175,7 @@ class CompactIndexerTest < Minitest::Test
 
     last_checksum = {}
     File.read(@indexer.versions_path).split("\n").drop(2).each do |line|
-      name, _versions, md5 = line.split(" ")
+      name, _versions, md5 = line.split
       last_checksum[name] = md5
     end
     last_checksum.each do |name, md5|

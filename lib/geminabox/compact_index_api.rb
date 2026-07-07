@@ -3,7 +3,6 @@
 require 'digest'
 
 module Geminabox
-
   # Sinatra helpers implementing the compact index HTTP semantics:
   # - ETag is the quoted MD5 of the full body (Bundler <= 2.4 verifies
   #   exactly that after reassembling ranged fetches).
@@ -38,11 +37,12 @@ module Geminabox
       end
     end
 
-  private
+    private
 
     def range_start(header, size)
       match = /\Abytes=(\d+)-\z/.match(header.to_s)
       return unless match
+
       first_byte = Integer(match[1])
       first_byte < size ? first_byte : nil
     end
@@ -55,5 +55,4 @@ module Geminabox
       end
     end
   end
-
 end
