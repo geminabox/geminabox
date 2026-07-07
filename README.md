@@ -85,6 +85,18 @@ networks, bandwidth, protection against upstream yanks), use
 [gemstash](https://github.com/rubygems/gemstash), maintained by the RubyGems
 organization.
 
+## Compact index
+
+Geminabox serves the [compact index API](https://guides.rubygems.org/rubygems-org-compact-index-api/)
+(`/versions`, `/info/GEMNAME`, `/names`). Bundler 1.12+ detects and uses it
+automatically; no client configuration is needed. Responses support
+`If-None-Match` and ranged requests, so `bundle install` only downloads
+index data that changed since the last run.
+
+The materialized index lives in `data/compact_index/` and is updated
+whenever gems are added or removed. Deleting that directory (or hitting
+`/reindex`) is safe; it is rebuilt from the stored gems on the next request.
+
 ## HTTP adapter
 
 Geminabox uses the HTTPClient gem to manage its connections to remote resources.
