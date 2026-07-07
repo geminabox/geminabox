@@ -105,7 +105,12 @@ module Geminabox
         additions << version_line(name, removed.map { |id| "-#{id}" }, info_body)
       end
 
-      return if additions.empty?
+      if additions.empty?
+        # Self-heal a names file deleted out from under an intact
+        # versions.list, so /names does not 404 forever.
+        write_names(current.keys) unless File.exist?(names_path)
+        return
+      end
       atomic_write(versions_path, File.read(versions_path) + additions)
       write_names(current.keys)
     end

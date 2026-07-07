@@ -107,4 +107,15 @@ class CompactIndexTest < Minitest::Test
     assert last_response.ok?
     assert_equal "---\na\nb\n", last_response.body
   end
+
+  test "GET /names self-heals a names file deleted under an intact versions.list" do
+    get "/versions"
+    names_path = Geminabox::Server.compact_indexer.names_path
+    File.delete(names_path)
+    refute File.exist?(names_path)
+
+    get "/names"
+    assert last_response.ok?
+    assert_equal "---\na\nb\n", last_response.body
+  end
 end

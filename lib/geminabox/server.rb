@@ -110,12 +110,12 @@ module Geminabox
     helpers Geminabox::CompactIndexApi
 
     get '/versions' do
-      bootstrap_compact_index
+      bootstrap_compact_index(self.class.compact_indexer.versions_path)
       serve_compact_file(self.class.compact_indexer.versions_path)
     end
 
     get '/names' do
-      bootstrap_compact_index
+      bootstrap_compact_index(self.class.compact_indexer.names_path)
       serve_compact_file(self.class.compact_indexer.names_path)
     end
 
@@ -240,8 +240,8 @@ module Geminabox
       self.class.with_rlock(&block)
     end
 
-    def bootstrap_compact_index
-      return if File.exist?(self.class.compact_indexer.versions_path)
+    def bootstrap_compact_index(path)
+      return if File.exist?(path)
       serialize_update { self.class.compact_indexer.reindex }
     end
 
