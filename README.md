@@ -102,6 +102,25 @@ first request to `/versions` builds the index and can take a while as it
 checksums every stored gem, so hitting `/reindex` or `/versions` right
 after upgrading avoids surprising the first `bundle install`.
 
+### Running behind a reverse proxy
+
+A stock nginx or Passenger deployment needs no special configuration for the
+compact index. gzip is safe to leave on, even for `text/plain`: Bundler sends
+its ranged requests without `Accept-Encoding`, and nginx never compresses 206
+responses, so 304 revalidation and ranged tail appends keep working.
+
+Two things do interfere:
+
+- Proxy-level caching of `/versions`, `/info/*`, or `/names` (nginx
+  `proxy_cache`, or a CDN). The files reference each other by checksum, so a
+  cache serving one fresh and another stale makes Bundler report checksum
+  mismatches. Bundler already caches and revalidates client-side; leave these
+  paths uncached.
+- Middleware or middleboxes that strip or rewrite headers. Removing `ETag`
+  disables 304 revalidation; removing `Repr-Digest`/`Digest` makes Bundler
+  refuse to append partial responses and re-download the full file after
+  every change.
+
 ### Replacing a published version
 
 `gem inabox -o` (and the `allow_replace` server option) overwrites a stored
