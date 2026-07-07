@@ -13,6 +13,20 @@ class CompactIndexerTest < Minitest::Test
     @indexer.reindex
   end
 
+  # Replaces the already-stored a-1.0.0.gem with a fresh build that declares
+  # different dependencies. GemFactory skips building when the target file
+  # exists, so the replacement is produced in a separate directory and copied
+  # over the stored gem with a current mtime.
+  def replace_gem_a
+    Dir.mktmpdir do |other|
+      replacement = GemFactory.new(other).gem("a", deps: { c: ">= 2.0" })
+      dest = File.join(Geminabox.data, "gems", "a-1.0.0.gem")
+      FileUtils.cp(replacement, dest)
+      File.utime(Time.now, Time.now, dest)
+    end
+    Gem::Indexer.new(Geminabox.data).generate_index
+  end
+
   def gem_sha256(filename)
     Digest::SHA256.file(File.join(Geminabox.data, "gems", filename)).hexdigest
   end
@@ -168,6 +182,32 @@ class CompactIndexerTest < Minitest::Test
       assert_equal Digest::MD5.hexdigest(File.read(@indexer.info_path(name))), md5,
                    "info/#{name} bytes must hash to the last versions.list checksum"
     end
+  end
+
+  test "replacing a same-version gem refreshes its info and appends a touch line" do
+    build_index { |builder| builder.gem "a", deps: { b: ">= 1.0" } }
+    original = File.read(@indexer.versions_path)
+    assert_match(/b:>= 1\.0/, File.read(@indexer.info_path("a")))
+
+    replace_gem_a
+    @indexer.reindex
+
+    updated = File.read(@indexer.versions_path)
+    assert updated.start_with?(original), "versions.list must be append-only"
+    info = File.read(@indexer.info_path("a"))
+    assert_match(/c:>= 2\.0/, info)
+    refute_match(/b:>= 1\.0/, info)
+    assert_equal "a -1.0.0,1.0.0 #{Digest::MD5.hexdigest(info)}",
+                 updated.split("\n").last
+  end
+
+  test "reconcile after replacement stays idempotent" do
+    build_index { |builder| builder.gem "a", deps: { b: ">= 1.0" } }
+    replace_gem_a
+    @indexer.reindex
+    before = File.read(@indexer.versions_path)
+    @indexer.reindex
+    assert_equal before, File.read(@indexer.versions_path)
   end
 
   test "Server.reindex(:force_rebuild) refreshes the compact index" do

@@ -50,16 +50,20 @@ module Geminabox
 
   private
 
-    # Cumulative state recorded in versions.list: name => array of
-    # version_and_platform strings still live (yanks subtracted).
-    # Returns nil when the file is missing or unparseable, which triggers
-    # a from-scratch build.
+    # Cumulative state recorded in versions.list. Returns nil when the file
+    # is missing or unparseable, which triggers a from-scratch build.
+    # Otherwise returns [state, checksums]:
+    #   state     => name => array of version_and_platform strings still
+    #                live (yanks subtracted).
+    #   checksums => name => the last MD5 recorded for that name, so a
+    #                content-only change can be detected against it.
     def known_versions
       return nil unless File.exist?(versions_path)
       lines = File.read(versions_path).split("\n")
       separator = lines.index("---")
       return nil unless separator
       state = Hash.new { |hash, key| hash[key] = [] }
+      checksums = {}
       lines.drop(separator + 1).each do |line|
         name, versions, checksum = line.split(" ")
         return nil unless name && versions && checksum
@@ -70,25 +74,31 @@ module Geminabox
             state[name] << entry
           end
         end
+        checksums[name] = checksum
       end
-      state
+      [state, checksums]
     end
 
     def reconcile(known, current)
+      known_state, known_checksums = known
       additions = +""
 
       current.each do |name, versions|
         current_ids = versions.map(&:number_and_platform)
-        added = current_ids - known.fetch(name, [])
-        removed = known.fetch(name, []) - current_ids
-        next if added.empty? && removed.empty?
+        added = current_ids - known_state.fetch(name, [])
+        removed = known_state.fetch(name, []) - current_ids
+        if added.empty? && removed.empty?
+          line = refresh_line(name, versions, current_ids, known_checksums[name])
+          additions << line if line
+          next
+        end
         info_body = write_info(name, versions)
         entries = added + removed.map { |id| "-#{id}" }
         additions << version_line(name, entries, info_body)
       end
 
-      (known.keys - current.keys).each do |name|
-        removed = known[name]
+      (known_state.keys - current.keys).each do |name|
+        removed = known_state[name]
         next if removed.empty?
         info_body = CompactIndex.info([])
         atomic_write(info_path(name), info_body)
@@ -98,6 +108,35 @@ module Geminabox
       return if additions.empty?
       atomic_write(versions_path, File.read(versions_path) + additions)
       write_names(current.keys)
+    end
+
+    # A same-version replacement (allow_replace / `gem inabox -o`) changes the
+    # .gem contents without changing the version identity set, so the identity
+    # diff is empty. Detect that here and, when the freshly rendered info body
+    # differs from what versions.list last recorded, emit a "touch" line that
+    # yanks and re-adds every current version in one entry. Bundler processes
+    # entries in order, so delete-then-add leaves the version set intact while
+    # the trailing MD5 (last checksum wins) points at the new info bytes.
+    # Returns nil when nothing needs to change, keeping reconcile idempotent.
+    def refresh_line(name, versions, current_ids, known_checksum)
+      return unless dirty?(name, versions)
+      info_body = write_info(name, versions)
+      return if Digest::MD5.hexdigest(info_body) == known_checksum
+      entries = current_ids.map { |id| "-#{id}" } + current_ids
+      version_line(name, entries, info_body)
+    end
+
+    # A gem is content-dirty when its info file is missing, or when any of its
+    # stored .gem files is at least as new as the info file. The >= tolerance
+    # matches Geminabox::Indexer.updated_gemspecs.
+    def dirty?(name, versions)
+      info = info_path(name)
+      return true unless File.exist?(info)
+      info_mtime = File.stat(info).mtime
+      versions.any? do |version|
+        gem_file = File.join(@data_dir, "gems", "#{version.gemfile_name}.gem")
+        File.exist?(gem_file) && File.stat(gem_file).mtime >= info_mtime
+      end
     end
 
     def version_line(name, entries, info_body)
