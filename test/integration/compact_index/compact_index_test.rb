@@ -173,6 +173,29 @@ class CompactIndexIntegrationTest < Geminabox::TestCase
     end
   end
 
+  test "an unchanged index revalidates to 304 for a real Bundler" do
+    # A dependency-free gem with a unique name no other test builds, so the
+    # shared GemFactory fixture cache can't leak dependencies into resolution.
+    assert_can_push(:freshcheck)
+
+    Dir.mktmpdir do |dir|
+      write_gemfile(dir, "freshcheck")
+      # The first install fetches and caches /versions along with its ETag.
+      bundle(dir, "install")
+
+      # bundle update re-resolves and revalidates /versions with a conditional
+      # If-None-Match. The index is unchanged, so its quoted-MD5 ETag still
+      # matches and serve_compact_file takes the 304 branch (checked before any
+      # range handling). A plain second install would ride its cache without a
+      # request; update forces the revalidation.
+      output = bundle(dir, "update freshcheck")
+      assert_match(%r{HTTP 304 Not Modified http://localhost:\d+/versions}, output,
+                   "an unchanged /versions must revalidate to 304, not re-download")
+      assert_match(/^    freshcheck \(1\.0\.0\)$/, File.read(File.join(dir, "Gemfile.lock")),
+                   "resolution still succeeds from the revalidated cache")
+    end
+  end
+
   protected
 
   def write_gemfile(dir, gem_name = "a")
