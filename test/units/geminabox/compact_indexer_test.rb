@@ -234,4 +234,75 @@ class CompactIndexerTest < Minitest::Test
     assert after.start_with?(before), "incremental reindex must append"
     assert_match(/\Aa 2\.0\.0 [0-9a-f]{32}\z/, after.split("\n").last)
   end
+
+  test "heal_info rebuilds a deleted info file to match the ledger checksum" do
+    build_index { |builder| builder.gem "a", deps: { b: ">= 1.0" } }
+    expected = File.read(@indexer.info_path("a"))
+    ledger_md5 = File.read(@indexer.versions_path).split("\n").grep(/\Aa /).last.split.last
+
+    File.delete(@indexer.info_path("a"))
+    assert @indexer.heal_info("a"), "heal_info should report it rebuilt the file"
+
+    healed = File.read(@indexer.info_path("a"))
+    assert_equal expected, healed
+    assert_equal ledger_md5, Digest::MD5.hexdigest(healed)
+  end
+
+  test "heal_info restores a fully-yanked name to the empty info body" do
+    build_index do |builder|
+      builder.gem "a"
+      builder.gem "b"
+    end
+    File.delete File.join(Geminabox.data, "gems", "a-1.0.0.gem")
+    Gem::Indexer.new(Geminabox.data).generate_index
+    @indexer.reindex
+    assert_equal "---\n", File.read(@indexer.info_path("a"))
+
+    File.delete(@indexer.info_path("a"))
+    assert @indexer.heal_info("a")
+    assert_equal "---\n", File.read(@indexer.info_path("a"))
+  end
+
+  test "heal_info refuses a name the ledger does not list" do
+    build_index { |builder| builder.gem "a" }
+    refute @indexer.heal_info("ghost")
+    refute File.exist?(@indexer.info_path("ghost"))
+  end
+
+  test "heal_info tolerates a missing versions.list" do
+    refute @indexer.heal_info("a")
+  end
+
+  test "heal_info tolerates a corrupt versions.list" do
+    build_index { |builder| builder.gem "a" }
+    File.write(@indexer.versions_path, "garbage")
+    File.delete(@indexer.info_path("a"))
+    refute @indexer.heal_info("a")
+    refute File.exist?(@indexer.info_path("a"))
+  end
+
+  test "ledger_lists? reports membership without the info file present" do
+    build_index { |builder| builder.gem "a" }
+    File.delete(@indexer.info_path("a"))
+    assert @indexer.ledger_lists?("a")
+    refute @indexer.ledger_lists?("ghost")
+  end
+
+  test "ledger_lists? still lists a fully-yanked name" do
+    build_index do |builder|
+      builder.gem "a"
+      builder.gem "b"
+    end
+    File.delete File.join(Geminabox.data, "gems", "a-1.0.0.gem")
+    Gem::Indexer.new(Geminabox.data).generate_index
+    @indexer.reindex
+    assert @indexer.ledger_lists?("a"), "a yanked name stays recorded in the ledger"
+  end
+
+  test "ledger_lists? is false for a missing or corrupt versions.list" do
+    refute @indexer.ledger_lists?("a")
+    build_index { |builder| builder.gem "a" }
+    File.write(@indexer.versions_path, "garbage")
+    refute @indexer.ledger_lists?("a")
+  end
 end

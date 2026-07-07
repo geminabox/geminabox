@@ -47,6 +47,35 @@ module Geminabox
       end
     end
 
+    # True when versions.list exists, parses, and records NAME at all --
+    # including a fully-yanked name whose live versions net to zero. Reads
+    # only versions.list and takes no lock, so callers can gate a read-path
+    # heal on it without letting arbitrary /info probes force index writes.
+    def ledger_lists?(name)
+      state, = known_versions
+      !state.nil? && state.key?(name)
+    end
+
+    # Rebuild the single info/NAME file the read path found missing while
+    # versions.list still lists the gem, so a partially corrupted index does
+    # not 404 a gem Bundler was told exists. Renders from the current specs
+    # index, so the bytes -- and their MD5 -- match what a full reconcile
+    # would write; a name with no live versions restores the empty body
+    # reconcile left at yank time. Returns whether it wrote the file; a name
+    # the ledger does not list is left to 404. Callers must hold the
+    # repository lock.
+    def heal_info(name)
+      return false unless ledger_lists?(name)
+
+      versions = current_versions[name]
+      if versions
+        write_info(name, versions)
+      else
+        atomic_write(info_path(name), CompactIndex.info([]))
+      end
+      true
+    end
+
     private
 
     # Cumulative state recorded in versions.list. Returns nil when the file

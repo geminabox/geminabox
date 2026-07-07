@@ -82,6 +82,34 @@ class CompactIndexTest < Minitest::Test
     assert_equal 404, last_response.status
   end
 
+  test "GET /info/GEMNAME self-heals an info file deleted under an intact versions.list" do
+    get "/versions"
+    get "/info/a"
+    original = last_response.body
+    info_path = Geminabox::Server.compact_indexer.info_path("a")
+    File.delete(info_path)
+    refute File.exist?(info_path)
+
+    get "/info/a"
+    assert last_response.ok?
+    assert_equal original, last_response.body
+    assert_equal %("#{Digest::MD5.hexdigest(original)}"),
+                 last_response.headers["ETag"]
+    sha = [Digest::SHA256.digest(original)].pack("m0")
+    assert_equal "sha-256=#{sha}", last_response.headers["Digest"]
+  end
+
+  test "GET /info/unknown-name stays 404 without writing the compact index" do
+    get "/versions"
+    info_dir = File.join(Geminabox::Server.compact_indexer.compact_index_dir, "info")
+    before = Dir.children(info_dir).sort
+
+    get "/info/nope"
+    assert_equal 404, last_response.status
+    refute File.exist?(Geminabox::Server.compact_indexer.info_path("nope"))
+    assert_equal before, Dir.children(info_dir).sort
+  end
+
   test "GET /info with a null byte returns 404 rather than 500" do
     get "/versions"
     get "/info/%00"

@@ -124,7 +124,9 @@ module Geminabox
       # filesystem. This also blocks NUL bytes and empty names, which would
       # otherwise raise ArgumentError from File.file? and 500.
       halt 404 unless params[:name] =~ /\A[a-zA-Z0-9_.-]+\z/
-      serve_compact_file(self.class.compact_indexer.info_path(params[:name]))
+      path = self.class.compact_indexer.info_path(params[:name])
+      heal_missing_info(params[:name], path) unless File.file?(path)
+      serve_compact_file(path)
     end
 
     get '/api/v1/dependencies' do
@@ -247,6 +249,17 @@ module Geminabox
     def bootstrap_compact_index(path)
       return if File.exist?(path)
       serialize_update { self.class.compact_indexer.reindex }
+    end
+
+    # Rebuild info/NAME on the read path when it is missing but versions.list
+    # still lists the gem, so a partially corrupted index does not 404 a gem
+    # Bundler was told exists. The ledger-membership check reads only
+    # versions.list and takes no lock, so an unknown name stays a cheap 404
+    # with no per-gem stats -- arbitrary /info probes cannot force writes.
+    def heal_missing_info(name, path)
+      indexer = self.class.compact_indexer
+      return unless indexer.ledger_lists?(name)
+      serialize_update { indexer.heal_info(name) unless File.file?(path) }
     end
 
     def handle_incoming_gem(gem)
