@@ -97,6 +97,11 @@ The materialized index lives in `data/compact_index/` and is updated
 whenever gems are added or removed. Deleting that directory (or hitting
 `/reindex`) is safe; it is rebuilt from the stored gems on the next request.
 
+On installs upgraded from an earlier version with many stored gems, the
+first request to `/versions` builds the index and can take a while as it
+checksums every stored gem, so hitting `/reindex` or `/versions` right
+after upgrading avoids surprising the first `bundle install`.
+
 ## HTTP adapter
 
 Geminabox uses the HTTPClient gem to manage its connections to remote resources.
