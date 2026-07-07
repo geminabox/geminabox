@@ -107,6 +107,22 @@ module Geminabox
       erb :atom, :layout => false
     end
 
+    helpers Geminabox::CompactIndexApi
+
+    get '/versions' do
+      bootstrap_compact_index
+      serve_compact_file(self.class.compact_indexer.versions_path)
+    end
+
+    get '/names' do
+      bootstrap_compact_index
+      serve_compact_file(self.class.compact_indexer.names_path)
+    end
+
+    get '/info/:name' do
+      serve_compact_file(self.class.compact_indexer.info_path(params[:name]))
+    end
+
     get '/api/v1/dependencies' do
       content_type 'application/octet-stream'
       query_gems.any? ? Marshal.dump(gem_list) : 200
@@ -222,6 +238,11 @@ module Geminabox
 
     def with_rlock(&block)
       self.class.with_rlock(&block)
+    end
+
+    def bootstrap_compact_index
+      return if File.exist?(self.class.compact_indexer.versions_path)
+      serialize_update { self.class.compact_indexer.reindex }
     end
 
     def handle_incoming_gem(gem)
