@@ -34,7 +34,7 @@ protected
 
   def bundle(dir, command)
     output = without_bundler do
-      execute("env -C #{dir} HOME=#{dir} BUNDLE_PATH=#{dir}/vendor " \
+      execute("cd #{dir} && env HOME=#{dir} BUNDLE_PATH=#{dir}/vendor " \
               "bundle #{command} --verbose 2>&1")
     end
     assert $?.success?, "bundle #{command} failed:\n#{output}"
