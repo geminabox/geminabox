@@ -82,6 +82,12 @@ class CompactIndexTest < Minitest::Test
     assert_equal 404, last_response.status
   end
 
+  test "GET /info with a null byte returns 404 rather than 500" do
+    get "/versions"
+    get "/info/%00"
+    assert_equal 404, last_response.status
+  end
+
   test "GET /info rejects directory traversal" do
     get "/versions"
     get "/info/.."

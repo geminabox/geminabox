@@ -120,6 +120,10 @@ module Geminabox
     end
 
     get '/info/:name' do
+      # Reject anything that is not a gem-name shape before touching the
+      # filesystem. This also blocks NUL bytes and empty names, which would
+      # otherwise raise ArgumentError from File.file? and 500.
+      halt 404 unless params[:name] =~ /\A[a-zA-Z0-9_.\-]+\z/
       serve_compact_file(self.class.compact_indexer.info_path(params[:name]))
     end
 
