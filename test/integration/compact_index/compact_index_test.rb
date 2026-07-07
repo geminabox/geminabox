@@ -72,6 +72,97 @@ class CompactIndexIntegrationTest < Geminabox::TestCase
     end
   end
 
+  test "a same-version replacement reaches a warm-cache consumer as a 206 tail append" do
+    # Unique gem names so the shared GemFactory fixture cache can't leak a
+    # different dependency set into this resolution. warmcache initially depends
+    # on warmbee; the in-place replacement below re-points it at warmsee.
+    assert_can_push(:warmcache, deps: [[:warmbee, ">= 0"]])
+    assert_can_push(:warmbee)
+    assert_can_push(:warmsee)
+
+    Dir.mktmpdir do |dir|
+      write_gemfile(dir, "warmcache")
+
+      # First install warms this dir's HOME-scoped compact-index cache: Bundler
+      # stores /versions, /info/warmcache and their ETags under
+      # $HOME/.bundle/cache/compact_index/. The bundle helper sets HOME=dir, so
+      # that cache survives into the second install below.
+      bundle(dir, "install")
+      lock = File.read(File.join(dir, "Gemfile.lock"))
+      assert_match(/^    warmcache \(1\.0\.0\)$/, lock)
+      assert_match(/^      warmbee$/, lock, "baseline: warmcache depends on warmbee")
+      refute_match(/^      warmsee$/, lock)
+
+      # Replace the stored warmcache-1.0.0.gem in place with a build that depends
+      # on warmsee: same version identity, different content. reconcile sees an
+      # empty identity diff and appends a touch line to versions.list that yanks
+      # and re-adds warmcache-1.0.0 in one entry under the new info MD5.
+      Dir.mktmpdir do |other|
+        replacement = GemFactory.new(other).gem("warmcache", deps: { warmsee: ">= 0" })
+        push_overwrite(replacement)
+      end
+
+      # Drop only the lockfile, keeping the warm HOME cache. Bundler 2.5+ records
+      # CHECKSUMS in the lockfile and a kept lock aborts a same-version content
+      # change with ChecksumMismatchError (see README "Replacing a published
+      # version"); removing it isolates the index-transport behaviour under test.
+      File.delete(File.join(dir, "Gemfile.lock"))
+
+      # Re-resolving from scratch must revalidate /versions against the warm
+      # cache and receive the touch line as an HTTP 206 tail append: not a 304
+      # (the appended line changed the ETag) and not a full re-download (the
+      # prefix is unchanged, so the byte range is honored). The refreshed
+      # warmcache checksum no longer matches the cached /info/warmcache, forcing
+      # a refetch, and the replaced dependency set lands in the new lock.
+      output = bundle(dir, "install")
+      assert_match(%r{HTTP 206 Partial Content http://localhost:\d+/versions}, output,
+                   "the touch line must arrive as a ranged tail append")
+      assert_match(%r{HTTP GET http://localhost:\d+/info/warmcache}, output,
+                   "the changed checksum must force a refetch of info/warmcache")
+      lock = File.read(File.join(dir, "Gemfile.lock"))
+      assert_match(/^    warmcache \(1\.0\.0\)$/, lock, "same version identity")
+      assert_match(/^      warmsee$/, lock, "warmcache's dependency must now be warmsee")
+      assert_match(/^    warmsee \(1\.0\.0\)$/, lock)
+      refute_match(/^      warmbee$/, lock, "warmcache's old dependency warmbee must be gone")
+    end
+  end
+
+  test "a locked consumer hits a checksum mismatch on a same-version replacement" do
+    # Pins the README "Replacing a published version" claim: a client whose
+    # Gemfile.lock already records the CHECKSUMS entry for pinnedcache-1.0.0
+    # cannot be handed replaced bytes for the same version. Unique gem names
+    # keep the shared GemFactory fixture cache from leaking dependencies here.
+    assert_can_push(:pinnedcache, deps: [[:pinnedbee, ">= 0"]])
+    assert_can_push(:pinnedbee)
+    assert_can_push(:pinnedsee)
+
+    Dir.mktmpdir do |dir|
+      write_gemfile(dir, "pinnedcache")
+      # This lock records pinnedcache-1.0.0's original checksum in CHECKSUMS.
+      bundle(dir, "install")
+      assert_match(/^    pinnedcache \(1\.0\.0\)$/, File.read(File.join(dir, "Gemfile.lock")))
+
+      Dir.mktmpdir do |other|
+        replacement = GemFactory.new(other).gem("pinnedcache", deps: { pinnedsee: ">= 0" })
+        push_overwrite(replacement)
+      end
+
+      # Keep the lock. A plain reinstall would ride the already-satisfied lock
+      # without re-resolving, so force a resolve with update: it fetches the
+      # replaced info/pinnedcache, whose new checksum contradicts the locked
+      # CHECKSUMS entry, and Bundler aborts rather than trust the swap. Nothing
+      # on the server can override this; the conflict is client-side.
+      output = without_bundler do
+        execute("cd #{dir} && env HOME=#{dir} BUNDLE_PATH=#{dir}/vendor " \
+                "bundle update pinnedcache --verbose 2>&1")
+      end
+      refute $?.success?, "a same-version replacement must not resolve against a pinned lock:\n#{output}"
+      assert_match(/Bundler::ChecksumMismatchError/, output,
+                   "the abort must be the checksum guard the README documents")
+      assert_match(/mismatched checksums/i, output)
+    end
+  end
+
   test "a yanked version is dropped for a fresh resolver" do
     # A dependency-free gem with a name no other test builds, so the shared
     # GemFactory fixture cache can't leak dependencies into this resolution.
