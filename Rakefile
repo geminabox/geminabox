@@ -41,6 +41,15 @@ Rake::TestTask.new("test:units") do |t|
   t.warning = nil
 end
 
+# Runs the rubygems compact-index conformance suite against a live geminabox.
+# Kept out of the default :test run because it shells out to the external
+# gem_server_conformance RSpec CLI; CI drives it as its own job.
+Rake::TestTask.new("test:conformance") do |t|
+  t.libs << "test" << "lib"
+  t.pattern = "test/conformance/**/*_test.rb"
+  t.warning = nil
+end
+
 task :st => "test:smoke"
 task :test => ["test:units", "test:requests", "test:integration"]
 task :default => :test
