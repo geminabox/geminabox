@@ -210,6 +210,13 @@ class CompactIndexerTest < Minitest::Test
     assert_equal before, File.read(@indexer.versions_path)
   end
 
+  test "published index files are world-readable within the umask" do
+    build_index { |builder| builder.gem "a" }
+    expected = 0o644 & ~File.umask
+    assert_equal expected, File.stat(@indexer.versions_path).mode & 0o777
+    assert_equal expected, File.stat(@indexer.info_path("a")).mode & 0o777
+  end
+
   test "Server.reindex(:force_rebuild) refreshes the compact index" do
     GemFactory.new(File.join(Geminabox.data, "gems")).gem("a")
     Geminabox::Server.reindex(:force_rebuild)

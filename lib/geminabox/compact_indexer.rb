@@ -231,6 +231,11 @@ module Geminabox
       temp_file = Tempfile.new(".compact", compact_index_dir)
       temp_file.binmode
       temp_file.write(contents)
+      # Tempfile is created 0600; publish the served files world-readable
+      # (subject to the process umask) like Gem::Indexer's own output.
+      # chmod while the handle is still open -- Tempfile#chmod delegates to
+      # the underlying File, which raises once closed.
+      temp_file.chmod(0o644 & ~File.umask)
       temp_file.close
       File.rename(temp_file.path, file_name)
     end
