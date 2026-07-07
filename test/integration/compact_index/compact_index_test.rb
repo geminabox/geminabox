@@ -136,6 +136,43 @@ class CompactIndexIntegrationTest < Geminabox::TestCase
            "the first request must have rebuilt the compact index on the server"
   end
 
+  test "a corrupt versions.list is rebuilt by /reindex and served to a fresh resolver" do
+    # A dependency-free gem with a unique name no other test builds, so the
+    # shared GemFactory fixture cache can't leak dependencies into resolution.
+    assert_can_push(:healme)
+
+    versions_path = File.join(config.data, "compact_index", "versions.list")
+    assert File.exist?(versions_path), "the push should have built the compact index"
+
+    # Corrupt the ledger in place with no "---" separator, so known_versions
+    # cannot parse it. A corrupt-but-present file is served as-is on reads;
+    # only a reindex (a write path) heals it.
+    File.write(versions_path, "garbage\nlines\n")
+    refute_match(/^---$/, File.read(versions_path), "precondition: the ledger is corrupt")
+
+    # Hit the explicit rebuild route. Server.reindex(:force_rebuild) runs
+    # compact_indexer.reindex, whose known_versions returns nil for the
+    # unparseable ledger, triggering a from-scratch full_build.
+    reindex_url = url_for("/reindex")
+    response = http_client_for(reindex_url).get(reindex_url)
+    assert response.status < 400, "GET /reindex failed: #{response.status}"
+
+    healed = File.read(versions_path)
+    assert_match(/\Acreated_at: /, healed, "the ledger must be rebuilt with a header")
+    assert_match(/^---$/, healed)
+    assert_match(/^healme /, healed)
+
+    # A fresh consumer must resolve against the healed index.
+    Dir.mktmpdir do |dir|
+      write_gemfile(dir, "healme")
+      output = bundle(dir, "install")
+      assert_match(/^    healme \(1\.0\.0\)$/, File.read(File.join(dir, "Gemfile.lock")),
+                   "resolution must succeed against the rebuilt index")
+      assert_match(%r{HTTP GET http://localhost:\d+/versions}, output)
+      assert_match(%r{HTTP GET http://localhost:\d+/info/healme}, output)
+    end
+  end
+
   protected
 
   def write_gemfile(dir, gem_name = "a")
