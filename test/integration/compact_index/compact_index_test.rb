@@ -72,12 +72,47 @@ class CompactIndexIntegrationTest < Geminabox::TestCase
     end
   end
 
+  test "a yanked version is dropped for a fresh resolver" do
+    # A dependency-free gem with a name no other test builds, so the shared
+    # GemFactory fixture cache can't leak dependencies into this resolution.
+    assert_can_push(:yankme)
+    assert_can_push(:yankme, version: "2.0.0")
+
+    # First consumer resolves against the latest (2.0.0). This also builds the
+    # compact index, so the yank below exercises reconcile's removal branch
+    # rather than a cold full_build.
+    Dir.mktmpdir do |dir|
+      write_gemfile(dir, "yankme")
+      bundle(dir, "install")
+      assert_match(/^    yankme \(2\.0\.0\)$/, File.read(File.join(dir, "Gemfile.lock")),
+                   "baseline: latest resolvable version is 2.0.0")
+    end
+
+    # Yank 2.0.0 through the real gem client (allow_delete is on by default).
+    output = gemcutter_yank(:yankme, "2.0.0")
+    refute File.exist?(File.join(config.data, "gems", "yankme-2.0.0.gem")),
+           "yank should remove the stored .gem:\n#{output}"
+
+    # A fresh consumer must no longer see 2.0.0: the compact index replays the
+    # -2.0.0 yank marker and bares it from info/yankme, so resolution falls to
+    # 1.0.0.
+    Dir.mktmpdir do |dir|
+      write_gemfile(dir, "yankme")
+      output = bundle(dir, "install")
+      lock = File.read(File.join(dir, "Gemfile.lock"))
+      assert_match(/^    yankme \(1\.0\.0\)$/, lock, "resolution must fall back to 1.0.0")
+      refute_match(/^    yankme \(2\.0\.0\)$/, lock, "yanked 2.0.0 must be gone")
+      assert_match(%r{HTTP GET http://localhost:\d+/versions}, output)
+      assert_match(%r{HTTP GET http://localhost:\d+/info/yankme}, output)
+    end
+  end
+
   protected
 
-  def write_gemfile(dir)
+  def write_gemfile(dir, gem_name = "a")
     File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
       source "#{url_for('/')}"
-      gem "a"
+      gem "#{gem_name}"
     GEMFILE
   end
 
