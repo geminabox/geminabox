@@ -42,6 +42,7 @@ class CompactIndexTest < Minitest::Test
     get "/versions", {}, { "HTTP_IF_NONE_MATCH" => etag }
     assert_equal 304, last_response.status
     assert_equal "", last_response.body
+    assert_equal etag, last_response.headers["ETag"]
   end
 
   test "GET /versions serves a tail for a satisfiable range" do

@@ -16,7 +16,9 @@ module Geminabox
   module CompactIndexApi
     def serve_compact_file(path)
       halt 404 unless File.file?(path)
-      md5, sha256 = compact_file_digests(path)
+      stat = File.stat(path)
+      contents = File.binread(path)
+      md5, sha256 = compact_file_digests(path, stat, contents)
       etag = %("#{md5}")
       headers "ETag" => etag,
               "Accept-Ranges" => "bytes",
@@ -25,7 +27,6 @@ module Geminabox
               "Cache-Control" => "max-age=60"
       content_type "text/plain; charset=utf-8"
       halt 304 if request.env["HTTP_IF_NONE_MATCH"] == etag
-      contents = File.binread(path)
       first_byte = range_start(request.env["HTTP_RANGE"], contents.bytesize)
       if first_byte
         status 206
@@ -46,11 +47,9 @@ module Geminabox
       first_byte < size ? first_byte : nil
     end
 
-    def compact_file_digests(path)
-      stat = File.stat(path)
+    def compact_file_digests(path, stat, contents)
       key = "compact_digests:#{path}:#{stat.mtime.to_f}:#{stat.size}"
       dependency_cache.marshal_cache(key) do
-        contents = File.binread(path)
         [Digest::MD5.hexdigest(contents),
          [Digest::SHA256.digest(contents)].pack("m0")]
       end
