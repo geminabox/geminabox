@@ -75,4 +75,98 @@ class CompactIndexerTest < Minitest::Test
     assert_match(/\Acreated_at: /, lines[0])
     assert_equal ["---"], lines[1..]
   end
+
+  test "uploading a new version appends to versions.list" do
+    build_index { |builder| builder.gem "a" }
+    original = File.read(@indexer.versions_path)
+
+    inject_gems { |builder| builder.gem "a", version: "2.0.0" }
+    @indexer.reindex
+
+    updated = File.read(@indexer.versions_path)
+    assert updated.start_with?(original), "versions.list must be append-only"
+    info = File.read(@indexer.info_path("a"))
+    assert_match(/^2\.0\.0 /, info)
+    assert_equal "a 2.0.0 #{Digest::MD5.hexdigest(info)}", updated.split("\n").last
+  end
+
+  test "reindex without changes appends nothing" do
+    build_index { |builder| builder.gem "a" }
+    before = File.read(@indexer.versions_path)
+    @indexer.reindex
+    assert_equal before, File.read(@indexer.versions_path)
+  end
+
+  test "deleting a version appends a yank line and rewrites info" do
+    build_index do |builder|
+      builder.gem "a"
+      builder.gem "a", version: "2.0.0"
+    end
+    original = File.read(@indexer.versions_path)
+
+    File.delete File.join(Geminabox.data, "gems", "a-2.0.0.gem")
+    Gem::Indexer.new(Geminabox.data).generate_index
+    @indexer.reindex
+
+    updated = File.read(@indexer.versions_path)
+    assert updated.start_with?(original)
+    info = File.read(@indexer.info_path("a"))
+    refute_match(/^2\.0\.0 /, info)
+    assert_equal "a -2.0.0 #{Digest::MD5.hexdigest(info)}", updated.split("\n").last
+  end
+
+  test "deleting the last version leaves a bare info file and drops the name" do
+    build_index do |builder|
+      builder.gem "a"
+      builder.gem "b"
+    end
+
+    File.delete File.join(Geminabox.data, "gems", "a-1.0.0.gem")
+    Gem::Indexer.new(Geminabox.data).generate_index
+    @indexer.reindex
+
+    assert_equal "---\n", File.read(@indexer.info_path("a"))
+    assert_equal "---\nb\n", File.read(@indexer.names_path)
+    assert_equal "a -1.0.0 #{Digest::MD5.hexdigest("---\n")}",
+                 File.read(@indexer.versions_path).split("\n").last
+  end
+
+  test "names file gains new gems on reconcile" do
+    build_index { |builder| builder.gem "a" }
+    inject_gems { |builder| builder.gem "b" }
+    @indexer.reindex
+    assert_equal "---\na\nb\n", File.read(@indexer.names_path)
+  end
+
+  test "an unparseable versions.list triggers a from-scratch rebuild" do
+    build_index { |builder| builder.gem "a" }
+    File.write(@indexer.versions_path, "garbage")
+    @indexer.reindex
+    lines = File.read(@indexer.versions_path).split("\n")
+    assert_match(/\Acreated_at: /, lines[0])
+    assert_equal "---", lines[1]
+    assert_match(/\Aa 1\.0\.0 [0-9a-f]{32}\z/, lines[2])
+  end
+
+  test "every versions.list checksum matches its info file bytes" do
+    build_index do |builder|
+      builder.gem "a", deps: { b: ">= 1.0" }
+      builder.gem "c"
+    end
+    inject_gems { |builder| builder.gem "a", version: "2.0.0" }
+    @indexer.reindex
+    File.delete File.join(Geminabox.data, "gems", "c-1.0.0.gem")
+    Gem::Indexer.new(Geminabox.data).generate_index
+    @indexer.reindex
+
+    last_checksum = {}
+    File.read(@indexer.versions_path).split("\n").drop(2).each do |line|
+      name, _versions, md5 = line.split(" ")
+      last_checksum[name] = md5
+    end
+    last_checksum.each do |name, md5|
+      assert_equal Digest::MD5.hexdigest(File.read(@indexer.info_path(name))), md5,
+                   "info/#{name} bytes must hash to the last versions.list checksum"
+    end
+  end
 end

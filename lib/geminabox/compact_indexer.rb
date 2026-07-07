@@ -39,10 +39,70 @@ module Geminabox
 
     def reindex
       FileUtils.mkdir_p(File.join(compact_index_dir, "info"))
-      full_build(current_versions)
+      known = known_versions
+      current = current_versions
+      if known
+        reconcile(known, current)
+      else
+        full_build(current)
+      end
     end
 
   private
+
+    # Cumulative state recorded in versions.list: name => array of
+    # version_and_platform strings still live (yanks subtracted).
+    # Returns nil when the file is missing or unparseable, which triggers
+    # a from-scratch build.
+    def known_versions
+      return nil unless File.exist?(versions_path)
+      lines = File.read(versions_path).split("\n")
+      separator = lines.index("---")
+      return nil unless separator
+      state = Hash.new { |hash, key| hash[key] = [] }
+      lines.drop(separator + 1).each do |line|
+        name, versions, checksum = line.split(" ")
+        return nil unless name && versions && checksum
+        versions.split(",").each do |entry|
+          if entry.start_with?("-")
+            state[name].delete(entry[1..])
+          else
+            state[name] << entry
+          end
+        end
+      end
+      state
+    end
+
+    def reconcile(known, current)
+      additions = +""
+
+      current.each do |name, versions|
+        current_ids = versions.map(&:number_and_platform)
+        added = current_ids - known.fetch(name, [])
+        removed = known.fetch(name, []) - current_ids
+        next if added.empty? && removed.empty?
+        info_body = write_info(name, versions)
+        entries = added + removed.map { |id| "-#{id}" }
+        additions << version_line(name, entries, info_body)
+      end
+
+      (known.keys - current.keys).each do |name|
+        removed = known[name]
+        next if removed.empty?
+        info_body = CompactIndex.info([])
+        atomic_write(info_path(name), info_body)
+        additions << version_line(name, removed.map { |id| "-#{id}" }, info_body)
+      end
+
+      return if additions.empty?
+      atomic_write(versions_path, File.read(versions_path) + additions)
+      write_names(current.keys)
+    end
+
+    def version_line(name, entries, info_body)
+      "#{name} #{entries.join(",")} #{Digest::MD5.hexdigest(info_body)}\n"
+    end
 
     # name => GemVersionCollection, name-sorted; versions version-sorted.
     def current_versions
