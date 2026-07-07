@@ -190,8 +190,16 @@ module Geminabox
       halt 400 unless request.form_data?
 
       serialize_update do
-        gems = load_gems.select { |gem| params['gem_name'] == gem.name and
-                                  params['version'] == gem.number.version }
+        # A yank targets one platform. The client omits the platform param for
+        # a plain-ruby gem, so an absent/blank value means the ruby platform;
+        # without this a `gem yank foo -v 1.0.0` would also destroy foo's java
+        # and mingw builds sharing that version.
+        requested_platform = params['platform'].to_s.empty? ? 'ruby' : params['platform']
+        gems = load_gems.select do |gem|
+          params['gem_name'] == gem.name &&
+            params['version'] == gem.number.version &&
+            (gem.ruby? ? 'ruby' : gem.platform) == requested_platform
+        end
         halt 404, 'Gem not found' if gems.size == 0
         gems.each do |gem|
           gem_path = File.expand_path(File.join(Geminabox.data, 'gems',
