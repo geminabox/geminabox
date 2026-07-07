@@ -102,6 +102,28 @@ first request to `/versions` builds the index and can take a while as it
 checksums every stored gem, so hitting `/reindex` or `/versions` right
 after upgrading avoids surprising the first `bundle install`.
 
+### Replacing a published version
+
+`gem inabox -o` (and the `allow_replace` server option) overwrites a stored
+gem in place: same version number, different contents. Geminabox updates the
+compact index to match, including the new checksum. Bundler, however, guards
+against a version's bytes changing.
+
+Since 2.5, Bundler records each gem's checksum in the `CHECKSUMS` section of
+`Gemfile.lock`. On a later resolve it compares the checksum the server now
+advertises against the locked one, and if they differ for the same name and
+version it aborts with `Bundler::ChecksumMismatchError`, treating the change as
+a possible supply-chain swap. Nothing on the server can override this; the
+conflict is between the client's lockfile and the replaced contents.
+
+An overwrite is therefore transparent only to consumers who have not locked
+that version yet. Anyone whose `Gemfile.lock` already pins it hits the error on
+their next `bundle install` or `bundle update`. Their options are to remove
+that gem's line from `CHECKSUMS`, delete the lockfile and re-resolve, or turn
+off the check with `bundle config set --local disable_checksum_validation true`.
+The clean fix is to bump the version instead of replacing it; treat `-o` as a
+convenience for a private box whose gems nobody has locked yet.
+
 ## HTTP adapter
 
 Geminabox uses the HTTPClient gem to manage its connections to remote resources.
