@@ -503,10 +503,12 @@ Security/Eval:
   Exclude:
     - 'Rakefile'
 
-# Offense count: 11
+# Offense count: 13
 Security/MarshalLoad:
   Exclude:
+    - 'lib/geminabox/compact_indexer.rb'
     - 'lib/geminabox/disk_cache.rb'
+    - 'lib/geminabox/gem_version_collection.rb'
     - 'lib/geminabox/proxy/splicer.rb'
     - 'lib/geminabox/rubygems_dependency.rb'
     - 'lib/geminabox/server.rb'
