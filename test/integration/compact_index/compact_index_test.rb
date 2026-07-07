@@ -107,6 +107,35 @@ class CompactIndexIntegrationTest < Geminabox::TestCase
     end
   end
 
+  test "the compact index cold-bootstraps on first request after an upgrade" do
+    # A dependency-free gem with a unique name no other test builds, so the
+    # shared GemFactory fixture cache can't leak dependencies into resolution.
+    assert_can_push(:bootme)
+
+    # Simulate upgrading to a compact-index-capable geminabox over an existing
+    # repo: the gems and the legacy Marshal index are present, but the compact
+    # index was never built. Delete only data/compact_index/, leaving the
+    # legacy specs index intact.
+    versions_path = File.join(config.data, "compact_index", "versions.list")
+    assert File.exist?(versions_path), "the push should have built the compact index"
+    FileUtils.rm_rf(File.join(config.data, "compact_index"))
+    refute File.exist?(versions_path), "precondition: the compact index is absent"
+
+    # The first real bundle install must trigger bootstrap_compact_index, which
+    # full_builds the index from the legacy specs index, then serves it.
+    Dir.mktmpdir do |dir|
+      write_gemfile(dir, "bootme")
+      output = bundle(dir, "install")
+      assert_match(/^    bootme \(1\.0\.0\)$/, File.read(File.join(dir, "Gemfile.lock")),
+                   "a fresh resolver must resolve against the bootstrapped index")
+      assert_match(%r{HTTP GET http://localhost:\d+/versions}, output)
+      assert_match(%r{HTTP GET http://localhost:\d+/info/bootme}, output)
+    end
+
+    assert File.exist?(versions_path),
+           "the first request must have rebuilt the compact index on the server"
+  end
+
   protected
 
   def write_gemfile(dir, gem_name = "a")
