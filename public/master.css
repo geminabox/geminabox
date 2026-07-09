@@ -179,6 +179,30 @@ ul.gemlist {
   flex-shrink: 0;
 }
 
+.version-row .actions button.copy-command {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #d9d9dc;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #6b6b70;
+}
+
+.version-row .actions button.copy-command:hover {
+  background: #eef0f4;
+  color: #333;
+}
+
+.version-row .actions button.copy-command.copied {
+  color: #3fa34d;
+  border-color: #bfe3c5;
+}
+
 .version-row .actions a.download {
   font-size: 12px;
   font-weight: 600;

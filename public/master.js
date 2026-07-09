@@ -62,6 +62,49 @@
     );
   }
 
+  var CHECK_ICON =
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" ' +
+    'stroke="#3fa34d" stroke-width="2.5" stroke-linecap="round" ' +
+    'stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+  function copyText(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text);
+      return;
+    }
+    // Plain-http deployments have no navigator.clipboard.
+    var scratch = document.createElement("textarea");
+    scratch.value = text;
+    scratch.setAttribute("readonly", "");
+    scratch.style.position = "absolute";
+    scratch.style.left = "-9999px";
+    document.body.appendChild(scratch);
+    scratch.select();
+    try {
+      document.execCommand("copy");
+    } catch (e) {}
+    document.body.removeChild(scratch);
+  }
+
+  [].forEach.call(document.querySelectorAll("button.copy-command"), function (button) {
+    var originalIcon = button.innerHTML;
+    button.addEventListener(
+      "click",
+      function () {
+        var code = button.closest(".version-row").querySelector("code");
+        copyText(code.textContent.replace(/\s+/g, " ").trim());
+        button.innerHTML = CHECK_ICON;
+        button.classList.add("copied");
+        clearTimeout(button.__copyTimer);
+        button.__copyTimer = setTimeout(function () {
+          button.innerHTML = originalIcon;
+          button.classList.remove("copied");
+        }, 1200);
+      },
+      false
+    );
+  });
+
   [].forEach.call(document.querySelectorAll("form.delete-form"), function (form) {
     form.addEventListener(
       "submit",
