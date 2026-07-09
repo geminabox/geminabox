@@ -16,6 +16,7 @@ class DeleteConfirmationMarkupTest < Minitest::Test
     clean_data_dir
     inject_gems do |builder|
       builder.gem "foo", version: "1.2.3"
+      builder.gem "bar", version: "2.0.0", platform: "java"
     end
   end
 
@@ -53,5 +54,44 @@ class DeleteConfirmationMarkupTest < Minitest::Test
     forms = doc.css(CONFIRMED_FORM_SELECTOR)
     refute_empty forms
     assert forms.all? { |form| form.css("button[type=submit]").any? }
+  end
+
+  test "delete forms carry the attributes the dialog names the gem with" do
+    get "/"
+    foo = doc.css("#{CONFIRMED_FORM_SELECTOR}[data-gem-name=foo]").first
+    assert foo
+    assert_equal "1.2.3", foo["data-version"]
+    assert_equal "ruby", foo["data-platform"]
+
+    bar = doc.css("#{CONFIRMED_FORM_SELECTOR}[data-gem-name=bar]").first
+    assert bar
+    assert_equal "2.0.0", bar["data-version"]
+    assert_equal "java", bar["data-platform"]
+  end
+
+  test "gem page delete forms carry the same data attributes" do
+    get "/gems/bar"
+    form = doc.css("#{CONFIRMED_FORM_SELECTOR}[data-gem-name=bar]").first
+    assert form
+    assert_equal "2.0.0", form["data-version"]
+    assert_equal "java", form["data-platform"]
+  end
+
+  test "pages with delete forms render the confirmation dialog skeleton" do
+    ["/", "/gems/foo"].each do |path|
+      get path
+      dialog = doc.css("dialog#delete-confirm")
+      refute_empty dialog
+      refute_empty dialog.css("button.cancel")
+      refute_empty dialog.css("button.danger")
+    end
+  end
+
+  test "no dialog is rendered when deletion is disabled" do
+    Geminabox.allow_delete = false
+    get "/"
+    assert_empty doc.css("dialog#delete-confirm")
+  ensure
+    Geminabox.allow_delete = true
   end
 end

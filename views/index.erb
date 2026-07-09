@@ -26,7 +26,7 @@
               <small class="platform"><%= h(version.platform) %></small>
             <% end %>
           </p>
-          <form class="delete-form" method="post" action="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">
+          <form class="delete-form" method="post" action="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>" data-gem-name="<%= h(version.name) %>" data-version="<%= h(version.number) %>" data-platform="<%= h(version.platform) %>">
             <a class="download" href="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">download</a>
             <% if @allow_delete %>
             <input type="hidden" name="_method" value="DELETE" />
