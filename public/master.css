@@ -9,7 +9,8 @@ body {
   padding: 36px 20px;
   background: #e7e7ea;
   color: #444;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+    sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -36,7 +37,9 @@ form {
   margin: 0 auto;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 10px 30px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 10px 30px rgba(0, 0, 0, 0.05);
   padding: 52px 56px;
 }
 
@@ -218,7 +221,7 @@ ul.gemlist {
   text-decoration: none;
 }
 
-.version-row .actions button[type=submit] {
+.version-row .actions button[type="submit"] {
   font-size: 12px;
   font-weight: 600;
   font-family: inherit;
@@ -230,7 +233,7 @@ ul.gemlist {
   cursor: pointer;
 }
 
-.version-row .actions button[type=submit]:hover {
+.version-row .actions button[type="submit"]:hover {
   background: #c23e3e;
 }
 
@@ -275,11 +278,11 @@ ul.gemlist {
   margin-top: 24px;
 }
 
-.upload-form input[type=file] {
+.upload-form input[type="file"] {
   font-size: 14px;
 }
 
-.upload-form input[type=submit] {
+.upload-form input[type="submit"] {
   font-size: 14px;
   font-weight: 600;
   font-family: inherit;
@@ -292,7 +295,7 @@ ul.gemlist {
   margin-left: 10px;
 }
 
-.upload-form input[type=submit]:hover {
+.upload-form input[type="submit"]:hover {
   background: #123aa3;
 }
 
@@ -317,7 +320,8 @@ dialog#delete-confirm {
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
   padding: 0;
   overflow: hidden;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+    sans-serif;
 }
 
 dialog#delete-confirm::backdrop {

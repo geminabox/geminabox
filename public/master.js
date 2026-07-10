@@ -25,8 +25,11 @@
       body:
         "This can't be undone, and projects that depend on this exact " +
         "version will no longer be able to install it. The version number " +
-        "itself stays available: you can upload a new " + name + " " +
-        version + " afterward."
+        "itself stays available: you can upload a new " +
+        name +
+        " " +
+        version +
+        " afterward."
     };
   }
 
@@ -86,40 +89,46 @@
     document.body.removeChild(scratch);
   }
 
-  [].forEach.call(document.querySelectorAll("button.copy-command"), function (button) {
-    var originalIcon = button.innerHTML;
-    button.addEventListener(
-      "click",
-      function () {
-        var code = button.closest(".version-row").querySelector("code");
-        copyText(code.textContent.replace(/\s+/g, " ").trim());
-        button.innerHTML = CHECK_ICON;
-        button.classList.add("copied");
-        clearTimeout(button.__copyTimer);
-        button.__copyTimer = setTimeout(function () {
-          button.innerHTML = originalIcon;
-          button.classList.remove("copied");
-        }, 1200);
-      },
-      false
-    );
-  });
+  [].forEach.call(
+    document.querySelectorAll("button.copy-command"),
+    function (button) {
+      var originalIcon = button.innerHTML;
+      button.addEventListener(
+        "click",
+        function () {
+          var code = button.closest(".version-row").querySelector("code");
+          copyText(code.textContent.replace(/\s+/g, " ").trim());
+          button.innerHTML = CHECK_ICON;
+          button.classList.add("copied");
+          clearTimeout(button.__copyTimer);
+          button.__copyTimer = setTimeout(function () {
+            button.innerHTML = originalIcon;
+            button.classList.remove("copied");
+          }, 1200);
+        },
+        false
+      );
+    }
+  );
 
-  [].forEach.call(document.querySelectorAll("form.delete-form"), function (form) {
-    form.addEventListener(
-      "submit",
-      function (ev) {
-        if (dialog && typeof dialog.showModal === "function") {
-          ev.preventDefault();
-          openDialog(form);
-        } else {
-          var text = confirmationText(form);
-          if (!confirm(text.title + "\n\n" + text.body)) {
+  [].forEach.call(
+    document.querySelectorAll("form.delete-form"),
+    function (form) {
+      form.addEventListener(
+        "submit",
+        function (ev) {
+          if (dialog && typeof dialog.showModal === "function") {
             ev.preventDefault();
+            openDialog(form);
+          } else {
+            var text = confirmationText(form);
+            if (!confirm(text.title + "\n\n" + text.body)) {
+              ev.preventDefault();
+            }
           }
-        }
-      },
-      false
-    );
-  });
+        },
+        false
+      );
+    }
+  );
 })();
