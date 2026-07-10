@@ -10,7 +10,7 @@ require 'nokogiri'
 class DeleteConfirmationMarkupTest < Minitest::Test
   include Rack::Test::Methods
 
-  CONFIRMED_FORM_SELECTOR = "form.delete-form"
+  CONFIRMED_FORM_SELECTOR = "form.delete-form".freeze
 
   def setup
     clean_data_dir
@@ -39,7 +39,7 @@ class DeleteConfirmationMarkupTest < Minitest::Test
     assert last_response.ok?
     forms = doc.css(CONFIRMED_FORM_SELECTOR)
     refute_empty forms
-    assert forms.all? { |form| form.css("button[type=submit]").any? }
+    assert(forms.all? { |form| form.css("button[type=submit]").any? })
   end
 
   test "gem page loads master.js" do
@@ -53,7 +53,7 @@ class DeleteConfirmationMarkupTest < Minitest::Test
     assert last_response.ok?
     forms = doc.css(CONFIRMED_FORM_SELECTOR)
     refute_empty forms
-    assert forms.all? { |form| form.css("button[type=submit]").any? }
+    assert(forms.all? { |form| form.css("button[type=submit]").any? })
   end
 
   test "delete forms carry the attributes the dialog names the gem with" do
