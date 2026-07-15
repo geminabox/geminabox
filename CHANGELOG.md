@@ -45,6 +45,7 @@
 - Yanking a version now removes only the requested platform build instead of
   every build of that version number.
 
+
 ## [3.1.0] - 2026-06-02
 
 ### Deprecated
