@@ -14,5 +14,5 @@ jobs:
     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
     - name: Prettier JS
       run: |
-        npm install prettier@3.0.0
+        npm install prettier@3.9.5
         npx prettier --trailing-comma none --check public/**/*.js public/**/*.css

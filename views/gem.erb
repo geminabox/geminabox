@@ -1,40 +1,42 @@
-<p>
-<a href="/">Back to Gem Index</a>
+<p class="back-link">
+<a href="<%= url("/") %>">Back to Gem Index</a>
 </p>
 
 <ul class="gemlist">
   <% @gem.by_name do |name, versions| %>
-    <li class="gem-version">
-      <h2><%= h(name) %> (<%= h(versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}") %>)</h2>
-      <% versions.each.reverse_each do |version| %>
-        <p>
-        <code>gem install <%= h(version.name) %> <%= "--prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= h(version.number) %>"</code>
-        <% unless version.platform =~ /^ruby/i %>
-          <small class="platform"><%= h(version.platform) %></small>
+    <li class="gem-card">
+      <div class="card-header">
+        <h2><%= h(name) %> (<%= h(versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}") %>)</h2>
+      </div>
+      <div class="card-body">
+        <% versions.each.reverse_each do |version| %>
+          <div class="version-row">
+            <code>gem install <%= h(version.name) %><%= " --prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= h(version.number) %>"</code>
+            <% unless version.platform =~ /^ruby/i %>
+              <small class="platform"><%= h(version.platform) %></small>
+            <% end %>
+            <div class="actions">
+              <button type="button" class="copy-command" title="Copy install command" aria-label="Copy install command"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><rect x="4" y="4" width="11" height="11" rx="2"></rect></svg></button>
+              <a class="download" href="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">download</a>
+              <% if @allow_delete %>
+              <form class="delete-form" method="post" action="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>" data-gem-name="<%= h(version.name) %>" data-version="<%= h(version.number) %>" data-platform="<%= h(version.platform) %>">
+                <input type="hidden" name="_method" value="DELETE" />
+                <button type="submit">delete</button>
+              </form>
+              <% end %>
+            </div>
+          </div>
         <% end %>
-        </p>
-        <div class="delete-form">
-          <a class="download" href="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">download</a>
-          <% if @allow_delete %>
-          <form method="post" action="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">
-            <input type="hidden" name="_method" value="DELETE" />
-            <button type="submit">delete</button>
-          </form>
-          <% end %>
-        </div>
-      <% end %>
+      </div>
 
-      <div class="details">
-        <p>
+      <div class="card-footer">
         <% newest_gem = versions.newest %>
         <% if spec = spec_for(name, newest_gem.number, newest_gem.platform) %>
-          <%= h(spec.description) %>
-          <br/>
-          <span class="author">– <%= spec.authors.map do |author|
+          <p><%= h(spec.description) %></p>
+          <p class="author">– <%= spec.authors.map do |author|
             "<a href='#{href(spec.homepage)}'>#{h(author)}</a>"
-          end.join(', ') %></span>
+          end.join(', ') %></p>
         <% end %>
-        </p>
       </div>
 
     </li>
