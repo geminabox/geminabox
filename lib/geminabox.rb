@@ -28,6 +28,8 @@ module Geminabox
   autoload :GemStoreError,          geminabox_path('gem_store_error')
   autoload :GemVersion,             geminabox_path('gem_version')
   autoload :GemVersionCollection,   geminabox_path('gem_version_collection')
+  autoload :CompactIndexer,         geminabox_path('compact_indexer')
+  autoload :CompactIndexApi,        geminabox_path('compact_index_api')
   autoload :Server,                 geminabox_path('server')
   autoload :DiskCache,              geminabox_path('disk_cache')
   autoload :IncomingGem,            geminabox_path('incoming_gem')

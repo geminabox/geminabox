@@ -42,4 +42,11 @@ class ContentTypeTest < Minitest::Test
     assert last_response.ok?
     assert_equal 'application/json', last_response.media_type
   end
+
+  test 'quick spec endpoint returns binary content type' do
+    inject_gems { |builder| builder.gem 'example' }
+    get '/quick/Marshal.4.8/example-1.0.0.gemspec.rz'
+    assert last_response.ok?
+    assert_equal 'application/octet-stream', last_response.media_type
+  end
 end

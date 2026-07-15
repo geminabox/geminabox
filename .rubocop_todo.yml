@@ -441,10 +441,10 @@ Lint/UnusedMethodArgument:
     - 'test/test_support/http_socket_error_dummy.rb'
     - 'test/units/geminabox/server_test.rb'
 
-# Offense count: 8
+# Offense count: 9
 # Configuration parameters: AllowedMethods, AllowedPatterns, CountRepeatedAttributes.
 Metrics/AbcSize:
-  Max: 36
+  Max: 46
 
 # Offense count: 3
 # Configuration parameters: CountComments, CountAsOne, AllowedMethods, AllowedPatterns.
@@ -457,20 +457,20 @@ Metrics/BlockLength:
 Metrics/ClassLength:
   Max: 312
 
-# Offense count: 1
+# Offense count: 3
 # Configuration parameters: AllowedMethods, AllowedPatterns.
 Metrics/CyclomaticComplexity:
-  Max: 8
+  Max: 12
 
 # Offense count: 10
 # Configuration parameters: CountComments, CountAsOne, AllowedMethods, AllowedPatterns.
 Metrics/MethodLength:
   Max: 41
 
-# Offense count: 1
+# Offense count: 3
 # Configuration parameters: AllowedMethods, AllowedPatterns.
 Metrics/PerceivedComplexity:
-  Max: 9
+  Max: 12
 
 # Offense count: 5
 Naming/AccessorMethodName:
@@ -503,10 +503,12 @@ Security/Eval:
   Exclude:
     - 'Rakefile'
 
-# Offense count: 11
+# Offense count: 13
 Security/MarshalLoad:
   Exclude:
+    - 'lib/geminabox/compact_indexer.rb'
     - 'lib/geminabox/disk_cache.rb'
+    - 'lib/geminabox/gem_version_collection.rb'
     - 'lib/geminabox/proxy/splicer.rb'
     - 'lib/geminabox/rubygems_dependency.rb'
     - 'lib/geminabox/server.rb'

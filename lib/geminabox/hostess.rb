@@ -23,7 +23,10 @@ module Geminabox
     end
 
     get '/quick/Marshal.4.8/*.gemspec.rz' do
-      content_type('application/x-deflate')
+      # rubygems.org serves the deflated quick specs as octet-stream, and the
+      # compact-index conformance suite asserts it; clients inflate the body
+      # regardless of this header.
+      content_type('application/octet-stream')
       serve
     end
 

@@ -85,6 +85,64 @@ networks, bandwidth, protection against upstream yanks), use
 [gemstash](https://github.com/rubygems/gemstash), maintained by the RubyGems
 organization.
 
+## Compact index
+
+Geminabox serves the [compact index API](https://guides.rubygems.org/rubygems-org-compact-index-api/)
+(`/versions`, `/info/GEMNAME`, `/names`). Bundler 1.12+ detects and uses it
+automatically; no client configuration is needed. Responses support
+`If-None-Match` and ranged requests, so `bundle install` only downloads
+index data that changed since the last run.
+
+The materialized index lives in `data/compact_index/` and is updated
+whenever gems are added or removed. Deleting that directory (or hitting
+`/reindex`) is safe; it is rebuilt from the stored gems on the next request.
+
+On installs upgraded from an earlier version with many stored gems, the
+first request to `/versions` builds the index and can take a while as it
+checksums every stored gem, so hitting `/reindex` or `/versions` right
+after upgrading avoids surprising the first `bundle install`.
+
+### Running behind a reverse proxy
+
+A stock nginx or Passenger deployment needs no special configuration for the
+compact index. gzip is safe to leave on, even for `text/plain`: Bundler sends
+its ranged requests without `Accept-Encoding`, and nginx never compresses 206
+responses, so 304 revalidation and ranged tail appends keep working.
+
+Two things do interfere:
+
+- Proxy-level caching of `/versions`, `/info/*`, or `/names` (nginx
+  `proxy_cache`, or a CDN). The files reference each other by checksum, so a
+  cache serving one fresh and another stale makes Bundler report checksum
+  mismatches. Bundler already caches and revalidates client-side; leave these
+  paths uncached.
+- Middleware or middleboxes that strip or rewrite headers. Removing `ETag`
+  disables 304 revalidation; removing `Repr-Digest`/`Digest` makes Bundler
+  refuse to append partial responses and re-download the full file after
+  every change.
+
+### Replacing a published version
+
+`gem inabox -o` (and the `allow_replace` server option) overwrites a stored
+gem in place: same version number, different contents. Geminabox updates the
+compact index to match, including the new checksum. Bundler, however, guards
+against a version's bytes changing.
+
+Since 2.5, Bundler records each gem's checksum in the `CHECKSUMS` section of
+`Gemfile.lock`. On a later resolve it compares the checksum the server now
+advertises against the locked one, and if they differ for the same name and
+version it aborts with `Bundler::ChecksumMismatchError`, treating the change as
+a possible supply-chain swap. Nothing on the server can override this; the
+conflict is between the client's lockfile and the replaced contents.
+
+An overwrite is therefore transparent only to consumers who have not locked
+that version yet. Anyone whose `Gemfile.lock` already pins it hits the error on
+their next `bundle install` or `bundle update`. Their options are to remove
+that gem's line from `CHECKSUMS`, delete the lockfile and re-resolve, or turn
+off the check with `bundle config set --local disable_checksum_validation true`.
+The clean fix is to bump the version instead of replacing it; treat `-o` as a
+convenience for a private box whose gems nobody has locked yet.
+
 ## HTTP adapter
 
 Geminabox uses the HTTPClient gem to manage its connections to remote resources.
