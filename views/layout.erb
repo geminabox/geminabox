@@ -10,5 +10,21 @@
       <h1>Gem in a Box</h1>
       <%= yield %>
     </div>
+    <% if @allow_delete %>
+    <dialog id="delete-confirm">
+      <div class="delete-confirm-body">
+        <div class="accent"></div>
+        <div>
+          <h3></h3>
+          <p></p>
+        </div>
+      </div>
+      <div class="delete-confirm-actions">
+        <button type="button" class="cancel">Cancel</button>
+        <button type="button" class="danger">Delete this version</button>
+      </div>
+    </dialog>
+    <% end %>
+    <script type="text/javascript" src="<%= url "/master.js", false %>"></script>
   </body>
 </html>

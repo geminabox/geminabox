@@ -1,161 +1,424 @@
-@import "https://fonts.googleapis.com/css?family=Droid+Sans+Mono";
+@import "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap";
 
-body {
-  background: #ddd;
-  color: #444;
-  font-size: 1.2em;
-  font-family: "helvetica neue", sans-serif;
-  margin: 0;
+* {
+  box-sizing: border-box;
 }
 
-small {
-  color: #999;
-  font-size: 60%;
+body {
+  margin: 0;
+  padding: 36px 20px;
+  background: #e7e7ea;
+  color: #444;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
+  color: #1a4fd6;
   text-decoration: none;
-  color: #00a;
 }
 
 a:hover {
-  color: #00f;
+  color: #123aa3;
+  text-decoration: underline;
 }
 
-a#more_link {
-  font-size: 0.7em;
-  line-height: 1.2;
-  vertical-align: bottom;
+code {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
 }
 
 form {
   margin: 0;
 }
 
-code {
-  font-size: 0.7em;
-  font-family: "Droid Sans Mono", monospace;
-}
-
 #content {
-  background: #fff;
-  border: 1px solid #ccc;
-  width: 600px;
+  max-width: 940px;
   margin: 0 auto;
-  overflow: hidden;
-  padding: 0.5em 0 1em 0;
-  text-align: center;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 10px 30px rgba(0, 0, 0, 0.05);
+  padding: 52px 56px;
 }
 
 #content h1 {
   margin: 0;
-  color: #a00;
-  font-weight: 600;
-  text-shadow: #aaa 1px 1px 1px;
+  text-align: center;
+  font-size: 46px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #a11212;
 }
 
-h2 {
-  font-weight: 200;
-  font-size: 1em;
-  color: #000;
-  margin: 0 0 0.5em 0;
-  padding: 0.3em 0;
-  background: #aaa;
-  border-radius: 0.5em 0.5em 0 0;
-  -moz-border-radius: 0.5em 0.5em 0 0;
-  -webkit-border-radius: 0.5em 0.5em 0 0;
+.intro {
+  max-width: 640px;
+  margin: 36px auto 0;
+  text-align: center;
+}
+
+.hint {
+  margin: 26px 0 10px;
+  font-size: 13px;
+  color: #8a8a8f;
+}
+
+.intro .hint:first-child {
+  margin-top: 0;
+}
+
+code.command {
+  display: block;
+  font-size: 14px;
+  color: #2a2a2e;
+  background: #f5f5f6;
+  border: 1px solid #ececee;
+  border-radius: 8px;
+  padding: 12px 16px;
+  line-height: 1.9;
+  overflow-x: auto;
+}
+
+.upload-link {
+  text-align: center;
+  margin: 40px 0 8px;
+}
+
+.upload-link a {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+nav#alpha_index {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 14px;
+  margin: 28px 0 40px;
+  font-size: 16px;
+  text-transform: uppercase;
+}
+
+nav#alpha_index a {
+  font-weight: 700;
+}
+
+nav#alpha_index span {
+  color: #b7b7bc;
 }
 
 ul.gemlist {
   list-style: none;
-  margin-top: 0em;
-  margin-bottom: 2em;
-  margin-left: 0;
-  margin-right: 0;
+  margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 }
 
-ul.gemlist li {
-  margin: 1em;
-  background: #eee;
-  border-radius: 0.5em;
-  -moz-border-radius: 0.5em;
-  -webkit-border-radius: 0.5em;
-  position: relative;
+.gem-card {
+  border: 1px solid #ececee;
+  border-radius: 10px;
   overflow: hidden;
 }
 
-ul.gemlist li strong {
-  display: block;
-  font-size: 1.2em;
+.card-header {
+  background: #f6f6f7;
+  color: #1a1a1a;
+  border-bottom: 1px solid #ececee;
+  padding: 24px;
+  text-align: center;
+  scroll-margin-top: 12px;
 }
 
-ul.gemlist li .delete-form {
-  position: relative;
-  margin: 2px 0;
-}
-ul.gemlist li button,
-ul.gemlist li a.download {
-  display: none;
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  border-radius: 0.5em 0 0 0.5em;
-  -moz-border-radius: 0.5em 0 0 0.5em;
-  -webkit-border-radius: 0.5em 0 0 0.5em;
-  background: #c55;
-  border: 0;
-  color: #fff;
+.card-header h2 {
   margin: 0;
-  font-size: 8pt;
-  padding: 3px;
+  font-size: 22px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-header .permalink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #b5b5ba;
+  opacity: 0;
+  transition:
+    opacity 0.15s ease,
+    color 0.15s ease;
+}
+
+.gem-card:hover .permalink,
+.card-header .permalink:focus-visible {
+  opacity: 1;
+}
+
+.card-header .permalink:hover {
+  color: #333;
+}
+
+.card-body {
+  padding: 24px;
+  background: #fbfbfc;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.version-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: #f4f4f5;
+  border: 1px solid #ececed;
+  border-radius: 8px;
+  padding: 9px 12px;
+}
+
+.version-row:hover {
+  background: #eef0f4;
+}
+
+.version-row code {
+  font-size: 13.5px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.version-row small.platform {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: 12px;
+  color: #8a8a8f;
+}
+
+.version-row .actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.version-row .actions button.copy-command {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #d9d9dc;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #6b6b70;
+}
+
+.version-row .actions button.copy-command:hover {
+  background: #eef0f4;
+  color: #333;
+}
+
+.version-row .actions button.copy-command.copied {
+  color: #3fa34d;
+  border-color: #bfe3c5;
+}
+
+.version-row .actions a.download {
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: #3fa34d;
+  padding: 5px 12px;
+  border-radius: 6px;
+}
+
+.version-row .actions a.download:hover {
+  background: #358841;
+  color: #fff;
+  text-decoration: none;
+}
+
+.version-row .actions button[type="submit"] {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #fff;
+  background: #d94f4f;
+  border: 0;
+  padding: 5px 12px;
+  border-radius: 6px;
   cursor: pointer;
 }
 
-ul.gemlist li a.download {
-  background: #5c5;
-  border-radius: 0.5em 0 0 0.5em;
-  -moz-border-radius: 0.5em 0 0 0.5em;
-  -webkit-border-radius: 0 0.5em 0.5em 0;
-  left: 0;
-  right: auto;
+.version-row .actions button[type="submit"]:hover {
+  background: #c23e3e;
 }
 
-ul.gemlist li:hover button,
-ul.gemlist li:hover a.download {
+.more-link {
+  text-align: center;
+  padding: 6px 0 2px;
+}
+
+.more-link a {
+  font-weight: 600;
+}
+
+.card-footer {
+  padding: 24px;
+  background: #f0f0f2;
+  border-top: 1px solid #ececee;
+  text-align: center;
+}
+
+.card-footer p {
   margin: 0;
-  display: block;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #4a4a4e;
 }
 
-.details {
-  margin: 0;
-  overflow: hidden;
-  margin-top: 1em;
-  font-size: 0.7em;
-  border-radius: 0 0 0.5em 0.5em;
-  -moz-border-radius: 0 0 0.5em 0.5em;
-  -webkit-border-radius: 0 0 0.5em 0.5em;
-  border-top: 1px dashed #ddd;
-  background: #ddd;
+.card-footer p.author {
+  margin-top: 8px;
+  color: #666;
 }
 
-#alpha_index {
-  font-size: 0.8em;
-  margin-top: 1em;
-  color: #aaa;
+.card-footer p.author a {
+  font-weight: 500;
 }
 
-.gem-version p {
-  margin: 0;
-  padding: 1px 0;
-  border: 0;
-  font-weight: normal;
-  font-style: normal;
-  font-size: 100%;
-  line-height: 1;
+.back-link {
+  margin: 0 0 24px;
+}
+
+.upload-form {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.upload-form input[type="file"] {
+  font-size: 14px;
+}
+
+.upload-form input[type="submit"] {
+  font-size: 14px;
+  font-weight: 600;
   font-family: inherit;
+  color: #fff;
+  background: #1a4fd6;
+  border: 0;
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: 10px;
 }
 
-.gem-version small.platform {
-  padding: 0 0 0 15px;
+.upload-form input[type="submit"]:hover {
+  background: #123aa3;
+}
+
+@media (max-width: 700px) {
+  body {
+    padding: 16px 8px;
+  }
+
+  #content {
+    padding: 28px 20px;
+  }
+
+  #content h1 {
+    font-size: 32px;
+  }
+}
+
+dialog#delete-confirm {
+  width: min(468px, calc(100vw - 48px));
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+  padding: 0;
+  overflow: hidden;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+dialog#delete-confirm::backdrop {
+  background: rgba(20, 20, 24, 0.42);
+  backdrop-filter: blur(2px);
+}
+
+.delete-confirm-body {
+  display: flex;
+  gap: 16px;
+  padding: 28px 28px 22px;
+  text-align: left;
+}
+
+.delete-confirm-body .accent {
+  flex-shrink: 0;
+  width: 4px;
+  border-radius: 4px;
+  background: #d94f4f;
+}
+
+.delete-confirm-body h3 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+
+.delete-confirm-body p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #55555b;
+  text-wrap: pretty;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 28px;
+  background: #f6f6f7;
+  border-top: 1px solid #ececee;
+}
+
+.delete-confirm-actions button {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.delete-confirm-actions .cancel {
+  color: #333;
+  background: #fff;
+  border: 1px solid #d3d3d7;
+}
+
+.delete-confirm-actions .cancel:hover {
+  background: #eef0f4;
+}
+
+.delete-confirm-actions .danger {
+  color: #fff;
+  background: #d94f4f;
+  border: 1px solid #d94f4f;
+  white-space: nowrap;
+}
+
+.delete-confirm-actions .danger:hover {
+  background: #c23e3e;
+  border-color: #c23e3e;
 }

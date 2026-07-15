@@ -1,55 +1,63 @@
-<p>
-<small>If you did not need any credentials to get to this page</small>
-  <pre><code>gem sources -a <%= url "/" %></code></pre>
-<small>If you needed some credentials to get to this page</small>
-  <pre><code>gem sources -a <%= url.to_s.gsub('://','://username:password@') %></code></pre>
-<% if @allow_upload %>
-<small>and then ...</small>
-  <pre><code>gem install geminabox<br />gem inabox [gemfile]</code></pre>
-<% end %>
-</p>
+<div class="intro">
+  <p class="hint">If you did not need any credentials to get to this page</p>
+  <code class="command">gem sources -a <%= url "/" %></code>
+  <p class="hint">If you needed some credentials to get to this page</p>
+  <code class="command">gem sources -a <%= url.to_s.gsub('://','://username:password@') %></code>
+  <% if @allow_upload %>
+  <p class="hint">and then ...</p>
+  <code class="command">gem install geminabox<br />gem inabox [gemfile]</code>
+  <% end %>
+</div>
 
 <% if @gems.any? %>
-  <% if @allow_upload %><a href="<%= url("/upload") %>">Upload Another Gem</a><% end %>
+  <% if @allow_upload %><p class="upload-link"><a href="<%= url("/upload") %>">Upload Another Gem</a></p><% end %>
 
-  <div id="alpha_index"><%= ("a".."z").map{|i| @index_gems.include?(i) ? "<a href='#jump_#{i}'>#{i}</a>" : i }.join(" - ") %></div>
+  <nav id="alpha_index">
+    <% ("a".."z").each do |i| %>
+      <% if @index_gems.include?(i) %><a href="#jump_<%= i %>"><%= i %></a><% else %><span><%= i %></span><% end %>
+    <% end %>
+  </nav>
 
   <ul class="gemlist">
 
     <% @gems.by_name do |name, versions| %>
-      <li <%= %{id="jump_#{name[0..0].downcase}"} if @index_gems.delete(name[0..0].downcase) %> class="gem-version">
-        <h2><%= h(name) %> (<%= h(versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}") %>)</h2>
-        <% versions.each.reverse_each.first(5).each do |version| %>
-          <p>
-            <code>gem install <%= h(version.name) %> <%= "--prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= h(version.number) %>"</code>
-            <% unless version.platform =~ /^ruby/i %>
-              <small class="platform"><%= h(version.platform) %></small>
-            <% end %>
-          </p>
-          <form class="delete-form" method="post" action="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">
-            <a class="download" href="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">download</a>
-            <% if @allow_delete %>
-            <input type="hidden" name="_method" value="DELETE" />
-            <button type="submit">delete</button>
-            <% end %>
-          </form>
-        <% end %>
+      <li <%= %{id="jump_#{name[0..0].downcase}"} if @index_gems.delete(name[0..0].downcase) %> class="gem-card">
+        <div class="card-header" id="gem_<%= h(name) %>">
+          <h2><%= h(name) %> (<%= h(versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}") %>)<a class="permalink" href="#gem_<%= h(name) %>" title="Permalink to <%= h(name) %>" aria-label="Permalink to <%= h(name) %>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 1 1 0 10h-2"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
+        </div>
+        <div class="card-body">
+          <% versions.each.reverse_each.first(5).each do |version| %>
+            <div class="version-row">
+              <code>gem install <%= h(version.name) %><%= " --prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= h(version.number) %>"</code>
+              <% unless version.platform =~ /^ruby/i %>
+                <small class="platform"><%= h(version.platform) %></small>
+              <% end %>
+              <div class="actions">
+                <button type="button" class="copy-command" title="Copy install command" aria-label="Copy install command"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><rect x="4" y="4" width="11" height="11" rx="2"></rect></svg></button>
+                <a class="download" href="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">download</a>
+                <% if @allow_delete %>
+                <form class="delete-form" method="post" action="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>" data-gem-name="<%= h(version.name) %>" data-version="<%= h(version.number) %>" data-platform="<%= h(version.platform) %>">
+                  <input type="hidden" name="_method" value="DELETE" />
+                  <button type="submit">delete</button>
+                </form>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
 
-        <% if versions.count > 5 %>
-          <a href="<%= h(url("/gems/#{name}")) %>" id="more_link">Older versions...</a>
-        <% end %>
+          <% if versions.count > 5 %>
+            <div class="more-link"><a href="<%= h(url("/gems/#{name}")) %>">Older versions...</a></div>
+          <% end %>
+        </div>
 
-        <div class="details">
-          <p>
-            <% newest_gem = versions.newest %>
-            <% if spec = spec_for(name, newest_gem.number, newest_gem.platform) %>
-              <%= h(spec.description) %>
-              <br/>
-              <span class="author">– <%= spec.authors.map do |author|
-                "<a href='#{href(spec.homepage)}'>#{h(author)}</a>"
-              end.join(', ') %></span>
-            <% end %>
-          </p>
+        <div class="card-footer">
+          <% newest_gem = versions.newest %>
+          <% if spec = spec_for(name, newest_gem.number, newest_gem.platform) %>
+            <p><%= h(spec.description) %></p>
+            <p class="author">– <%= spec.authors.map do |author|
+              "<a href='#{href(spec.homepage)}'>#{h(author)}</a>"
+            end.join(', ') %></p>
+          <% end %>
         </div>
 
       </li>
@@ -57,6 +65,4 @@
   </ul>
 <% end %>
 
-<% if @allow_upload %><a href="<%= url("/upload") %>">Upload Another Gem</a><% end %>
-
-<script type="text/javascript" src="<%= url "/master.js", false %>"></script>
+<% if @allow_upload %><p class="upload-link"><a href="<%= url("/upload") %>">Upload Another Gem</a></p><% end %>

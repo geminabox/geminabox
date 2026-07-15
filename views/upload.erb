@@ -1,8 +1,6 @@
-<p>
-<small>Choose a gem file to upload ...</small>
-</p>
+<p class="hint">Choose a gem file to upload ...</p>
 <%= @error %>
-<form method="POST" enctype="multipart/form-data"> 
+<form method="POST" enctype="multipart/form-data" class="upload-form">
   <input type="file" name="file">
   <input type="submit" value="Upload">
-</form> 
+</form>
