@@ -17,7 +17,6 @@ module Geminabox
   class Error < StandardError ; end
 
   require_relative 'geminabox/version'
-  require_relative 'geminabox/proxy'
   require_relative 'geminabox/http_adapter'
 
   def self.geminabox_path(file)
@@ -27,8 +26,6 @@ module Geminabox
   autoload :Hostess,                geminabox_path('hostess')
   autoload :GemStore,               geminabox_path('gem_store')
   autoload :GemStoreError,          geminabox_path('gem_store_error')
-  autoload :RubygemsDependency,     geminabox_path('rubygems_dependency')
-  autoload :GemListMerge,           geminabox_path('gem_list_merge')
   autoload :GemVersion,             geminabox_path('gem_version')
   autoload :GemVersionCollection,   geminabox_path('gem_version_collection')
   autoload :Server,                 geminabox_path('server')
@@ -45,14 +42,9 @@ module Geminabox
       :allow_replace,
       :gem_permissions,
       :allow_delete,
-      :rubygems_proxy,
-      :rubygems_proxy_merge_strategy,
       :http_adapter,
       :lockfile,
       :retry_interval,
-      :allow_remote_failure,
-      :ruby_gems_url,
-      :bundler_ruby_gems_url,
       :allow_upload,
       :on_gem_received
     )
@@ -68,17 +60,6 @@ module Geminabox
       Server.settings
     end
 
-    # Deprecated: the RubyGems proxy is unmaintained and will be removed in
-    # Geminabox 4.0. It depends on the RubyGems.org Dependency API
-    # (/api/v1/dependencies), which was sunset on 2023-05-24, so proxy mode no
-    # longer functions.
-    def warn_rubygems_proxy_deprecation
-      warn '[DEPRECATION] Geminabox RubyGems proxy is deprecated and will be ' \
-           'removed in Geminabox 4.0. It depends on the RubyGems.org ' \
-           'Dependency API (/api/v1/dependencies), which was sunset on ' \
-           '2023-05-24, so proxy mode no longer functions.'
-    end
-
     def call(env)
       Server.call env
     end
@@ -91,17 +72,38 @@ module Geminabox
     views:                          File.join(File.dirname(__FILE__), *%w[.. views]),
     allow_replace:                  false,
     gem_permissions:                0644,
-    rubygems_proxy:                 (ENV['RUBYGEMS_PROXY'] == 'true'),
-    rubygems_proxy_merge_strategy:  ENV.fetch('RUBYGEMS_PROXY_MERGE_STRATEGY') { :local_gems_take_precedence_over_remote_gems }.to_sym,
     allow_delete:                   true,
     http_adapter:                   HttpClientAdapter.new,
     lockfile:                       File.join(ENV.fetch('TMPDIR', Dir.tmpdir), 'geminabox.lockfile'),
     retry_interval:                 60,
-    allow_remote_failure:           false,
-    ruby_gems_url:                  'https://rubygems.org/',
-    bundler_ruby_gems_url:          'https://bundler.rubygems.org/',
     allow_upload:                   true,
     on_gem_received:                nil
   )
+
+  # Removed in 4.0 with the RubyGems proxy. Warn-and-ignore (rather than
+  # NoMethodError at boot) so stale config.ru lines don't break upgrades.
+  # Drop these shims in 5.0.
+  [
+    :rubygems_proxy,
+    :rubygems_proxy_merge_strategy,
+    :allow_remote_failure,
+    :ruby_gems_url,
+    :bundler_ruby_gems_url
+  ].each do |setting|
+    define_singleton_method("#{setting}=") do |_value|
+      warn "[REMOVED] Geminabox.#{setting} was removed in Geminabox 4.0 " \
+           'along with the RubyGems proxy and has no effect. Remove this ' \
+           'line from your config.ru. Migration notes: ' \
+           'https://github.com/geminabox/geminabox/pull/735'
+    end
+    define_singleton_method(setting) { nil }
+  end
+
+  if ENV['RUBYGEMS_PROXY'] == 'true' || ENV.key?('RUBYGEMS_PROXY_MERGE_STRATEGY')
+    warn '[REMOVED] The RUBYGEMS_PROXY and RUBYGEMS_PROXY_MERGE_STRATEGY ' \
+         'environment variables were removed in Geminabox 4.0; Geminabox ' \
+         'now always serves only local gems. Migration notes: ' \
+         'https://github.com/geminabox/geminabox/pull/735'
+  end
 
 end
