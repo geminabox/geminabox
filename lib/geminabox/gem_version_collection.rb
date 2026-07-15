@@ -1,11 +1,23 @@
 # frozen_string_literal: true
 
+require 'rubygems/util'
+
 module Geminabox
 
   # This class represents a sorted collection of Geminabox::GemVersion objects.
   # It it used widely throughout the system for displaying and filtering gems.
   class GemVersionCollection
     include Enumerable
+
+    # Loads the collection recorded in the legacy Marshal specs indexes
+    # (specs.4.8.gz and prerelease_specs.4.8.gz) under data_dir.
+    def self.from_specs_index(data_dir)
+      specs = %w[specs prerelease_specs].flat_map do |type|
+        path = File.join(data_dir, "#{type}.#{Gem.marshal_version}.gz")
+        File.exist?(path) ? Marshal.load(Gem::Util.gunzip(Gem.read_binary(path))) : []
+      end
+      new(specs.uniq)
+    end
 
     # Array of Geminabox::GemVersion objects, or an array of [name, version,
     # platform] triples.

@@ -38,7 +38,6 @@ module Geminabox
 
       def restore_server
         Geminabox.http_adapter = HttpClientAdapter.new
-        Geminabox.allow_remote_failure = false
         Geminabox::Server.file_class = File
       end
     end

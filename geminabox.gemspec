@@ -29,5 +29,7 @@ Gem::Specification.new do |s|
   s.add_dependency('nesty')
   s.add_dependency('faraday', "> 1.0", "< 3.0")
   s.add_dependency('reentrant_flock')
+  s.add_dependency('compact_index', '~> 0.15')
   s.add_dependency('rubygems-generate_index', '~> 1.1')
+  s.add_dependency('rss', '~> 0.3')
 end

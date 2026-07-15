@@ -2,6 +2,7 @@
 
 require 'reentrant_flock'
 require 'rubygems/util'
+require 'rss'
 
 module Geminabox
 
@@ -11,12 +12,7 @@ module Geminabox
     set :views, Geminabox.views
     set :host_authorization, { permitted_hosts: [] }
 
-    if Geminabox.rubygems_proxy
-      Geminabox.warn_rubygems_proxy_deprecation
-      use Proxy::Hostess
-    else
-      use Hostess
-    end
+    use Hostess
 
     class << self
       def disallow_replace?
@@ -43,6 +39,7 @@ module Geminabox
         if force_rebuild
           indexer.generate_index
           dependency_cache.flush
+          compact_indexer.reindex
         else
           begin
             require 'geminabox/indexer'
@@ -50,6 +47,7 @@ module Geminabox
             return if updated_gemspecs.empty?
             indexer.update_index
             updated_gemspecs.each { |gem| dependency_cache.flush_key(gem.name) }
+            compact_indexer.reindex
           rescue Errno::ENOENT
             with_rlock { reindex(:force_rebuild) }
           rescue => e
@@ -67,6 +65,10 @@ module Geminabox
 
       def dependency_cache
         @dependency_cache ||= Geminabox::DiskCache.new(File.join(Geminabox.data, "_cache"))
+      end
+
+      def compact_indexer
+        Geminabox::CompactIndexer.new(Geminabox.data)
       end
 
       def with_rlock(&block)
@@ -91,6 +93,7 @@ module Geminabox
     end
 
     get '/' do
+      content_type :html
       @gems = load_gems
       @index_gems = index_gems(@gems)
       @allow_upload = self.class.allow_upload?
@@ -99,15 +102,40 @@ module Geminabox
     end
 
     get '/atom.xml' do
+      content_type 'application/atom+xml'
       @gems = load_gems
       erb :atom, :layout => false
     end
 
+    helpers Geminabox::CompactIndexApi
+
+    get '/versions' do
+      bootstrap_compact_index(self.class.compact_indexer.versions_path)
+      serve_compact_file(self.class.compact_indexer.versions_path)
+    end
+
+    get '/names' do
+      bootstrap_compact_index(self.class.compact_indexer.names_path)
+      serve_compact_file(self.class.compact_indexer.names_path)
+    end
+
+    get '/info/:name' do
+      # Reject anything that is not a gem-name shape before touching the
+      # filesystem. This also blocks NUL bytes and empty names, which would
+      # otherwise raise ArgumentError from File.file? and 500.
+      halt 404 unless params[:name] =~ /\A[a-zA-Z0-9_.-]+\z/
+      path = self.class.compact_indexer.info_path(params[:name])
+      heal_missing_info(params[:name], path) unless File.file?(path)
+      serve_compact_file(path)
+    end
+
     get '/api/v1/dependencies' do
+      content_type 'application/octet-stream'
       query_gems.any? ? Marshal.dump(gem_list) : 200
     end
 
     get '/api/v1/dependencies.json' do
+      content_type :json
       query_gems.any? ? gem_list.to_json : {}
     end
 
@@ -116,6 +144,7 @@ module Geminabox
         error_response(403, 'Gem uploading is disabled')
       end
 
+      content_type :html
       erb :upload
     end
 
@@ -136,6 +165,7 @@ module Geminabox
       @gem = gems[params[:gemname]]
       @allow_delete = self.class.allow_delete?
       halt 404 unless @gem
+      content_type :html
       erb :gem
     end
 
@@ -160,8 +190,16 @@ module Geminabox
       halt 400 unless request.form_data?
 
       serialize_update do
-        gems = load_gems.select { |gem| params['gem_name'] == gem.name and
-                                  params['version'] == gem.number.version }
+        # A yank targets one platform. The client omits the platform param for
+        # a plain-ruby gem, so an absent/blank value means the ruby platform;
+        # without this a `gem yank foo -v 1.0.0` would also destroy foo's java
+        # and mingw builds sharing that version.
+        requested_platform = params['platform'].to_s.empty? ? 'ruby' : params['platform']
+        gems = load_gems.select do |gem|
+          params['gem_name'] == gem.name &&
+            params['version'] == gem.number.version &&
+            (gem.ruby? ? 'ruby' : gem.platform) == requested_platform
+        end
         halt 404, 'Gem not found' if gems.size == 0
         gems.each do |gem|
           gem_path = File.expand_path(File.join(Geminabox.data, 'gems',
@@ -216,6 +254,22 @@ module Geminabox
       self.class.with_rlock(&block)
     end
 
+    def bootstrap_compact_index(path)
+      return if File.exist?(path)
+      serialize_update { self.class.compact_indexer.reindex }
+    end
+
+    # Rebuild info/NAME on the read path when it is missing but versions.list
+    # still lists the gem, so a partially corrupted index does not 404 a gem
+    # Bundler was told exists. The ledger-membership check reads only
+    # versions.list and takes no lock, so an unknown name stays a cheap 404
+    # with no per-gem stats -- arbitrary /info probes cannot force writes.
+    def heal_missing_info(name, path)
+      indexer = self.class.compact_indexer
+      return unless indexer.ledger_lists?(name)
+      serialize_update { indexer.heal_info(name) unless File.file?(path) }
+    end
+
     def handle_incoming_gem(gem)
       begin
         GemStore.create(gem, params[:overwrite])
@@ -262,36 +316,8 @@ HTML
       self.class.dependency_cache
     end
 
-    def all_gems
-      all_gems_with_duplicates.inject(:|)
-    end
-
-    def all_gems_with_duplicates
-      specs_files_paths.map do |specs_file_path|
-        if File.exist?(specs_file_path)
-          Marshal.load(Gem::Util.gunzip(Gem.read_binary(specs_file_path)))
-        else
-          []
-        end
-      end
-    end
-
-    def specs_file_types
-      [:specs, :prerelease_specs]
-    end
-
-    def specs_files_paths
-      specs_file_types.map do |specs_file_type|
-        File.join(Geminabox.data, spec_file_name(specs_file_type))
-      end
-    end
-
-    def spec_file_name(specs_file_type)
-      [specs_file_type, Gem.marshal_version, 'gz'].join('.')
-    end
-
     def load_gems
-      @loaded_gems ||= Geminabox::GemVersionCollection.new(all_gems)
+      @loaded_gems ||= Geminabox::GemVersionCollection.from_specs_index(Geminabox.data)
     end
 
     def index_gems(gems)
@@ -299,23 +325,11 @@ HTML
     end
 
     def gem_list
-      Geminabox.rubygems_proxy ? combined_gem_list : local_gem_list
+      query_gems.map{|query_gem| gem_dependencies(query_gem) }.flatten(1)
     end
 
     def query_gems
       params[:gems].to_s.split(',')
-    end
-
-    def local_gem_list
-      query_gems.map{|query_gem| gem_dependencies(query_gem) }.flatten(1)
-    end
-
-    def remote_gem_list
-      RubygemsDependency.for(*query_gems)
-    end
-
-    def combined_gem_list
-      GemListMerge.merge(local_gem_list, remote_gem_list, strategy: Geminabox.rubygems_proxy_merge_strategy)
     end
 
     helpers do

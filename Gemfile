@@ -35,6 +35,10 @@ group :test do
   gem 'logger'
   gem 'webmock'
 
+  # Drives the rubygems compact-index conformance suite against a running
+  # geminabox in test/conformance. Only test:conformance loads it.
+  gem 'gem_server_conformance', '~> 0.1.5'
+
   # Used only in test/requests/atom_feed_test.rb
   gem "rss", require: false
 
