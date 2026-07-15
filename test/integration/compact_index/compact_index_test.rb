@@ -73,6 +73,12 @@ class CompactIndexIntegrationTest < Geminabox::TestCase
   end
 
   test "a same-version replacement reaches a warm-cache consumer as a 206 tail append" do
+    # A warm-cache consumer only re-resolves a same-version content swap on
+    # Bundler >= 2.7. Older clients reuse the already-installed gem/spec and
+    # never refetch it, so the replacement is invisible to them. geminabox
+    # serves the swap correctly regardless (see CompactIndexerTest).
+    skip_below_bundler("2.7", "warm-cache re-resolution of a same-version replacement")
+
     # Unique gem names so the shared GemFactory fixture cache can't leak a
     # different dependency set into this resolution. warmcache initially depends
     # on warmbee; the in-place replacement below re-points it at warmsee.
@@ -128,6 +134,12 @@ class CompactIndexIntegrationTest < Geminabox::TestCase
   end
 
   test "a locked consumer hits a checksum mismatch on a same-version replacement" do
+    # The loud ChecksumMismatchError abort is a Bundler >= 4.0 behaviour. On
+    # older Bundler the locked consumer is still protected -- it keeps the
+    # locked bytes and never resolves the swapped content -- but it exits 0
+    # silently rather than raising, so only assert the abort where it exists.
+    skip_below_bundler("4.0", "Bundler's same-version ChecksumMismatchError abort")
+
     # Pins the README "Replacing a published version" claim: a client whose
     # Gemfile.lock already records the CHECKSUMS entry for pinnedcache-1.0.0
     # cannot be handed replaced bytes for the same version. Unique gem names
@@ -288,6 +300,27 @@ class CompactIndexIntegrationTest < Geminabox::TestCase
   end
 
   protected
+
+  # The Bundler that the +bundle+ helper shells out to, which is the client
+  # whose version-dependent behaviour these tests turn on. Probe it in an empty
+  # dir (no Gemfile.lock to pin a version) and in the unbundled env the helper
+  # uses, so it matches the Bundler a real +bundle install+ here would select.
+  def client_bundler_version
+    @client_bundler_version ||= Dir.mktmpdir do |probe|
+      output = without_bundler { execute("cd #{probe} && env HOME=#{probe} bundle --version 2>&1") }
+      match = output[/\d+\.\d+(?:\.\w+)*/]
+      match && Gem::Version.new(match)
+    end
+  end
+
+  def skip_below_bundler(minimum, behavior)
+    version = client_bundler_version
+    return if version && version >= Gem::Version.new(minimum)
+
+    skip "needs Bundler >= #{minimum} for #{behavior}; the client here is " \
+         "#{version || 'unknown'}. geminabox serves the swap correctly, but older " \
+         "Bundler reuses the already-installed same-version gem instead of re-resolving it."
+  end
 
   def write_gemfile(dir, gem_name = "a")
     File.write(File.join(dir, "Gemfile"), <<~GEMFILE)
