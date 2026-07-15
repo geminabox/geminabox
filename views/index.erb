@@ -22,8 +22,8 @@
 
     <% @gems.by_name do |name, versions| %>
       <li <%= %{id="jump_#{name[0..0].downcase}"} if @index_gems.delete(name[0..0].downcase) %> class="gem-card">
-        <div class="card-header">
-          <h2><%= h(name) %> (<%= h(versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}") %>)</h2>
+        <div class="card-header" id="gem_<%= h(name) %>">
+          <h2><%= h(name) %> (<%= h(versions.count == 1 ? versions.first.number : "#{versions.oldest.number} - #{versions.newest.number}") %>)<a class="permalink" href="#gem_<%= h(name) %>" title="Permalink to <%= h(name) %>" aria-label="Permalink to <%= h(name) %>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"></path><path d="M15 7h2a5 5 0 1 1 0 10h-2"></path><line x1="8" y1="12" x2="16" y2="12"></line></svg></a></h2>
         </div>
         <div class="card-body">
           <% versions.each.reverse_each.first(5).each do |version| %>
