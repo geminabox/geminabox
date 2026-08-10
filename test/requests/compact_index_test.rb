@@ -67,6 +67,84 @@ class CompactIndexTest < Minitest::Test
     assert_equal size, last_response.body.bytesize
   end
 
+  test "GET /versions serves a closed range" do
+    get "/versions"
+    full = last_response.body
+    get "/versions", {}, { "HTTP_RANGE" => "bytes=10-20" }
+    assert_equal 206, last_response.status
+    assert_equal full.byteslice(10..20), last_response.body
+    assert_equal "bytes 10-20/#{full.bytesize}",
+                 last_response.headers["Content-Range"]
+  end
+
+  test "GET /versions clamps a closed range that runs past EOF" do
+    get "/versions"
+    full = last_response.body
+    last = full.bytesize - 1
+    get "/versions", {}, { "HTTP_RANGE" => "bytes=10-#{full.bytesize + 500}" }
+    assert_equal 206, last_response.status
+    assert_equal full.byteslice(10..last), last_response.body
+    assert_equal "bytes 10-#{last}/#{full.bytesize}",
+                 last_response.headers["Content-Range"]
+  end
+
+  test "GET /versions serves a suffix range" do
+    get "/versions"
+    full = last_response.body
+    size = full.bytesize
+    get "/versions", {}, { "HTTP_RANGE" => "bytes=-10" }
+    assert_equal 206, last_response.status
+    assert_equal full.byteslice(size - 10, 10), last_response.body
+    assert_equal "bytes #{size - 10}-#{size - 1}/#{size}",
+                 last_response.headers["Content-Range"]
+  end
+
+  test "GET /versions serves the whole file for an oversized suffix range" do
+    get "/versions"
+    full = last_response.body
+    get "/versions", {}, { "HTTP_RANGE" => "bytes=-#{full.bytesize + 500}" }
+    assert_equal 206, last_response.status
+    assert_equal full, last_response.body
+    assert_equal "bytes 0-#{full.bytesize - 1}/#{full.bytesize}",
+                 last_response.headers["Content-Range"]
+  end
+
+  test "GET /versions ignores a zero-length suffix range" do
+    get "/versions"
+    full = last_response.body
+    get "/versions", {}, { "HTTP_RANGE" => "bytes=-0" }
+    assert_equal 200, last_response.status
+    assert_equal full, last_response.body
+  end
+
+  test "GET /versions ignores an inverted range" do
+    get "/versions"
+    full = last_response.body
+    get "/versions", {}, { "HTTP_RANGE" => "bytes=20-10" }
+    assert_equal 200, last_response.status
+    assert_equal full, last_response.body
+  end
+
+  test "GET /versions ignores a multipart range" do
+    get "/versions"
+    full = last_response.body
+    get "/versions", {}, { "HTTP_RANGE" => "bytes=0-5,10-15" }
+    assert_equal 200, last_response.status
+    assert_equal full, last_response.body
+    assert_nil last_response.headers["Content-Range"]
+  end
+
+  test "GET /info/GEMNAME serves a closed range" do
+    get "/versions"
+    get "/info/a"
+    full = last_response.body
+    get "/info/a", {}, { "HTTP_RANGE" => "bytes=5-15" }
+    assert_equal 206, last_response.status
+    assert_equal full.byteslice(5..15), last_response.body
+    assert_equal "bytes 5-15/#{full.bytesize}",
+                 last_response.headers["Content-Range"]
+  end
+
   test "GET /info/GEMNAME serves the info file" do
     get "/versions"
     get "/info/a"
