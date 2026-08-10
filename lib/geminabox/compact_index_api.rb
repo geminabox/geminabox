@@ -6,8 +6,10 @@ module Geminabox
   # Sinatra helpers implementing the compact index HTTP semantics:
   # - ETag is the quoted MD5 of the full body (Bundler <= 2.4 verifies
   #   exactly that after reassembling ranged fetches).
-  # - Only the open-ended range form Bundler sends (bytes=N-) is honored;
-  #   anything else gets a full 200, which clients must tolerate.
+  # - A single byte range is honored in all three forms (bytes=N-, bytes=N-M,
+  #   bytes=-N); Bundler only ever sends the open-ended tail. Multipart,
+  #   malformed, and unsatisfiable ranges get a full 200 rather than a 416,
+  #   which clients must tolerate (RFC 9110 permits ignoring Range).
   # - Repr-Digest/Digest carry sha-256 of the FULL file even on 206 —
   #   without them Bundler >= 2.5 refuses to append partial responses.
   #
@@ -26,12 +28,12 @@ module Geminabox
               "Cache-Control" => "max-age=60"
       content_type "text/plain; charset=utf-8"
       halt 304 if request.env["HTTP_IF_NONE_MATCH"] == etag
-      first_byte = range_start(request.env["HTTP_RANGE"], contents.bytesize)
-      if first_byte
+      range = byte_range(request.env["HTTP_RANGE"], contents.bytesize)
+      if range
         status 206
         headers "Content-Range" =>
-          "bytes #{first_byte}-#{contents.bytesize - 1}/#{contents.bytesize}"
-        contents.byteslice(first_byte..)
+          "bytes #{range.begin}-#{range.end}/#{contents.bytesize}"
+        contents.byteslice(range)
       else
         contents
       end
@@ -39,12 +41,29 @@ module Geminabox
 
     private
 
-    def range_start(header, size)
-      match = /\Abytes=(\d+)-\z/.match(header.to_s)
-      return unless match
+    # Inclusive byte range to serve, or nil to serve the whole body.
+    def byte_range(header, size)
+      match = /\Abytes=(\d*)-(\d*)\z/.match(header.to_s)
+      return if match.nil? || size.zero?
 
-      first_byte = Integer(match[1])
-      first_byte < size ? first_byte : nil
+      first, last = match.captures
+      return suffix_range(last, size) if first.empty?
+
+      first_byte = Integer(first)
+      return if first_byte >= size
+
+      last_byte = last.empty? ? size - 1 : [Integer(last), size - 1].min
+      first_byte..last_byte unless last_byte < first_byte
+    end
+
+    # bytes=-N asks for the final N bytes; N == 0 is unsatisfiable.
+    def suffix_range(last, size)
+      return if last.empty?
+
+      length = Integer(last)
+      return if length.zero?
+
+      [size - length, 0].max..(size - 1)
     end
 
     def compact_file_digests(path, stat, contents)
