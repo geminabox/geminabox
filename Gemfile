@@ -4,7 +4,7 @@ gemspec
 
 group :development do
   gem 'byebug'
-  gem 'rubocop', '~> 1.89.0'
+  gem 'rubocop', '~> 1.90.0'
   gem 'rubocop-minitest', '~> 0.20'
   gem 'rubocop-rake', '~> 0.6'
 end
