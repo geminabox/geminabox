@@ -146,38 +146,33 @@ off the check with `bundle config set --local disable_checksum_validation true`.
 The clean fix is to bump the version instead of replacing it; treat `-o` as a
 convenience for a private box whose gems nobody has locked yet.
 
-## HTTP adapter
+## HTTP client
 
-Geminabox uses the HTTPClient gem to manage its connections to remote resources.
-The relationship is managed via Geminabox::HttpClientAdapter.
+The Geminabox server makes no outbound HTTP requests. The `gem inabox`
+client uploads gems with the [HTTPClient](https://github.com/nahi/httpclient)
+gem, which honors the `http_proxy` / `HTTP_PROXY` environment variables.
 
-To configure options of HTTPClient, pass your own HTTPClient object in config.ru as:
+If you drive `GeminaboxClient` from Ruby (a Rake task, say), you can configure
+its HTTP layer through `Geminabox.http_adapter` before creating the client:
 
 ```ruby
+require "geminabox"
+require "geminabox_client"
+
 # Geminabox.http_adapter = Geminabox::HttpClientAdapter.new # default
-Geminabox.http_adapter.http_client = HTTPClient.new(ENV['http_proxy']).tap do |http_client|
-  http_client.transparent_gzip_decompression = true
+Geminabox.http_adapter.http_client = HTTPClient.new.tap do |http_client|
   http_client.keep_alive_timeout = 32 # sec
-  http_client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
-  http_client.send_timeout = 0
-  http_client.receive_timeout = 0
 end
+
+GeminaboxClient.new("https://gems.example.com").push("pkg/my-gem-1.0.0.gem")
 ```
 
-If you would like to use an alternative HTTP gem, create your own adapter
-and specify it in config.ru:
+To use a different HTTP library, subclass `Geminabox::HttpAdapter` and
+implement `post` and `set_auth` (the client's upload path), plus `get` and
+`get_content` for completeness. `Geminabox::TemplateFaradayAdapter` is a
+worked example.
 
     Geminabox.http_adapter = YourHttpAdapter.new
-
-It is recommend (but not essential) that your adapter inherits from HttpAdapter.
-The adapter will need to replace HttpAdapter's methods with those specific to
-the alternative HTTP gem. It should also be able to handle HTTP proxy
-settings.
-
-Defining your own adapter also allows you to configure Geminabox to use the
-local systems SSL certificates.
-
-TemplateFaradayAdapter is provided as an example of an alternative HTTPAdapter.
 
 ## Hooks
 
