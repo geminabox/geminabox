@@ -5,7 +5,6 @@
 - Check if a bug you run into is already filed in https://github.com/geminabox/geminabox/issues.
    - Please add your comments to the issue if you find.
 - Check if a bug you run into is already fixed in [the latest release](https://github.com/geminabox/geminabox/releases) or [the gem available at RubyGems.org](https://rubygems.org/gems/geminabox).
-   - The latest release as of 2022-06 is 2.1.0.
 - File a new issue at https://github.com/geminabox/geminabox/issues/new
 
 ## Code contributions
@@ -16,21 +15,23 @@
 - Push your change to the forked repository.
 - Create a PR with your change in the repository.
 - Write a good title for the PR.
-  - The title will be used for changelog.
 - Include the reason and relevant issue link(s) if exists.
-- Changelog in CHANGELOG.md is now replaced by PR title.
+- Add an entry under `## [Unreleased]` in CHANGELOG.md for user-visible changes.
 - Make sure if Checks in your PR are green.
 
 ### Setup development environment
 
-1. Fork the repository: e.g.:
-   - `git clone https://github.com/geminabox/geminabox.git` or
-   - `gh repo clone geminabox/geminabox`
-   - open a Codespace workspace at https://github.dev/geminabox/geminabox
-2. Prepare Ruby 3.1, RubyGems 3.3, and Bundler 2.3.
+1. Fork and clone the repository: e.g.:
+   - `gh repo fork geminabox/geminabox --clone` or
+   - fork on GitHub, then `git clone` your fork
+2. Prepare Ruby 3.0 or newer (CI tests 3.0 through 4.0) and RubyGems 3.2.3 or newer.
 3. Retrieve all dependencies with `bundle install`.
 4. Change code whatever you want.
-5. Test with `bundle exec rake test`.
+5. Run the same checks as CI:
+   - `bundle exec rake test`
+   - `bundle exec rubocop`
+   - `bundle exec rake test:conformance` if you touch the compact index
+   - `npx prettier@3.9.5 --trailing-comma none --check public/**/*.js public/**/*.css` if you touch JS or CSS
 
 ## First contribution?
 
