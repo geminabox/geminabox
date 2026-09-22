@@ -186,15 +186,15 @@ end
 ```
 
 Typically you might use this to push a notification to your team chat. Any
-exceptions which occur within the hook is silently ignored, so please ensure they
-are handled properly if this is not desirable.
+exceptions raised within the hook are silently ignored, so handle them
+yourself if that is not what you want.
 
 Also, please note that this hook blocks `POST /upload` and `POST /api/v1/gems` APIs processing.
-Hook authors are responsible to perform any action non-blocking/async to avoid HTTP timeout.
+Hook authors are responsible for making slow work non-blocking/async to avoid HTTP timeouts.
 
 ## Client Usage
 
-Since version 0.10, Geminabox supports the standard gemcutter push API:
+Geminabox supports the standard gemcutter push API:
 
     gem push pkg/my-awesome-gem-1.0.gem --host HOST
 
@@ -204,7 +204,7 @@ You can also use the gem plugin:
 
     gem inabox pkg/my-awesome-gem-1.0.gem
 
-And since version 1.2.0, Geminabox supports the standard gemcutter yank API:
+And the standard gemcutter yank API:
 
     gem yank my-awesome-gem -v 1.0 --host HOST
 
@@ -226,15 +226,18 @@ Simples!
         -c, --configure                  Configure GemInABox
         -g, --host HOST                  Host to upload to.
         -o, --overwrite                  Overwrite Gem.
+        -p, --port                       Sets port
 
 
       Common Options:
         -h, --help                       Get help on this command
         -V, --[no-]verbose               Set the verbose level of output
-        -q, --quiet                      Silence commands
+        -q, --quiet                      Silence command progress meter
+            --silent                     Silence RubyGems output
             --config-file FILE           Use this config file instead of default
             --backtrace                  Show stack backtrace on errors
             --debug                      Turn on Ruby debugging
+            --norc                       Avoid loading any .gemrc file
 
 
       Arguments:
@@ -292,7 +295,10 @@ gems when the container is replaced; without it they are lost.
 
 ## Running the tests
 
-Running `rake` will run the complete test suite.
+Running `rake` runs the unit, request, and integration tests.
+`rake test:conformance` runs the RubyGems compact-index conformance suite
+separately. See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full set of checks
+CI runs.
 
 The test suite uses
 [minitest-reporters](https://github.com/minitest-reporters/minitest-reporters)
