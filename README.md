@@ -7,11 +7,11 @@
 [![Code Climate](https://codeclimate.com/github/geminabox/geminabox/badges/gpa.svg)](https://codeclimate.com/github/geminabox/geminabox)
 
 Geminabox lets you host your own gems, and push new gems to it just like with rubygems.org.
-The bundler dependencies API is supported out of the box.
+Bundler finds your gems through the [compact index](#compact-index), with no client configuration.
 Authentication is left up to either the web server, or the Rack stack.
-For basic auth, try [Rack::Auth](http://www.rubydoc.info/github/rack/rack/Rack/Auth/Basic).
+For basic auth, try [Rack::Auth::Basic](https://rubydoc.info/gems/rack/Rack/Auth/Basic).
 
-![screen shot](http://pics.tomlea.co.uk/bbbba6/geminabox.png)
+![Geminabox web UI listing hosted gems with install commands](docs/screenshot.png)
 
 ## System Requirements
 
