@@ -20,7 +20,10 @@ For basic auth, try [Rack::Auth](http://www.rubydoc.info/github/rack/rack/Rack/A
 
 ## Server Setup
 
-    gem install geminabox
+    gem install geminabox rackup webrick
+
+`rackup` and a Rack server are separate gems on Ruby 3.0+ with Rack 3.
+WEBrick is used here; any Rack server works.
 
 Create a config.ru as follows:
 
@@ -39,7 +42,7 @@ Create a config.ru as follows:
 
     run Geminabox::Server
 
-Start your gem server with 'rackup' to run WEBrick or hook up the config.ru as you normally would ([passenger](https://www.phusionpassenger.com/), [thin](http://code.macournoyer.com/thin/), [unicorn](https://bogomips.org/unicorn/), whatever floats your boat).
+Start your gem server with `rackup`, or hook up the config.ru as you normally would ([passenger](https://www.phusionpassenger.com/), [puma](https://puma.io/), [unicorn](https://yhbt.net/unicorn/), whatever floats your boat).
 
 ## Using Geminabox alongside rubygems.org
 
