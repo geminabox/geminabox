@@ -6,7 +6,9 @@ WORKDIR /usr/src/app
 COPY . /usr/src/app
 RUN bundle install
 
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /usr/src/app
+# data/ must exist before the chown so a named volume mounted there
+# inherits appuser ownership instead of root's.
+RUN mkdir -p /usr/src/app/data && useradd -m -u 1000 appuser && chown -R appuser:appuser /usr/src/app
 USER appuser
 
 EXPOSE 9292

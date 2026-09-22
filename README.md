@@ -258,9 +258,17 @@ Using Gem in a Box is really simple with the Dockerfile.  Move this Dockerfile i
 That directory only needs to contain:
 
 ```
-config.ru (explained above)
+config.ru
 Gemfile
 Gemfile.lock
+```
+
+Use the config.ru from [Server Setup](#server-setup), with the data directory
+set to the path the image prepares for it (the container runs as a non-root
+user and cannot create directories elsewhere):
+
+```ruby
+Geminabox.data = "/usr/src/app/data"
 ```
 
 Your Gemfile only needs:
@@ -280,10 +288,11 @@ docker build -t geminabox .
 ```
 
 ```
-docker run -d -p 9292:9292 geminabox:latest
+docker run -d -p 9292:9292 -v geminabox-data:/usr/src/app/data geminabox:latest
 ```
 
-Your server should now be running!
+Your server should now be running! The `geminabox-data` volume keeps your
+gems when the container is replaced; without it they are lost.
 
 
 ## Running the tests
