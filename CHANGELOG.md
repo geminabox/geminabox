@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [4.0.0] - 2026-09-22
 
 ### Breaking Changes
 - **RubyGems proxy removed.** Proxy mode (`RUBYGEMS_PROXY` env /
@@ -40,10 +40,51 @@
   rebuilds it from the stored gems on the next request. See the "Compact
   index" section of the README for reverse-proxy caveats and the behavior when
   a published version is replaced.
+- **Web UI refresh.** Card layout, a copy-to-clipboard button on each
+  install command, a permalink anchor on each gem card, and
+  always-visible download/delete buttons.
+  ([#747](https://github.com/geminabox/geminabox/pull/747))
+
+### Changed
+- GET responses now set an explicit content type: HTML for pages,
+  `application/atom+xml` for `/atom.xml`, JSON for
+  `/api/v1/dependencies.json`, and `application/octet-stream` for
+  `/api/v1/dependencies`. Previously all were served as `text/html`.
+  (thanks to Joseph Haig, @jrmhaig,
+  [#736](https://github.com/geminabox/geminabox/pull/736))
+- Deleting a version now asks for confirmation in a dialog that names the
+  exact version and platform being removed, replacing the browser's
+  generic `confirm()` prompt.
+  ([#747](https://github.com/geminabox/geminabox/pull/747))
+- `rss` is now a runtime dependency (see Fixed).
+- The web UI no longer recommends `gem sources -a`, which added the server
+  as a global RubyGems source. It shows a Gemfile `source` block for the
+  server, and each version row offers a `gem "name", "~> X.Y.Z"` line to
+  paste into it. Credentials go in `bundle config` instead of the URL.
 
 ### Fixed
 - Yanking a version now removes only the requested platform build instead of
   every build of that version number.
+- The Atom feed (`/atom.xml`) raised an error for any server with gems
+  unless something else had loaded the `rss` gem, which provides the
+  `Time#w3cdtf` it uses. `rss` left Ruby's default gems in 3.0.
+  ([#736](https://github.com/geminabox/geminabox/pull/736))
+- Deleting from a gem's detail page (`/gems/<name>`) submitted without any
+  confirmation prompt.
+  ([#747](https://github.com/geminabox/geminabox/pull/747))
+- The "Back to Gem Index" link sent users to the host root when Geminabox
+  is mounted under a sub-path (e.g. `Rack::URLMap` at `/gems`).
+  ([#747](https://github.com/geminabox/geminabox/pull/747))
+- Docker: pushes failed with a 500 when following the README, because the
+  container runs as a non-root user that could not create the configured
+  data directory, and a named volume mounted on it came up owned by root.
+  The image now creates `/usr/src/app/data` for that user, and the README
+  sets that path and mounts a volume on it so gems survive container
+  replacement.
+
+### Internal
+- CI: RuboCop and the RubyGems compact-index conformance suite now run on
+  every push and PR; Prettier pinned to 3.9.5.
 
 
 ## [3.1.0] - 2026-06-02
