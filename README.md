@@ -4,8 +4,6 @@
 
 [![Ruby](https://github.com/geminabox/geminabox/actions/workflows/ruby.yml/badge.svg)](https://github.com/geminabox/geminabox/actions/workflows/ruby.yml?query=branch%3Amaster)
 [![Gem Version](https://badge.fury.io/rb/geminabox.svg)](http://badge.fury.io/rb/geminabox)
-[![Code Climate](https://codeclimate.com/github/geminabox/geminabox/badges/gpa.svg)](https://codeclimate.com/github/geminabox/geminabox)
-
 Geminabox lets you host your own gems, and push new gems to it just like with rubygems.org.
 Bundler finds your gems through the [compact index](#compact-index), with no client configuration.
 Authentication is left up to either the web server, or the Rack stack.
