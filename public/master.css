@@ -26,6 +26,8 @@ a:hover {
 
 code {
   font-family: "JetBrains Mono", ui-monospace, monospace;
+  /* JetBrains Mono otherwise draws "~>" as an arrow glyph. */
+  font-variant-ligatures: none;
 }
 
 form {
@@ -78,6 +80,11 @@ code.command {
   padding: 12px 16px;
   line-height: 1.9;
   overflow-x: auto;
+}
+
+code.command.snippet {
+  text-align: left;
+  white-space: pre;
 }
 
 .upload-link {

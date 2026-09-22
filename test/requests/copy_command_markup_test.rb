@@ -23,7 +23,7 @@ class CopyCommandMarkupTest < Minitest::Test
     Nokogiri::HTML(last_response.body)
   end
 
-  test "each version row offers a copy button next to its install command" do
+  test "each version row offers a copy button next to its Gemfile line" do
     ["/", "/gems/foo"].each do |path|
       get path
       rows = doc.css(".version-row")
