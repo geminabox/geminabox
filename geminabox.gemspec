@@ -10,7 +10,6 @@ Gem::Specification.new do |s|
   s.homepage          = "https://github.com/geminabox/geminabox"
 
   s.metadata["homepage_uri"]    = s.homepage
-  s.metadata["source_code_uri"] = "https://github.com/geminabox/geminabox"
   s.metadata["changelog_uri"]   = "https://github.com/geminabox/geminabox/releases"
 
   s.required_ruby_version     = ">= 3.0.0"
