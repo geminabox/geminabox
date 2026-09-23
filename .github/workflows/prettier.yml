@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ master ]
 
+permissions:
+  contents: read
+
 jobs:
   prettier:
     runs-on: ubuntu-22.04
@@ -14,5 +17,5 @@ jobs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Prettier JS
       run: |
-        npm install prettier@3.9.5
+        npm install --ignore-scripts prettier@3.9.5
         npx prettier --trailing-comma none --check public/**/*.js public/**/*.css
