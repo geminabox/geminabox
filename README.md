@@ -4,14 +4,12 @@
 
 [![Ruby](https://github.com/geminabox/geminabox/actions/workflows/ruby.yml/badge.svg)](https://github.com/geminabox/geminabox/actions/workflows/ruby.yml?query=branch%3Amaster)
 [![Gem Version](https://badge.fury.io/rb/geminabox.svg)](http://badge.fury.io/rb/geminabox)
-[![Code Climate](https://codeclimate.com/github/geminabox/geminabox/badges/gpa.svg)](https://codeclimate.com/github/geminabox/geminabox)
-
 Geminabox lets you host your own gems, and push new gems to it just like with rubygems.org.
-The bundler dependencies API is supported out of the box.
+Bundler finds your gems through the [compact index](#compact-index), with no client configuration.
 Authentication is left up to either the web server, or the Rack stack.
-For basic auth, try [Rack::Auth](http://www.rubydoc.info/github/rack/rack/Rack/Auth/Basic).
+For basic auth, try [Rack::Auth::Basic](https://rubydoc.info/gems/rack/Rack/Auth/Basic).
 
-![screen shot](http://pics.tomlea.co.uk/bbbba6/geminabox.png)
+![Geminabox web UI listing hosted gems with install commands](docs/screenshot.png)
 
 ## System Requirements
 
@@ -20,7 +18,10 @@ For basic auth, try [Rack::Auth](http://www.rubydoc.info/github/rack/rack/Rack/A
 
 ## Server Setup
 
-    gem install geminabox
+    gem install geminabox rackup webrick
+
+`rackup` and a Rack server are separate gems on Ruby 3.0+ with Rack 3.
+WEBrick is used here; any Rack server works.
 
 Create a config.ru as follows:
 
@@ -39,7 +40,7 @@ Create a config.ru as follows:
 
     run Geminabox::Server
 
-Start your gem server with 'rackup' to run WEBrick or hook up the config.ru as you normally would ([passenger](https://www.phusionpassenger.com/), [thin](http://code.macournoyer.com/thin/), [unicorn](https://bogomips.org/unicorn/), whatever floats your boat).
+Start your gem server with `rackup`, or hook up the config.ru as you normally would ([passenger](https://www.phusionpassenger.com/), [puma](https://puma.io/), [unicorn](https://yhbt.net/unicorn/), whatever floats your boat).
 
 ## Using Geminabox alongside rubygems.org
 
@@ -143,38 +144,33 @@ off the check with `bundle config set --local disable_checksum_validation true`.
 The clean fix is to bump the version instead of replacing it; treat `-o` as a
 convenience for a private box whose gems nobody has locked yet.
 
-## HTTP adapter
+## HTTP client
 
-Geminabox uses the HTTPClient gem to manage its connections to remote resources.
-The relationship is managed via Geminabox::HttpClientAdapter.
+The Geminabox server makes no outbound HTTP requests. The `gem inabox`
+client uploads gems with the [HTTPClient](https://github.com/nahi/httpclient)
+gem, which honors the `http_proxy` / `HTTP_PROXY` environment variables.
 
-To configure options of HTTPClient, pass your own HTTPClient object in config.ru as:
+If you drive `GeminaboxClient` from Ruby (a Rake task, say), you can configure
+its HTTP layer through `Geminabox.http_adapter` before creating the client:
 
 ```ruby
+require "geminabox"
+require "geminabox_client"
+
 # Geminabox.http_adapter = Geminabox::HttpClientAdapter.new # default
-Geminabox.http_adapter.http_client = HTTPClient.new(ENV['http_proxy']).tap do |http_client|
-  http_client.transparent_gzip_decompression = true
+Geminabox.http_adapter.http_client = HTTPClient.new.tap do |http_client|
   http_client.keep_alive_timeout = 32 # sec
-  http_client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
-  http_client.send_timeout = 0
-  http_client.receive_timeout = 0
 end
+
+GeminaboxClient.new("https://gems.example.com").push("pkg/my-gem-1.0.0.gem")
 ```
 
-If you would like to use an alternative HTTP gem, create your own adapter
-and specify it in config.ru:
+To use a different HTTP library, subclass `Geminabox::HttpAdapter` and
+implement `post` and `set_auth` (the client's upload path), plus `get` and
+`get_content` for completeness. `Geminabox::TemplateFaradayAdapter` is a
+worked example.
 
     Geminabox.http_adapter = YourHttpAdapter.new
-
-It is recommend (but not essential) that your adapter inherits from HttpAdapter.
-The adapter will need to replace HttpAdapter's methods with those specific to
-the alternative HTTP gem. It should also be able to handle HTTP proxy
-settings.
-
-Defining your own adapter also allows you to configure Geminabox to use the
-local systems SSL certificates.
-
-TemplateFaradayAdapter is provided as an example of an alternative HTTPAdapter.
 
 ## Hooks
 
@@ -188,15 +184,15 @@ end
 ```
 
 Typically you might use this to push a notification to your team chat. Any
-exceptions which occur within the hook is silently ignored, so please ensure they
-are handled properly if this is not desirable.
+exceptions raised within the hook are silently ignored, so handle them
+yourself if that is not what you want.
 
 Also, please note that this hook blocks `POST /upload` and `POST /api/v1/gems` APIs processing.
-Hook authors are responsible to perform any action non-blocking/async to avoid HTTP timeout.
+Hook authors are responsible for making slow work non-blocking/async to avoid HTTP timeouts.
 
 ## Client Usage
 
-Since version 0.10, Geminabox supports the standard gemcutter push API:
+Geminabox supports the standard gemcutter push API:
 
     gem push pkg/my-awesome-gem-1.0.gem --host HOST
 
@@ -206,7 +202,7 @@ You can also use the gem plugin:
 
     gem inabox pkg/my-awesome-gem-1.0.gem
 
-And since version 1.2.0, Geminabox supports the standard gemcutter yank API:
+And the standard gemcutter yank API:
 
     gem yank my-awesome-gem -v 1.0 --host HOST
 
@@ -228,15 +224,18 @@ Simples!
         -c, --configure                  Configure GemInABox
         -g, --host HOST                  Host to upload to.
         -o, --overwrite                  Overwrite Gem.
+        -p, --port                       Sets port
 
 
       Common Options:
         -h, --help                       Get help on this command
         -V, --[no-]verbose               Set the verbose level of output
-        -q, --quiet                      Silence commands
+        -q, --quiet                      Silence command progress meter
+            --silent                     Silence RubyGems output
             --config-file FILE           Use this config file instead of default
             --backtrace                  Show stack backtrace on errors
             --debug                      Turn on Ruby debugging
+            --norc                       Avoid loading any .gemrc file
 
 
       Arguments:
@@ -255,9 +254,17 @@ Using Gem in a Box is really simple with the Dockerfile.  Move this Dockerfile i
 That directory only needs to contain:
 
 ```
-config.ru (explained above)
+config.ru
 Gemfile
 Gemfile.lock
+```
+
+Use the config.ru from [Server Setup](#server-setup), with the data directory
+set to the path the image prepares for it (the container runs as a non-root
+user and cannot create directories elsewhere):
+
+```ruby
+Geminabox.data = "/usr/src/app/data"
 ```
 
 Your Gemfile only needs:
@@ -277,15 +284,19 @@ docker build -t geminabox .
 ```
 
 ```
-docker run -d -p 9292:9292 geminabox:latest
+docker run -d -p 9292:9292 -v geminabox-data:/usr/src/app/data geminabox:latest
 ```
 
-Your server should now be running!
+Your server should now be running! The `geminabox-data` volume keeps your
+gems when the container is replaced; without it they are lost.
 
 
 ## Running the tests
 
-Running `rake` will run the complete test suite.
+Running `rake` runs the unit, request, and integration tests.
+`rake test:conformance` runs the RubyGems compact-index conformance suite
+separately. See [CONTRIBUTING.md](./CONTRIBUTING.md) for the full set of checks
+CI runs.
 
 The test suite uses
 [minitest-reporters](https://github.com/minitest-reporters/minitest-reporters)

@@ -1,8 +1,12 @@
 <div class="intro">
-  <p class="hint">If you did not need any credentials to get to this page</p>
-  <code class="command">gem sources -a <%= url "/" %></code>
-  <p class="hint">If you needed some credentials to get to this page</p>
-  <code class="command">gem sources -a <%= url.to_s.gsub('://','://username:password@') %></code>
+  <p class="hint">Add this server to your Gemfile, then paste gem lines from below into the block</p>
+  <code class="command snippet">source "<%= h(url("/")) %>" do
+  gem "..."
+end</code>
+  <p class="hint">If you needed credentials to get to this page</p>
+  <code class="command">bundle config set --global <%= h(URI(url("/")).host) %> username:password</code>
+  <p class="hint">Without Bundler</p>
+  <code class="command">gem install GEMNAME --source <%= h(url("/")) %></code>
   <% if @allow_upload %>
   <p class="hint">and then ...</p>
   <code class="command">gem install geminabox<br />gem inabox [gemfile]</code>
@@ -27,22 +31,7 @@
         </div>
         <div class="card-body">
           <% versions.each.reverse_each.first(5).each do |version| %>
-            <div class="version-row">
-              <code>gem install <%= h(version.name) %><%= " --prerelease" if version.number.to_s.match(/[a-z]/i) %> -v "<%= h(version.number) %>"</code>
-              <% unless version.platform =~ /^ruby/i %>
-                <small class="platform"><%= h(version.platform) %></small>
-              <% end %>
-              <div class="actions">
-                <button type="button" class="copy-command" title="Copy install command" aria-label="Copy install command"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"></rect><rect x="4" y="4" width="11" height="11" rx="2"></rect></svg></button>
-                <a class="download" href="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>">download</a>
-                <% if @allow_delete %>
-                <form class="delete-form" method="post" action="<%= h(url("/gems/#{version.gemfile_name}.gem")) %>" data-gem-name="<%= h(version.name) %>" data-version="<%= h(version.number) %>" data-platform="<%= h(version.platform) %>">
-                  <input type="hidden" name="_method" value="DELETE" />
-                  <button type="submit">delete</button>
-                </form>
-                <% end %>
-              </div>
-            </div>
+            <%= erb :_version_row, layout: false, locals: { version: version } %>
           <% end %>
 
           <% if versions.count > 5 %>

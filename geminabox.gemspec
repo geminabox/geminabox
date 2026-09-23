@@ -4,13 +4,12 @@ Gem::Specification.new do |s|
   s.name              = 'geminabox'
   s.version           = Geminabox::VERSION
   s.summary           = 'Really simple private RubyGems hosting'
-  s.description       = 'A private gem hosting and/or caching app, with client side gem push style functionality. Web UI is provided.'
+  s.description       = 'A private gem hosting app, with client side gem push style functionality. Web UI is provided.'
   s.authors           = ['Tom Lea', 'Jack Foy', 'Rob Nichols', 'Naotoshi Seo', "Takuya Noguchi"]
   s.email             = ['contrib@tomlea.co.uk', 'jack@foys.net', 'rob@undervale.co.uk', 'sonots@gmail.com', "takninnovationresearch@gmail.com"]
   s.homepage          = "https://github.com/geminabox/geminabox"
 
   s.metadata["homepage_uri"]    = s.homepage
-  s.metadata["source_code_uri"] = "https://github.com/geminabox/geminabox"
   s.metadata["changelog_uri"]   = "https://github.com/geminabox/geminabox/releases"
 
   s.required_ruby_version     = ">= 3.0.0"
