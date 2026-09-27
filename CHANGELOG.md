@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.1.1] - 2026-09-27
+
+### Security
+- **Uploaded gem names are validated before they become a path**
+  ([GHSA-rxr4-84rf-f47h](https://github.com/geminabox/geminabox/security/advisories/GHSA-rxr4-84rf-f47h)).
+  The destination file name was built from the name inside the uploaded
+  gem's spec, which RubyGems does not validate on read, so a crafted gem
+  named `../../x` could be written outside `Geminabox.data/gems` by anyone
+  able to upload. Uploads whose name does not match RubyGems' own name rule
+  are now rejected with a 400. (thanks to @NotAFlightRisk)
+- Gem downloads, `DELETE /gems/*.gem` and the RubyGems proxy's file
+  handling now refuse any path that resolves outside `Geminabox.data`,
+  rather than relying on `Rack::Protection::PathTraversal` alone. That
+  middleware is on by default, so default deployments were not exposed.
+  (#770)
+
 ## [3.1.0] - 2026-06-02
 
 ### Deprecated
