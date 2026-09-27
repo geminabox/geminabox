@@ -49,6 +49,24 @@ class PathContainmentTest < Minitest::Test
     refute File.exist?(File.join(TEST_DATA_DIR, 'evil-1.0.0.gem')), 'upload must not land outside the gems dir'
   end
 
+  test 'Proxy::Hostess refuses to serve a gem outside the data dir' do
+    @app = Geminabox::Proxy::Hostess.new!
+    get @traversal
+
+    assert_equal 404, last_response.status
+    refute_includes last_response.body, 'secret'
+  end
+
+  test 'Proxy::Hostess refuses to copy a gemspec from outside the data dir' do
+    File.write(File.join(TEST_DATA_DIR, 'data-outside.gemspec.rz'), 'secret')
+    @app = Geminabox::Proxy::Hostess.new!
+    get '/quick/Marshal.4.8/../../../data-outside.gemspec.rz'
+
+    assert_equal 404, last_response.status
+    refute_includes last_response.body, 'secret'
+    refute File.exist?(File.join(Geminabox.data, 'data-outside.gemspec.rz')), 'nothing may be copied in'
+  end
+
   test 'DELETE /gems still deletes a gem inside the data dir' do
     inject_gems { |builder| builder.gem 'jem', version: '1.0.0' }
     @app = Geminabox::Server.new!

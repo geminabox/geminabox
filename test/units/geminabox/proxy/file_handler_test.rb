@@ -50,6 +50,14 @@ module Geminabox
         end
       end
 
+      def test_rejects_a_file_name_that_escapes_the_data_dir
+        outside = File.join(TEST_DATA_DIR, '..', 'geminabox-escape-dir')
+        assert_raises ArgumentError do
+          FileHandler.new '../geminabox-escape-dir/x'
+        end
+        refute Dir.exist?(outside), 'no directory may be created outside the data dir'
+      end
+
       private
       def file_handler
         @file_handler ||= FileHandler.new 'foo/bar'

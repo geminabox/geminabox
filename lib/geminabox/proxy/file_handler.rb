@@ -8,6 +8,11 @@ module Geminabox
 
       def initialize(file_name)
         @file_name = file_name
+        # file_name comes from the request path; both paths get mkdir_p and writes.
+        root = File.expand_path(root_path) + File::SEPARATOR
+        unless local_path.start_with?(root) && proxy_path.start_with?(root)
+          raise ArgumentError, "#{file_name} resolves outside #{root_path}"
+        end
         ensure_destination_exists
       end
 

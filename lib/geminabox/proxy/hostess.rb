@@ -14,7 +14,7 @@ module Geminabox
         if file_handler
           send_file file_handler.proxy_path
         else
-          send_file(File.expand_path(File.join(Geminabox.data, *request.path_info)), :type => response['Content-Type'])
+          send_file(data_path, :type => response['Content-Type'])
         end
       end
 
@@ -53,9 +53,7 @@ module Geminabox
       private
       def get_from_rubygems_if_not_local
 
-        file = File.expand_path(File.join(Geminabox.data, *request.path_info))
-
-        unless File.exist?(file)
+        unless File.exist?(data_path)
           ruby_gems_url = Geminabox.ruby_gems_url
           path = File.join(ruby_gems_url, *request.path_info)
           content = Geminabox.http_adapter.get_content(path)
@@ -70,6 +68,15 @@ module Geminabox
 
       def copy_file(file_name)
         self.file_handler = Copier.copy(file_name)
+      rescue ArgumentError
+        halt 404
+      end
+
+      # Rack::Protection normally strips ".." first; this holds without it.
+      def data_path
+        path = File.expand_path(File.join(Geminabox.data, *request.path_info))
+        halt 404 unless path.start_with?(File.expand_path(Geminabox.data) + File::SEPARATOR)
+        path
       end
 
 
