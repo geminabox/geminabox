@@ -9,7 +9,10 @@ module Geminabox
 
     def serve
       headers["Cache-Control"] = 'no-transform'
-      send_file(File.expand_path(File.join(Geminabox.data, *request.path_info)), :type => response['Content-Type'])
+      path = File.expand_path(File.join(Geminabox.data, *request.path_info))
+      # Rack::Protection normally strips ".." first; this holds without it.
+      halt 404 unless path.start_with?(File.expand_path(Geminabox.data) + File::SEPARATOR)
+      send_file(path, :type => response['Content-Type'])
     end
 
     %w[/specs.4.8.gz

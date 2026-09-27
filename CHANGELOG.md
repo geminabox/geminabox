@@ -1,5 +1,28 @@
 # Changelog
 
+## [Unreleased]
+
+## [4.0.1] - 2026-09-27
+
+### Security
+- **Uploaded gem names are validated before they become a path**
+  ([GHSA-rxr4-84rf-f47h](https://github.com/geminabox/geminabox/security/advisories/GHSA-rxr4-84rf-f47h)).
+  The destination file name was built from the name inside the uploaded
+  gem's spec, which RubyGems does not validate on read, so a crafted gem
+  named `../../x` could be written outside `Geminabox.data/gems` by anyone
+  able to upload. Uploads whose name does not match RubyGems' own name rule
+  are now rejected with a 400. (thanks to @NotAFlightRisk)
+- Gem downloads and `DELETE /gems/*.gem` now return 404 for any path that
+  resolves outside `Geminabox.data`, rather than relying on
+  `Rack::Protection::PathTraversal` alone. That middleware is on by
+  default, so default deployments were not exposed. (#770)
+
+### Internal
+- CI: pinned `actions/stale` to a commit SHA, stopped persisting the
+  checkout token, and hardened the Prettier workflow (read-only token, no
+  npm install scripts, runs the installed `prettier` instead of `npx`).
+  (#763, #765, #766, #767)
+
 ## [4.0.0] - 2026-09-22
 
 ### Breaking Changes
