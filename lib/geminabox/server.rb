@@ -174,8 +174,9 @@ module Geminabox
         error_response(403, 'Gem deletion is disabled - see https://github.com/geminabox/geminabox/issues/115')
       end
 
+      path = file_path
       serialize_update do
-        File.delete file_path if File.exist? file_path
+        File.delete path if File.exist? path
         self.class.reindex(:force_rebuild)
         redirect url("/")
       end
@@ -309,7 +310,10 @@ HTML
     end
 
     def file_path
-      File.expand_path(File.join(Geminabox.data, *request.path_info))
+      path = File.expand_path(File.join(Geminabox.data, *request.path_info))
+      # Rack::Protection normally strips ".." first; this holds without it.
+      halt 404 unless path.start_with?(File.expand_path(Geminabox.data) + File::SEPARATOR)
+      path
     end
 
     def dependency_cache
