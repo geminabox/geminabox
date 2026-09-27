@@ -40,6 +40,15 @@ class PathContainmentTest < Minitest::Test
     assert File.exist?(@outside), 'file outside the data dir must survive'
   end
 
+  test 'POST /api/v1/gems refuses a gem whose name escapes the gems dir' do
+    evil = build_gem_named('../../evil')
+    @app = Geminabox::Server.new!
+    post '/api/v1/gems', File.binread(evil), 'CONTENT_TYPE' => 'application/octet-stream'
+
+    assert_equal 400, last_response.status
+    refute File.exist?(File.join(TEST_DATA_DIR, 'evil-1.0.0.gem')), 'upload must not land outside the gems dir'
+  end
+
   test 'DELETE /gems still deletes a gem inside the data dir' do
     inject_gems { |builder| builder.gem 'jem', version: '1.0.0' }
     @app = Geminabox::Server.new!
@@ -47,5 +56,20 @@ class PathContainmentTest < Minitest::Test
 
     assert_equal 302, last_response.status
     refute File.exist?(File.join(Geminabox.data, 'gems', 'jem-1.0.0.gem'))
+  end
+
+  private
+
+  # A client can craft the archive directly; skip_validation stands in for that.
+  def build_gem_named(name)
+    spec = Gem::Specification.new do |s|
+      s.name = name
+      s.version = '1.0.0'
+      s.summary = 'x'
+      s.authors = ['x']
+    end
+    path = File.join(TEST_DATA_DIR, 'crafted.gem')
+    silence { Gem::Package.build(spec, true, false, path) }
+    path
   end
 end

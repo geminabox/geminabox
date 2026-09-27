@@ -17,6 +17,24 @@ module Geminabox
       assert subject.valid?
     end
 
+    test "#valid? rejects a gem name that is not a valid RubyGems name" do
+      ["../../evil", "a/b", "a\\b"].each do |bad_name|
+        spec = Gem::Specification.new do |s|
+          s.name = bad_name
+          s.version = "1.0.0"
+          s.summary = "x"
+          s.authors = ["x"]
+        end
+        Dir.mktmpdir do |dir|
+          path = File.join(dir, "crafted.gem")
+          silence { Gem::Package.build(spec, true, false, path) }
+          subject = File.open(path, "rb") { |f| Geminabox::IncomingGem.new(f) }
+
+          refute subject.valid?, "expected #{bad_name.inspect} to be rejected"
+        end
+      end
+    end
+
     test "#spec" do
       file = File.open(GemFactory.gem_file(:example))
       subject = Geminabox::IncomingGem.new(file)

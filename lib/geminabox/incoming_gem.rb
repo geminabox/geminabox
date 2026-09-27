@@ -26,8 +26,12 @@ module Geminabox
       File.open(@tempfile.path, "rb")
     end
 
+    # spec comes from the uploaded archive and RubyGems does not validate it on
+    # read, so the name must be checked before it becomes part of a path.
     def valid?
-      spec && spec.name && spec.version
+      spec && spec.name && spec.version &&
+        spec.name.match?(Gem::Specification::VALID_NAME_PATTERN) &&
+        File.basename(name) == name
     rescue Gem::Package::Error
       false
     end
