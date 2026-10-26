@@ -17,7 +17,7 @@ jobs:
       with:
         persist-credentials: false
     - name: Set up Ruby 3.1
-      uses: ruby/setup-ruby@e8944e80fb94b20106697132f8c20c665fab29e9 # v1.325.0
+      uses: ruby/setup-ruby@26e5b7d197ebf60545ee9667bcbace0be11ccaec # v1.334.0
       with:
         ruby-version: 3.1.2
 
