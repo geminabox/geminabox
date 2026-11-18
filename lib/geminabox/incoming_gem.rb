@@ -3,6 +3,10 @@
 module Geminabox
 
   class IncomingGem
+    CANONICAL_VERSION = /\A#{Gem::Version::VERSION_PATTERN}\z/
+    PLATFORM_CHARS = /\A[a-zA-Z0-9_.-]+\z/
+    private_constant :CANONICAL_VERSION, :PLATFORM_CHARS
+
     def initialize(gem_data, root_path = Geminabox.data)
       unless gem_data.respond_to? :read
         raise ArgumentError, "Expected an instance of IO"
@@ -34,7 +38,9 @@ module Geminabox
         File.basename(name) == name &&
         loadable_version?(spec.version) &&
         indexable_platform? &&
-        spec.dependencies.all? { |dep| valid_dependency?(dep) }
+        spec.dependencies.all? { |dep| valid_dependency?(dep) } &&
+        valid_requirement?(spec.required_ruby_version) &&
+        valid_requirement?(spec.required_rubygems_version)
     rescue Gem::Package::Error
       false
     end
@@ -64,16 +70,32 @@ module Geminabox
     private
 
     # Gem::Version re-parses its string on Marshal.load, so one bad version in
-    # the specs index makes every later load of the index raise.
+    # the specs index makes every later load of the index raise. The string is
+    # also written raw into filenames and compact-index lines, so whitespace
+    # that Gem::Version.correct? tolerates (and Gem::Version.new strips) is
+    # rejected too.
     def loadable_version?(version)
-      version.is_a?(Gem::Version) && Gem::Version.correct?(version.version)
+      version.is_a?(Gem::Version) && version.version.is_a?(String) &&
+        version.version.match?(CANONICAL_VERSION)
     end
 
     # The gem is stored under its normalised platform, but the indexer records
     # the original string, so a legacy alias (i686-linux, mswin32, jruby)
     # points clients at a file that does not exist.
     def indexable_platform?
-      spec.original_platform.is_a?(String) && name == "#{spec.original_name}.gem"
+      spec.original_platform.is_a?(String) &&
+        spec.original_platform.match?(PLATFORM_CHARS) &&
+        name == "#{spec.original_name}.gem"
+    end
+
+    # nil is what an older spec without the field reads back as.
+    def valid_requirement?(requirement)
+      return true if requirement.nil?
+
+      requirement.is_a?(Gem::Requirement) &&
+        requirement.requirements.all? do |op, version|
+          Gem::Requirement::OPS.key?(op) && loadable_version?(version)
+        end
     end
 
     # Dependency names and requirements are written verbatim into the
@@ -82,9 +104,7 @@ module Geminabox
       dep_name = dep.name.is_a?(Array) ? dep.name.first : dep.name
       dep_name.is_a?(String) &&
         dep_name.match?(Gem::Specification::VALID_NAME_PATTERN) &&
-        dep.requirement.requirements.all? do |op, version|
-          Gem::Requirement::OPS.key?(op) && loadable_version?(version)
-        end
+        valid_requirement?(dep.requirement)
     end
   end
 

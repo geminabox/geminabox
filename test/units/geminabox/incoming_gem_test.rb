@@ -45,6 +45,54 @@ module Geminabox
       refute subject.valid?
     end
 
+    test "#valid? rejects a version carrying whitespace that Gem::Version.new would have stripped" do
+      ["1.0.0\n", "  1.0.0  ", ""].each do |raw|
+        subject = crafted_gem do |s|
+          bad = Gem::Version.allocate
+          bad.instance_variable_set(:@version, raw)
+          s.instance_variable_set(:@version, bad)
+        end
+
+        refute subject.valid?, "expected version #{raw.inspect} to be rejected"
+      end
+    end
+
+    test "#valid? accepts prerelease versions" do
+      %w[1.0.0.pre 1.0.0-rc1 2.0.0.beta.2 0.0.1a].each do |version|
+        subject = crafted_gem { |s| s.version = version }
+
+        assert subject.valid?, "expected version #{version.inspect} to be accepted"
+      end
+    end
+
+    test "#valid? rejects a platform containing a compact-index separator" do
+      subject = crafted_gem { |s| s.platform = "x86,a-linux" }
+
+      refute subject.valid?
+    end
+
+    test "#valid? rejects a malformed required_ruby_version or required_rubygems_version" do
+      bad = Gem::Version.allocate
+      bad.instance_variable_set(:@version, "1|x\ny")
+      [
+        ->(s) { s.required_ruby_version.instance_variable_set(:@requirements, [[">=", bad]]) },
+        ->(s) { s.required_rubygems_version.instance_variable_set(:@requirements, [["|", Gem::Version.new("1")]]) }
+      ].each_with_index do |mutate, i|
+        subject = crafted_gem { |s| mutate.call(s) }
+
+        refute subject.valid?, "expected case #{i} to be rejected"
+      end
+    end
+
+    test "#valid? accepts ordinary required_ruby_version and required_rubygems_version" do
+      subject = crafted_gem do |s|
+        s.required_ruby_version = ">= 3.0"
+        s.required_rubygems_version = ">= 3.2.3"
+      end
+
+      assert subject.valid?
+    end
+
     test "#valid? rejects a platform the index would record under a different filename" do
       %w[i686-linux mswin32 jruby].each do |platform|
         subject = crafted_gem { |s| s.platform = platform }
