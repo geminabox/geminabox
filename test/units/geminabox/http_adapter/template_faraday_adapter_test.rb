@@ -1,7 +1,7 @@
 require_relative '../../../test_helper'
 
 module Geminabox
-  class HttpClientAdapterTest < Minitest::Test
+  class TemplateFaradayAdapterTest < Minitest::Test
 
     def setup
       @default = 'foo bar'

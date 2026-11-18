@@ -36,7 +36,7 @@ module Geminabox
     end
 
     def test_set_auth
-      stub_request(:get, "http://foo:bar@example.com/").
+      stub_request(:get, "http://example.com/").
          with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='}).
          to_return(:status => 200, :body => @default, :headers => {})
 
