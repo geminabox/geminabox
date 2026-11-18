@@ -35,6 +35,92 @@ module Geminabox
       end
     end
 
+    test "#valid? rejects a version that cannot be loaded back from the index" do
+      subject = crafted_gem do |s|
+        bad = Gem::Version.allocate
+        bad.instance_variable_set(:@version, "1.0 x 2")
+        s.instance_variable_set(:@version, bad)
+      end
+
+      refute subject.valid?
+    end
+
+    test "#valid? rejects a platform the index would record under a different filename" do
+      %w[i686-linux mswin32 jruby].each do |platform|
+        subject = crafted_gem { |s| s.platform = platform }
+
+        refute subject.valid?, "expected platform #{platform.inspect} to be rejected"
+      end
+    end
+
+    test "#valid? accepts canonical platforms" do
+      %w[java x86_64-linux x86_64-linux-musl arm64-darwin x64-mingw-ucrt universal-java-11].each do |platform|
+        subject = crafted_gem { |s| s.platform = platform }
+
+        assert subject.valid?, "expected platform #{platform.inspect} to be accepted"
+      end
+    end
+
+    test "#valid? rejects a dependency name that is not a valid RubyGems name" do
+      ["rack\n2.0.0 |checksum:x", "a|b", "a,b", "a:b", "../x"].each do |bad_name|
+        subject = crafted_gem do |s|
+          s.add_dependency "rack"
+          s.dependencies.first.instance_variable_set(:@name, bad_name)
+        end
+
+        refute subject.valid?, "expected dependency #{bad_name.inspect} to be rejected"
+      end
+    end
+
+    test "#valid? accepts the legacy array-wrapped dependency name the compact indexer unwraps" do
+      subject = crafted_gem do |s|
+        s.add_dependency "rack"
+        s.dependencies.first.instance_variable_set(:@name, ["rack"])
+      end
+
+      assert_equal [["rack"]], subject.spec.dependencies.map(&:name)
+      assert subject.valid?
+    end
+
+    test "#valid? rejects a development dependency with an invalid name" do
+      subject = crafted_gem do |s|
+        s.add_development_dependency "rake"
+        s.dependencies.first.instance_variable_set(:@name, "rake\nx")
+      end
+
+      refute subject.valid?
+    end
+
+    test "#valid? rejects a dependency requirement that cannot be parsed" do
+      subject = crafted_gem do |s|
+        s.add_dependency "rack"
+        bad = Gem::Version.allocate
+        bad.instance_variable_set(:@version, "1|x\ny")
+        s.dependencies.first.requirement.instance_variable_set(:@requirements, [[">=", bad]])
+      end
+
+      refute subject.valid?
+    end
+
+    test "#valid? rejects a dependency requirement with an unknown operator" do
+      subject = crafted_gem do |s|
+        s.add_dependency "rack"
+        s.dependencies.first.requirement.instance_variable_set(:@requirements, [["|", Gem::Version.new("1")]])
+      end
+
+      refute subject.valid?
+    end
+
+    test "#valid? accepts ordinary dependencies" do
+      subject = crafted_gem do |s|
+        s.add_dependency "rack", ">= 2.0", "< 4"
+        s.add_dependency "json", "~> 2.7"
+        s.add_development_dependency "minitest"
+      end
+
+      assert subject.valid?
+    end
+
     test "#spec" do
       file = File.open(GemFactory.gem_file(:example))
       subject = Geminabox::IncomingGem.new(file)
@@ -69,6 +155,26 @@ module Geminabox
         subject = Geminabox::IncomingGem.new(file)
 
         assert_equal Digest::SHA1.hexdigest(File.binread(file_name)), subject.hexdigest
+      end
+    end
+
+    private
+
+    # A client can write any spec into the archive; skip_validation and
+    # instance_variable_set stand in for a hand-crafted metadata.gz.
+    def crafted_gem
+      spec = Gem::Specification.new do |s|
+        s.name = "crafted"
+        s.version = "1.0.0"
+        s.summary = "x"
+        s.authors = ["x"]
+        s.files = []
+      end
+      yield spec
+      Dir.mktmpdir do |dir|
+        path = File.join(dir, "crafted.gem")
+        silence { Gem::Package.build(spec, true, false, path) }
+        File.open(path, "rb") { |f| Geminabox::IncomingGem.new(f) }
       end
     end
 

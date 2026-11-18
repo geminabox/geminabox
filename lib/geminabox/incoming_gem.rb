@@ -31,7 +31,10 @@ module Geminabox
     def valid?
       spec && spec.name && spec.version &&
         spec.name.match?(Gem::Specification::VALID_NAME_PATTERN) &&
-        File.basename(name) == name
+        File.basename(name) == name &&
+        loadable_version?(spec.version) &&
+        indexable_platform? &&
+        spec.dependencies.all? { |dep| valid_dependency?(dep) }
     rescue Gem::Package::Error
       false
     end
@@ -56,6 +59,32 @@ module Geminabox
 
     def hexdigest
       @sha1
+    end
+
+    private
+
+    # Gem::Version re-parses its string on Marshal.load, so one bad version in
+    # the specs index makes every later load of the index raise.
+    def loadable_version?(version)
+      version.is_a?(Gem::Version) && Gem::Version.correct?(version.version)
+    end
+
+    # The gem is stored under its normalised platform, but the indexer records
+    # the original string, so a legacy alias (i686-linux, mswin32, jruby)
+    # points clients at a file that does not exist.
+    def indexable_platform?
+      spec.original_platform.is_a?(String) && name == "#{spec.original_name}.gem"
+    end
+
+    # Dependency names and requirements are written verbatim into the
+    # line-oriented compact index and Marshalled into the specs index.
+    def valid_dependency?(dep)
+      dep_name = dep.name.is_a?(Array) ? dep.name.first : dep.name
+      dep_name.is_a?(String) &&
+        dep_name.match?(Gem::Specification::VALID_NAME_PATTERN) &&
+        dep.requirement.requirements.all? do |op, version|
+          Gem::Requirement::OPS.key?(op) && loadable_version?(version)
+        end
     end
   end
 
