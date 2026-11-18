@@ -1,4 +1,5 @@
 require_relative '../../test_helper'
+require 'minitest/mock'
 module Geminabox
   class IncomingGemTest < Minitest::Test
 
@@ -169,6 +170,67 @@ module Geminabox
       assert subject.valid?
     end
 
+    test "#valid? rejects metadata larger than max_metadata_size" do
+      with_max_metadata_size(64 * 1024) do
+        subject = crafted_gem { |s| s.description = "x" * (65 * 1024) }
+
+        refute_parses_yaml { refute subject.valid? }
+      end
+    end
+
+    test "#valid? accepts metadata under max_metadata_size" do
+      with_max_metadata_size(64 * 1024) do
+        subject = crafted_gem { |s| s.description = "x" * (32 * 1024) }
+
+        assert subject.valid?
+      end
+    end
+
+    test "max_metadata_size defaults to 1 MiB" do
+      assert_equal 1024 * 1024, Geminabox.max_metadata_size
+    end
+
+    test "#valid? applies no cap of its own when max_metadata_size is nil" do
+      with_max_metadata_size(nil) do
+        subject = crafted_gem { |s| s.description = "x" * (2 * 1024 * 1024) }
+
+        assert subject.valid?
+      end
+    end
+
+    # RubyGems parses every metadata entry before it complains about the
+    # duplicate, so a small first entry must not hide a large second one.
+    test "#valid? checks every metadata entry, not only the first" do
+      with_max_metadata_size(64 * 1024) do
+        small = minimal_spec
+        large = minimal_spec.tap { |s| s.description = "x" * (65 * 1024) }
+        subject = tar_gem(
+          ["metadata.gz", gzip(small.to_yaml)],
+          ["metadata.gz", gzip(large.to_yaml)]
+        )
+
+        refute_parses_yaml { refute subject.valid? }
+      end
+    end
+
+    test "#valid? caps an uncompressed metadata entry too" do
+      with_max_metadata_size(64 * 1024) do
+        spec = minimal_spec.tap { |s| s.description = "x" * (65 * 1024) }
+        subject = tar_gem(["metadata", spec.to_yaml])
+
+        refute_parses_yaml { refute subject.valid? }
+      end
+    end
+
+    test "#valid? bounds a pre-2007 format gem by its file size" do
+      with_max_metadata_size(64 * 1024) do
+        old_format = "MD5SUM = 0\n---\ndescription: #{'x' * (65 * 1024)}\n"
+        subject = Geminabox::IncomingGem.new(StringIO.new(old_format))
+
+        refute_parses_yaml { refute subject.valid? }
+      end
+    end
+
     test "#spec" do
       file = File.open(GemFactory.gem_file(:example))
       subject = Geminabox::IncomingGem.new(file)
@@ -210,20 +272,53 @@ module Geminabox
 
     # A client can write any spec into the archive; skip_validation and
     # instance_variable_set stand in for a hand-crafted metadata.gz.
-    def crafted_gem
-      spec = Gem::Specification.new do |s|
+    def minimal_spec
+      Gem::Specification.new do |s|
         s.name = "crafted"
         s.version = "1.0.0"
         s.summary = "x"
         s.authors = ["x"]
         s.files = []
       end
+    end
+
+    def crafted_gem
+      spec = minimal_spec
       yield spec
       Dir.mktmpdir do |dir|
         path = File.join(dir, "crafted.gem")
         silence { Gem::Package.build(spec, true, false, path) }
         File.open(path, "rb") { |f| Geminabox::IncomingGem.new(f) }
       end
+    end
+
+    def tar_gem(*entries)
+      io = StringIO.new(+"", "wb")
+      Gem::Package::TarWriter.new(io) do |tar|
+        entries.each do |name, body|
+          tar.add_file_simple(name, 0o444, body.bytesize) { |f| f.write(body) }
+        end
+      end
+      Geminabox::IncomingGem.new(StringIO.new(io.string))
+    end
+
+    def gzip(string)
+      out = StringIO.new(+"", "wb")
+      Zlib::GzipWriter.wrap(out) { |gz| gz.write(string) }
+      out.string
+    end
+
+    # The memory cost is paid while parsing, so rejecting afterwards is too late.
+    def refute_parses_yaml(&block)
+      Gem::Specification.stub(:from_yaml, ->(*) { flunk "spec YAML was parsed" }, &block)
+    end
+
+    def with_max_metadata_size(size)
+      original = Geminabox.max_metadata_size
+      Geminabox.max_metadata_size = size
+      yield
+    ensure
+      Geminabox.max_metadata_size = original
     end
 
   end

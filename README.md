@@ -40,6 +40,12 @@ Create a config.ru as follows:
 
     run Geminabox::Server
 
+Uploads whose gemspec metadata exceeds 1 MiB uncompressed are refused with a
+400. RubyGems parses that YAML into many times its size in memory, so the cap
+keeps one upload from exhausting a worker. Typical gems use a few KiB. To
+change it, set `Geminabox.max_metadata_size` (in bytes) in config.ru; `nil`
+leaves only RubyGems' own 10 MiB limit.
+
 Start your gem server with `rackup`, or hook up the config.ru as you normally would ([passenger](https://www.phusionpassenger.com/), [puma](https://puma.io/), [unicorn](https://yhbt.net/unicorn/), whatever floats your boat).
 
 ## Using Geminabox alongside rubygems.org

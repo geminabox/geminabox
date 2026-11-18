@@ -33,15 +33,8 @@ module Geminabox
     # spec comes from the uploaded archive and RubyGems does not validate it on
     # read, so the name must be checked before it becomes part of a path.
     def valid?
-      spec && spec.name && spec.version &&
-        spec.name.match?(Gem::Specification::VALID_NAME_PATTERN) &&
-        File.basename(name) == name &&
-        loadable_version?(spec.version) &&
-        indexable_platform? &&
-        spec.dependencies.all? { |dep| valid_dependency?(dep) } &&
-        valid_requirement?(spec.required_ruby_version) &&
-        valid_requirement?(spec.required_rubygems_version)
-    rescue Gem::Package::Error
+      metadata_within_limit? && safe_filename? && indexable?
+    rescue Gem::Package::Error, Zlib::Error
       false
     end
 
@@ -68,6 +61,54 @@ module Geminabox
     end
 
     private
+
+    def safe_filename?
+      spec && spec.name && spec.version &&
+        spec.name.match?(Gem::Specification::VALID_NAME_PATTERN) &&
+        File.basename(name) == name
+    end
+
+    def indexable?
+      loadable_version?(spec.version) &&
+        indexable_platform? &&
+        spec.dependencies.all? { |dep| valid_dependency?(dep) } &&
+        valid_requirement?(spec.required_ruby_version) &&
+        valid_requirement?(spec.required_rubygems_version)
+    end
+
+    # Gem::Package#spec parses the spec YAML into roughly 50x its size in
+    # memory and allows up to 10 MiB of it, once per upload and again on every
+    # full reindex, so the cap is checked before anything is parsed. RubyGems
+    # parses every metadata entry, so all of them are measured.
+    def metadata_within_limit?
+      limit = Geminabox.max_metadata_size
+      return true if limit.nil?
+      # The pre-2007 format keeps the YAML inline; the file size bounds it.
+      return File.size(@tempfile.path) <= limit if Gem::Package.new(@tempfile.path).is_a?(Gem::Package::Old)
+
+      File.open(@tempfile.path, "rb") do |io|
+        Gem::Package::TarReader.new(io).each do |entry|
+          case entry.full_name
+          when "metadata"
+            return false if entry.size > limit
+          when "metadata.gz"
+            return false unless inflates_within?(entry, limit)
+          end
+        end
+      end
+      true
+    end
+
+    def inflates_within?(entry, limit)
+      Zlib::GzipReader.wrap(entry) do |gz|
+        total = 0
+        while (chunk = gz.read(64 * 1024))
+          total += chunk.bytesize
+          return false if total > limit
+        end
+      end
+      true
+    end
 
     # Gem::Version re-parses its string on Marshal.load, so one bad version in
     # the specs index makes every later load of the index raise. The string is

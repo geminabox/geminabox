@@ -48,7 +48,8 @@ module Geminabox
       :lockfile,
       :retry_interval,
       :allow_upload,
-      :on_gem_received
+      :on_gem_received,
+      :max_metadata_size
     )
 
     def set_defaults(defaults)
@@ -79,7 +80,8 @@ module Geminabox
     lockfile:                       File.join(ENV.fetch('TMPDIR', Dir.tmpdir), 'geminabox.lockfile'),
     retry_interval:                 60,
     allow_upload:                   true,
-    on_gem_received:                nil
+    on_gem_received:                nil,
+    max_metadata_size:              1024 * 1024
   )
 
   # Removed in 4.0 with the RubyGems proxy. Warn-and-ignore (rather than
