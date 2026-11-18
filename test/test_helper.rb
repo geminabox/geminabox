@@ -29,6 +29,7 @@ require_relative 'test_support/gem_factory'
 require_relative 'test_support/geminabox_test_case'
 require_relative 'test_support/http_dummy'
 require_relative 'test_support/http_socket_error_dummy'
+require_relative 'test_support/test_certificate'
 
 require 'rackup'
 require 'ostruct'

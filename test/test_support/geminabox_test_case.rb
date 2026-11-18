@@ -135,9 +135,9 @@ class Geminabox::TestCase < Minitest::Test
     end
   end
 
-  def execute(command)
+  def execute(command, env = {})
     output = +""
-    IO.popen(command, "r") do |io|
+    IO.popen(env, command, "r") do |io|
       data = io.read
       output << data
     end
@@ -172,10 +172,15 @@ class Geminabox::TestCase < Minitest::Test
     without_bundler { execute(command) }
   end
 
-  def geminabox_push(gemfile)
+  # Over TLS the client trusts the test CA unless a test passes its own env.
+  def geminabox_push(gemfile, env = default_client_env)
     Geminabox::TestCase.setup_fake_home!
     command = "GEM_HOME=#{FAKE_HOME} gem inabox #{gemfile} -g '#{config.url_with_port(@test_server_port)}' 2>&1"
-    execute(command)
+    execute(command, env)
+  end
+
+  def default_client_env
+    config.ssl ? { "SSL_CERT_FILE" => TestCertificate.ca_file } : {}
   end
 
   def assert_can_fetch(gemname = :example, *args)
@@ -257,8 +262,8 @@ class Geminabox::TestCase < Minitest::Test
       server_options.merge!(
         :SSLEnable => true,
         :SSLVerifyClient => OpenSSL::SSL::VERIFY_NONE,
-        :SSLPrivateKey => OpenSSL::PKey::RSA.new(File.read(fixture("localhost.key"))),
-        :SSLCertificate => OpenSSL::X509::Certificate.new(File.read(fixture("localhost.crt"))),
+        :SSLPrivateKey => TestCertificate.localhost_key,
+        :SSLCertificate => TestCertificate.localhost_cert,
         :SSLCertName => [["CN", "localhost"]]
       )
     end

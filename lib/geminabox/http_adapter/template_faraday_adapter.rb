@@ -19,11 +19,12 @@ module Geminabox
       adapter.post(*args)
     end
 
-    # Note that this configuration turns SSL certificate verification off.
+    # Note that this configuration verifies SSL certificates unless
+    # GEMINABOX_INSECURE_SKIP_TLS_VERIFY is set.
     # To set up the adapter for your environment see:
     # https://github.com/lostisland/faraday/wiki/Setting-up-SSL-certificates
     def set_auth(uri, username = nil, password = nil)
-      connection = Faraday.new url: uri, ssl: {verify: false} do |faraday|
+      connection = Faraday.new url: uri, ssl: {verify: verify_tls?} do |faraday|
         faraday.adapter http_engine
         faraday.proxy(ENV['http_proxy']) if ENV['http_proxy']
       end

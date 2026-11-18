@@ -27,7 +27,10 @@ module Geminabox
       @http_client ||= HTTPClient.new(ENV['http_proxy']).tap do |http_client|
         http_client.transparent_gzip_decompression = true
         http_client.keep_alive_timeout = 32 # sec
-        http_client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        # httpclient otherwise trusts only its own bundled CA file (from 2015,
+        # without Let's Encrypt's root) and ignores SSL_CERT_FILE.
+        http_client.ssl_config.set_default_paths
+        http_client.ssl_config.verify_mode = OpenSSL::SSL::VERIFY_NONE unless verify_tls?
         http_client.send_timeout = 0
         http_client.receive_timeout = 0
       end
