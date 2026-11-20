@@ -15,14 +15,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby-version: [3.0.7, 3.1.7, 3.2.10, 3.3.10, 3.4.8, 4.0.1]
+        ruby-version: [3.0.7, 3.1.7, 3.2.10, 3.3.10, 3.4.13, 4.0.10]
 
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Set up Ruby
-      uses: ruby/setup-ruby@e8944e80fb94b20106697132f8c20c665fab29e9 # v1.325.0
+      uses: ruby/setup-ruby@be3c7df29b3349ec6bcfc6b4792f1cf9f5237d18 # v1.343.0
       with:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true
@@ -38,7 +38,7 @@ jobs:
       with:
         persist-credentials: false
     - name: Set up Ruby
-      uses: ruby/setup-ruby@e8944e80fb94b20106697132f8c20c665fab29e9 # v1.325.0
+      uses: ruby/setup-ruby@be3c7df29b3349ec6bcfc6b4792f1cf9f5237d18 # v1.343.0
       with:
         ruby-version: 3.2.10
         bundler-cache: true
@@ -52,9 +52,9 @@ jobs:
       with:
         persist-credentials: false
     - name: Set up Ruby
-      uses: ruby/setup-ruby@e8944e80fb94b20106697132f8c20c665fab29e9 # v1.325.0
+      uses: ruby/setup-ruby@be3c7df29b3349ec6bcfc6b4792f1cf9f5237d18 # v1.343.0
       with:
-        ruby-version: 3.4.8
+        ruby-version: 3.4.13
         bundler-cache: true
     - name: Run the rubygems compact-index conformance suite
       run: bundle exec rake test:conformance
