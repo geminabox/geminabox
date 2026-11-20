@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [4.1.1] - 2026-11-20
+
+### Security
+- **The upload metadata cap now covers `checksums.yaml.gz`**
+  ([GHSA-4mrv-pqwx-3qh2](https://github.com/geminabox/geminabox/security/advisories/GHSA-4mrv-pqwx-3qh2)).
+  RubyGems YAML-parses a gem's `checksums.yaml.gz` before its spec, with
+  its own 10 MiB limit, and 4.1.0 capped only the spec metadata, so a gem
+  with a small spec and an inflated checksums file still cost hundreds of
+  megabytes of memory to reject (a 590 KiB upload took about 600 MiB).
+  `checksums.yaml.gz` now gets the same `Geminabox.max_metadata_size` cap,
+  checked before anything is parsed. Real gems carry a few hundred bytes of
+  checksums and are unaffected. Upgrade from 4.1.0 if your server accepts
+  uploads from people you do not trust.
+
 ## [4.1.0] - 2026-11-20
 
 ### Upgrade note: `gem inabox` now verifies TLS certificates
