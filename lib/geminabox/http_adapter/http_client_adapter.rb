@@ -40,8 +40,8 @@ module Geminabox
     private
 
     def configure_tls(ssl_config)
-      # httpclient otherwise trusts only its own bundled CA file (from 2015,
-      # without Let's Encrypt's root) and ignores SSL_CERT_FILE.
+      # httpclient otherwise trusts only its own bundled CA file (before 2.10,
+      # a 2015 one without Let's Encrypt's root) and ignores SSL_CERT_FILE.
       ssl_config.set_default_paths
       ssl_config.add_trust_ca(rubygems_ssl_ca_cert) if rubygems_ssl_ca_cert
       cert, key = rubygems_ssl_client_cert
