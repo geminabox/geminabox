@@ -222,6 +222,29 @@ module Geminabox
       end
     end
 
+    # Gem::Package#verify parses checksums.yaml.gz, with its own 10 MiB
+    # limit, before it reaches the metadata.
+    test "#valid? caps checksums.yaml.gz too" do
+      with_max_metadata_size(64 * 1024) do
+        checksums = "---\nSHA256:\n#{(1..6000).map { |i| "  k#{i}: [a, b, c, d]\n" }.join}"
+        assert_operator checksums.bytesize, :>, 64 * 1024
+        subject = tar_gem(
+          ["metadata.gz", gzip(minimal_spec.to_yaml)],
+          ["checksums.yaml.gz", gzip(checksums)]
+        )
+
+        refute_parses_yaml { refute subject.valid? }
+      end
+    end
+
+    test "#valid? accepts the checksums.yaml.gz of a real gem" do
+      with_max_metadata_size(64 * 1024) do
+        subject = File.open(GemFactory.gem_file(:example), "rb") { |f| Geminabox::IncomingGem.new(f) }
+
+        assert subject.valid?
+      end
+    end
+
     test "#valid? bounds a pre-2007 format gem by its file size" do
       with_max_metadata_size(64 * 1024) do
         old_format = "MD5SUM = 0\n---\ndescription: #{'x' * (65 * 1024)}\n"
@@ -310,7 +333,9 @@ module Geminabox
 
     # The memory cost is paid while parsing, so rejecting afterwards is too late.
     def refute_parses_yaml(&block)
-      Gem::Specification.stub(:from_yaml, ->(*) { flunk "spec YAML was parsed" }, &block)
+      Gem::Specification.stub(:from_yaml, ->(*) { flunk "spec YAML was parsed" }) do
+        Gem::SafeYAML.stub(:safe_load, ->(*) { flunk "checksums YAML was parsed" }, &block)
+      end
     end
 
     def with_max_metadata_size(size)

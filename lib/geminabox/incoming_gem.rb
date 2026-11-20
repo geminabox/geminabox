@@ -80,6 +80,8 @@ module Geminabox
     # memory and allows up to 10 MiB of it, once per upload and again on every
     # full reindex, so the cap is checked before anything is parsed. RubyGems
     # parses every metadata entry, so all of them are measured.
+    # checksums.yaml.gz is YAML-parsed the same way, before the spec, so it
+    # gets the same cap; a real one is a few hundred bytes.
     def metadata_within_limit?
       limit = Geminabox.max_metadata_size
       return true if limit.nil?
@@ -91,7 +93,7 @@ module Geminabox
           case entry.full_name
           when "metadata"
             return false if entry.size > limit
-          when "metadata.gz"
+          when "metadata.gz", "checksums.yaml.gz"
             return false unless inflates_within?(entry, limit)
           end
         end
