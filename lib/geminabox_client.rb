@@ -27,13 +27,43 @@ class GeminaboxClient
   end
 
   def push(gemfile, options = {})
-    response = http_client.post(url_for(:upload), { 'file' => File.open(gemfile, "rb"), 'overwrite' => !!options[:overwrite] }, { 'Accept' => 'text/plain' })
+    response = post_gem(gemfile, options)
 
     if response.status < 300
       response.body
     else
       raise GeminaboxClient::Error, "Error (#{response.status} received)\n\n#{response.body}"
     end
+  end
+
+  private
+
+  def post_gem(gemfile, options)
+    http_client.post(url_for(:upload), { 'file' => File.open(gemfile, "rb"), 'overwrite' => !!options[:overwrite] }, { 'Accept' => 'text/plain' })
+  rescue StandardError => e
+    raise unless certificate_failure?(e)
+
+    raise GeminaboxClient::Error, untrusted_certificate_message(e)
+  end
+
+  # Faraday wraps OpenSSL's error, so match on the message rather than the class.
+  def certificate_failure?(error)
+    error.message.include?("certificate verify failed")
+  end
+
+  def untrusted_certificate_message(error)
+    <<~MESSAGE
+      Could not verify the TLS certificate of #{url}
+        #{error.message}
+
+      If the server uses a self-signed certificate or a private CA, trust that CA by either:
+        - SSL_CERT_FILE=/path/to/ca.pem gem inabox ...
+        - adding ":ssl_ca_cert: /path/to/ca.pem" to ~/.gemrc (gem install reads it too)
+        - adding the CA to the system trust store
+
+      To push without verifying (anyone on the network path can then read your
+      credentials and the gem), set GEMINABOX_INSECURE_SKIP_TLS_VERIFY=1.
+    MESSAGE
   end
 
 end

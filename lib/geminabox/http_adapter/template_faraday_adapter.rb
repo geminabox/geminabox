@@ -24,7 +24,7 @@ module Geminabox
     # To set up the adapter for your environment see:
     # https://github.com/lostisland/faraday/wiki/Setting-up-SSL-certificates
     def set_auth(uri, username = nil, password = nil)
-      connection = Faraday.new url: uri, ssl: {verify: verify_tls?} do |faraday|
+      connection = Faraday.new url: uri, ssl: ssl_options do |faraday|
         faraday.adapter http_engine
         faraday.proxy(ENV['http_proxy']) if ENV['http_proxy']
       end
@@ -51,6 +51,17 @@ module Geminabox
     end
 
     private
+
+    def ssl_options
+      options = { verify: verify_tls? }
+      options[:verify_mode] = rubygems_ssl_verify_mode if options[:verify] && rubygems_ssl_verify_mode
+      if (ca_cert = rubygems_ssl_ca_cert)
+        options[File.directory?(ca_cert) ? :ca_path : :ca_file] = ca_cert
+      end
+      cert, key = rubygems_ssl_client_cert
+      options.merge!(client_cert: cert, client_key: key) if cert
+      options
+    end
 
     def set_username_and_password(connection, username, password)
       # Remove this condition when Faraday 1.x dropped (when Ruby 2.5 dropped)

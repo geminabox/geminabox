@@ -1,4 +1,5 @@
 require_relative '../../../test_helper'
+require 'minitest/mock'
 
 module Geminabox
   class HttpClientAdapterTest < Minitest::Test
@@ -70,7 +71,59 @@ module Geminabox
       end
     end
 
+    def test_trusts_the_gemrc_ssl_ca_cert
+      with_rubygems_config(ssl_ca_cert: TestCertificate.ca_file) do
+        store = @http_adapter.http_client.ssl_config.cert_store
+
+        assert store.verify(TestCertificate.localhost_cert), "a CA named in gemrc must be trusted"
+      end
+    end
+
+    def test_does_not_trust_the_test_ca_without_gemrc
+      with_env("SSL_CERT_FILE" => nil) do
+        with_rubygems_config do
+          refute @http_adapter.http_client.ssl_config.cert_store.verify(TestCertificate.localhost_cert)
+        end
+      end
+    end
+
+    def test_presents_the_gemrc_ssl_client_cert
+      Tempfile.create(["client", ".pem"]) do |pem|
+        pem.write(TestCertificate.localhost_cert.to_pem + TestCertificate.localhost_key.to_pem)
+        pem.close
+        with_rubygems_config(ssl_client_cert: pem.path) do
+          ssl_config = @http_adapter.http_client.ssl_config
+
+          assert_equal TestCertificate.localhost_cert.to_der, ssl_config.client_cert.to_der
+          assert_equal TestCertificate.localhost_key.to_der, ssl_config.client_key.to_der
+        end
+      end
+    end
+
+    def test_gemrc_ssl_verify_mode_zero_skips_verification_and_warns
+      with_env(HttpAdapter::INSECURE_SKIP_TLS_VERIFY_ENV => nil) do
+        with_rubygems_config(ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE) do
+          assert_output(nil, /ssl_verify_mode: 0/) do
+            assert_equal OpenSSL::SSL::VERIFY_NONE, @http_adapter.http_client.ssl_config.verify_mode
+          end
+        end
+      end
+    end
+
+    def test_applies_another_gemrc_ssl_verify_mode
+      mode = OpenSSL::SSL::VERIFY_PEER | OpenSSL::SSL::VERIFY_FAIL_IF_NO_PEER_CERT
+      with_rubygems_config(ssl_verify_mode: mode) do
+        assert_equal mode, @http_adapter.http_client.ssl_config.verify_mode
+      end
+    end
+
     private
+
+    RubygemsConfig = Struct.new(:ssl_ca_cert, :ssl_client_cert, :ssl_verify_mode, keyword_init: true)
+
+    def with_rubygems_config(**settings, &block)
+      Gem.stub(:configuration, RubygemsConfig.new(**settings), &block)
+    end
 
     def with_env(vars)
       saved = vars.keys.to_h { |k| [k, ENV.fetch(k, nil)] }

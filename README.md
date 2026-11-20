@@ -158,19 +158,29 @@ gem, which honors the `http_proxy` / `HTTP_PROXY` environment variables.
 
 ### TLS certificates
 
-Since 5.0, `gem inabox` verifies the server's TLS certificate against the
-system trust store (earlier versions accepted any certificate). If your
-server uses a self-signed certificate or a private CA, either add the CA to
-the system store or point the client at it:
+Since 4.1, `gem inabox` verifies the server's TLS certificate (earlier
+versions accepted any certificate). It trusts what `gem install` trusts: the
+system trust store plus the TLS settings in your gemrc. If your server uses a
+self-signed certificate or a private CA that the system does not trust,
+either add the CA to the system store, name it in `~/.gemrc`:
+
+```yaml
+:ssl_ca_cert: /path/to/your-ca.pem   # a file, or a directory of hashed certs
+```
+
+or point a single push at it:
 
     SSL_CERT_FILE=/path/to/your-ca.pem gem inabox pkg/my-gem-1.0.0.gem
 
-`SSL_CERT_DIR` works too.
+`SSL_CERT_DIR` works too. A gemrc `:ssl_client_cert:` (one PEM holding the
+certificate and its key) is presented to servers that ask for one, and a
+non-zero `:ssl_verify_mode:` is applied as-is, both as RubyGems does.
 
-To skip verification anyway, set `GEMINABOX_INSECURE_SKIP_TLS_VERIFY=1`. The
-client prints a warning on every push while it is set: without verification,
-anyone on the network path can read your credentials and the gem, and fake a
-successful upload.
+To skip verification anyway, set `GEMINABOX_INSECURE_SKIP_TLS_VERIFY=1`, or
+`:ssl_verify_mode: 0` in gemrc (which also turns verification off for
+`gem install`). The client prints a warning on every push while either is
+set: without verification, anyone on the network path can read your
+credentials and the gem, and fake a successful upload.
 
 If you drive `GeminaboxClient` from Ruby (a Rake task, say), you can configure
 its HTTP layer through `Geminabox.http_adapter` before creating the client:
