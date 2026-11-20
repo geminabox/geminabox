@@ -2,6 +2,54 @@
 
 ## [Unreleased]
 
+## [4.1.0] - 2026-11-20
+
+### Upgrade note: `gem inabox` now verifies TLS certificates
+Pushes to an `https://` server whose certificate this machine does not
+trust now fail, where earlier versions accepted any certificate. Servers
+with a public certificate (Let's Encrypt and the like) need no change. For a
+self-signed certificate or a private CA, trust the CA the way `gem install`
+already does: add it to the system trust store, name it with
+`:ssl_ca_cert:` in `~/.gemrc`, or set `SSL_CERT_FILE` for the push. To keep
+the old behavior, set `GEMINABOX_INSECURE_SKIP_TLS_VERIFY=1`; the client
+warns on every push while it is set. A failed push prints these options.
+See "TLS certificates" in the README.
+
+### Security
+- **`gem inabox` verifies the server's TLS certificate**
+  ([GHSA-c6m7-24q6-m3xc](https://github.com/geminabox/geminabox/security/advisories/GHSA-c6m7-24q6-m3xc)).
+  The default HTTP adapter set `VERIFY_NONE` and sent Basic auth
+  credentials on the first request, so anyone on the network path could
+  take the push credentials and the gem, and answer with a fake success.
+  Both shipped adapters now verify against the system trust store and the
+  gemrc settings RubyGems uses (`ssl_ca_cert`, `ssl_client_cert`,
+  `ssl_verify_mode`). The opt-out is described above. (thanks to @7a6163)
+- **Uploaded gem specs are validated before they reach the index**
+  ([GHSA-4mrv-pqwx-3qh2](https://github.com/geminabox/geminabox/security/advisories/GHSA-4mrv-pqwx-3qh2),
+  [GHSA-882c-jvgp-8hxv](https://github.com/geminabox/geminabox/security/advisories/GHSA-882c-jvgp-8hxv)).
+  One upload with a malformed version or requirement made `GET /` and the
+  dependency API return 500 for every user until the file was removed from
+  disk; a dependency name containing a newline, `|`, `,` or `:` injected
+  lines into `/info/NAME`; and a legacy platform alias (`i686-linux`,
+  `mswin32`, `jruby`) was stored under a filename the index could not
+  find. Such uploads now get a 400. Gems that install today are unaffected.
+  (thanks to @7a6163)
+- **Gemspec metadata is capped at 1 MiB before it is parsed**
+  ([GHSA-4mrv-pqwx-3qh2](https://github.com/geminabox/geminabox/security/advisories/GHSA-4mrv-pqwx-3qh2)).
+  RubyGems parses spec YAML into roughly 50 times its size in memory and
+  allows 10 MiB of it, so one upload could exhaust a worker. Uploads over
+  the cap get a 400. Change it with `Geminabox.max_metadata_size` (bytes;
+  `nil` leaves only RubyGems' limit). (thanks to @7a6163)
+
+### Internal
+- CI: test on Ruby 3.3.14, 3.4.13 and 4.0.10; `ruby/setup-ruby` v1.343.0.
+- The `HttpClientAdapter` unit tests were running against
+  `TemplateFaradayAdapter` (both test classes had the same name); they now
+  test the right adapter, and a stub that never matched is fixed.
+- The SSL integration test generates its CA and localhost certificate per
+  run, replacing a fixture certificate that expired in 2022, and covers
+  trusted, untrusted, gemrc and opted-out pushes.
+
 ## [4.0.1] - 2026-09-27
 
 ### Security
